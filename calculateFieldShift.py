@@ -7,6 +7,7 @@ Voy a "tradicir" el codigo de calculateFieldShift.m a python
 """
 import numpy as np
 from scipy import fftpack
+import time
 
 # Fourier Based Field-shift Calculation for MRI
 # - k-space Filtering (KF) implementation
@@ -128,7 +129,7 @@ def calculateFieldShift(dChi_3D, voxelSize):
         nz = np.arange(0,NzInput+1)
         dField_3D = dField_3D[nz,ny,nx]
     
-    return dField_3D, ZcX
+    return dField_3D
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -196,46 +197,84 @@ def Zc(X):
     Nx = 2*dim[2]
     Ny = 2*dim[1]
     Nz = 2*dim[0]
-    mid_x = range(int((Nx/4. + 1)), int((Nx*3./4.)+1))
-    mid_y = range(int((Ny/4. + 1)), int((Ny*3./4)+1))
-    mid_z = range(int((Nz/4. + 1)), int((Nz*3./4.)+1))
-    
-    ####################################
-    #############     no estoy seguro de si hice bien el ZcX
-    ####################################
-    # ZcX = repmat(circshift(X, [Ny/4, Nx/4, Nz/4]), [2 2 2]);  asi es en matlab
-    ZcX = np.tile(np.roll(X, [int(Nz/4.), int(Ny/4.), int(Nx/4.)], axis=[0,1,2]), (2,2,2))
-    ZcX[mid_z, mid_y, mid_x] = 0
+    mid_x = (int((Nx/4.)), int((Nx*3./4.))) # the slicing will be between
+    mid_y = (int((Ny/4.)), int((Ny*3./4.))) # mid[0]:mid[1], which begins in 
+    mid_z = (int((Nz/4.)), int((Nz*3./4.))) # mid[0] and ends in mid[1]-1
+
+    #ZcX = repmat(circshift(X, [Ny/4,       Nx/4,       Nz/4]), [2 2 2]);  asi es en matlab
+    ZcX = np.tile(np.roll  (X, [int(Nz/4.), int(Ny/4.), int(Nx/4.)], axis=[0,1,2]), (2,2,2))
+    ZcX[mid_z[0]:mid_z[1], mid_y[0]:mid_y[1], mid_x[0]:mid_x[1]] = 0
     
     return ZcX
 
 #------------------------------------------------------------------------------
+def UC2(domain):
+    """
+    UC = Upscaling + Cropping:
+    both crops as upscales (factor 2) the central part of a larger 
+    distribution. Therefore the size of input ('domain') and output
+    ('center') are the same.
+    
+    ESTE FUE EL PRIMER INTENTO
+    """
+    t = time.time()
+    dim = np.shape(domain)        
+    Nx = dim[2]
+    Ny = dim[1]
+    Nz = dim[0]
+    
+
+    Mx = np.round(np.arange(1,Nx+1)/2 + 1/4 + Nx/4).astype(int) - 1
+    My = np.round(np.arange(1,Ny+1)/2 + 1/4 + Ny/4).astype(int) - 1
+    Mz = np.round(np.arange(1,Nz+1)/2 + 1/4 + Nz/4).astype(int) - 1
+  
+    Sx = mx + (-1)**np.arange(1,Nx+1)
+    Sy = my + (-1)**np.arange(1,Ny+1)
+    Sz = mz + (-1)**np.arange(1,Nz+1)
+
+    center = np.zeros_like(domain)
+    center =          27./64.*domain[np.ix_(Mz,My,Mx)]
+    center = center +  9./64.*domain[np.ix_(Sz,My,Mx)]
+    center = center +  9./64.*domain[np.ix_(Mz,My,Sx)]
+    center = center +  3./64.*domain[np.ix_(Sz,My,Sx)]
+    center = center +  9./64.*domain[np.ix_(Mz,Sy,Mx)]
+    center = center +  3./64.*domain[np.ix_(Sz,Sy,Mx)]
+    center = center +  3./64.*domain[np.ix_(Mz,Sy,Sx)]
+    center = center +  1./64.*domain[np.ix_(Sz,Sy,Sx)]
+          
+    elapsed = time.time() - t
+    print('tiempo en UC:  ', elapsed)          
+    return center
+  
+#------------------------------------------------------------------------------  
 def UC(domain):
     """
     UC = Upscaling + Cropping:
     both crops as upscales (factor 2) the central part of a larger 
     distribution. Therefore the size of input ('domain') and output
-    ('center') are the same. 
+    ('center') are the same.
+    
+    ESTE INTENTO USO np.ix_ en lugar del meschgrid, CON ESTO LOGRE BAJAR EL TIEMPO!
+    IMPORTANTE: iniciar con el nucleo vacio
     """
-    
-    dim = np.shape(domain)
-    
-    print(dim)
-    
+    t = time.time()
+    dim = np.shape(domain)        
     Nx = dim[2]
     Ny = dim[1]
     Nz = dim[0]
+    
 
+    mx = np.round(np.arange(1,Nx+1)/2 + 1/4 + Nx/4).astype(int) - 1
+    my = np.round(np.arange(1,Ny+1)/2 + 1/4 + Ny/4).astype(int) - 1
+    mz = np.round(np.arange(1,Nz+1)/2 + 1/4 + Nz/4).astype(int) - 1
+  
+    sx = mx + (-1)**np.arange(1,Nx+1)
+    sy = my + (-1)**np.arange(1,Ny+1)
+    sz = mz + (-1)**np.arange(1,Nz+1)
+     
     
-    Mx = np.round(np.arange(1,Nx+1)/2 + 1/4 + Nx/4).astype(int) - 1
-    My = np.round(np.arange(1,Ny+1)/2 + 1/4 + Ny/4).astype(int) - 1
-    Mz = np.round(np.arange(1,Nz+1)/2 + 1/4 + Nz/4).astype(int) - 1
-    print(Mx,My,Mz)
-    
-    Sx = Mx + (-1)**np.arange(1,Nx+1)
-    Sy = My + (-1)**np.arange(1,Ny+1)
-    Sz = Mz + (-1)**np.arange(1,Nz+1)
-    
+    Mz, My, Mx = np.meshgrid(mz,my,mx, indexing='ij')
+    Sz, Sy, Sx = np.meshgrid(sz,sy,sx, indexing='ij')
     
     center = np.zeros_like(domain)
     center =          27./64.*domain[Mz,My,Mx]
@@ -246,7 +285,7 @@ def UC(domain):
     center = center +  3./64.*domain[Sz,Sy,Mx]
     center = center +  3./64.*domain[Mz,Sy,Sx]
     center = center +  1./64.*domain[Sz,Sy,Sx]
-    
-    print(np.shape(center))
-    
+          
+    elapsed = time.time() - t
+    print('tiempo en UC:  ', elapsed)          
     return center
