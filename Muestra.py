@@ -35,12 +35,29 @@ class Muestra(object):
   # defino el chi por defecto
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
   
-  def __init__(self, volumen, geometria, chi=chi_Li):
-    N, voxelSize, FOV = volumen
-        
-    self.chi = chi
-    self.matriz = None
-    self.geometria = 'bulk'
+  def __init__(self, volumen, geometria='bulk', chi=chi_Li):
+    N, voxelSize, FOV = volumen        
     self.N = N
     self.voxelSize = voxelSize
     self.FOV = FOV
+    
+    self.chi = chi
+    self.geometria = geometria
+    self.matriz = self.crear_matriz()
+    
+  
+  def crear_matriz(self):
+    """
+    Este metodo es para crear la matriz y rellenarla con la muestra
+    """
+    Nz, Ny, Nz = self.N
+    matriz = np.zeros([Nz,Ny,Nz])
+    
+    # guardo la variable matriz en el atributo matriz
+    self.matriz = matriz
+    
+    
+    
+    
+    
+    
