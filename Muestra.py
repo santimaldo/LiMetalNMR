@@ -66,14 +66,14 @@ class Muestra(object):
     
     # 1)_______________________________________________________________________
     N, voxelSize, FOV = volumen
-    N = np.astype(int)
+    N = N.astype(int)
     self.N = N
     self.voxelSize = voxelSize
     self.FOV = FOV
     self.matriz = None        
     self.chi = chi
     self.geometria = geometria
-    self.medidas = None 
+    self.medidas = medidas
     self.N_muestra = None
     self.muestra = None    
     # 2)_______________________________________________________________________
@@ -86,7 +86,7 @@ class Muestra(object):
     # 2.2)---------------------------------------------------------------------
     # con este metodo seteo las dimensiones de la submatriz que contiene a la 
     # muestra.
-    self.set_medidas(medidas)
+    self.set_medidas()
     # 2.3)---------------------------------------------------------------------
     # obtengo los indices de los voxels "vivos"
     indices = self.construir_geometria()
@@ -121,7 +121,9 @@ class Muestra(object):
     
     #<<<< aca llamo al constytructor de geometria, que me devuelve lista de
     # tuplas >>>>
-    
+    if self.geometria == 'bulk': # el constructor por defecto es una funcion
+      tuplas = bulk(Nmz , Nmy, Nmx)
+      
     # convierto a array para que ravel lo acepte. La transpues es para que sea
     # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)
     indices = np.array(tuplas).T
@@ -140,7 +142,7 @@ class Muestra(object):
     #  put(array       , indices, valor)
     np.put(muestra_flat, indices, self.chi)
     # convierto en 3d array
-    np.reshape(muestra_flat, (Nmz,Nmy,Nmx))
+    muestra = np.reshape(muestra_flat, (Nmz,Nmy,Nmx))
     self.muestra = muestra
     return 0
   #____________________________________________________________________________      
@@ -156,7 +158,15 @@ class Muestra(object):
     
     
     
-    
-    
-    
+def bulk(Nmz,Nmy,Nmx):
+  """
+  es una funcion que devuelve las tuplas con los indices de todos los elementos
+  de una matriz Nmz*Nmy*Nmx
+  """
+  indices = []
+  for k in range(Nmz):
+    for j in range(Nmy):
+      for i in range(Nmx):
+        indices.append((k,j,i))
+  return indices
     

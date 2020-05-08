@@ -9,6 +9,7 @@ Created on Thu May  7 12:18:27 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
+from Muestra import *
 from SimulationVolume import *
 
 
@@ -50,11 +51,12 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #Creo el objeto muestra. Le tengo que dar de entrada:
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
-muestra = Muestra(volumen, geometria='spikes1')
+#muestra = Muestra(volumen, geometria='spikes1')
+medidas = [0.071, 10, 4]
+muestra = Muestra(volumen, medidas=medidas)
 
 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
-
-delta = Delta(muestra)
+#delta = Delta(muestra)
 
 
