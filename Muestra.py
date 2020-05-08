@@ -111,15 +111,23 @@ class Muestra(object):
     self.N_muestra = N_muestra
     return 0
   #____________________________________________________________________________  
-  def construir_volumen(self):
+  def construir_geometria(self):
     """
-    Este metodo es para crear la matriz y rellenarla con la muestra
+    Este metodo es para crear la lista de indices que contienen el material.
+    Son indices flattened, es decir, en lugar de ser tuplas (z,y,x) son un 
+    numero entre 0 y (Nmz*Nmy*Nmx)-1
     """
-    Nz, Ny, Nx = self.N
-    matriz = np.zeros([Nz,Ny,Nx])
+    Nmz, Nmy, Nmx = self.N_muestra
     
-    # guardo la variable matriz en el atributo matriz
-    self.matriz = matriz
+    #<<<< aca llamo al constytructor de geometria, que me devuelve lista de
+    # tuplas >>>>
+    
+    # convierto a array para que ravel lo acepte. La transpues es para que sea
+    # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)
+    indices = np.array(tuplas).T
+    # convierto a indices planos
+    indices = np.ravel_multi_index(indices, (Nmz, Nmy, Nmx))
+    return indices
   #____________________________________________________________________________  
   def construir_muestra(self, indices):
     """
@@ -135,7 +143,16 @@ class Muestra(object):
     np.reshape(muestra_flat, (Nmz,Nmy,Nmx))
     self.muestra = muestra
     return 0
+  #____________________________________________________________________________      
+  def construir_volumen(self):
+    """
+    Este metodo es para crear la matriz y rellenarla con la muestra
+    """
+    Nz, Ny, Nx = self.N
+    matriz = np.zeros([Nz,Ny,Nx])
     
+    # guardo la variable matriz en el atributo matriz
+    self.matriz = matriz
     
     
     
