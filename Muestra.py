@@ -15,21 +15,28 @@ class Muestra(object):
   colocamos en el campo magnetico.
   
   Atributos
-  =========
-  + chi: float         -  Susceptibilidad magnetica del material
-  + matriz: np.array   -  Es la matriz de Nz*Ny*Nx que contiene el volumen 
-                          simulado y a la muestra. Ceros en vacio, Chi en la 
-                          muestra
-  + geometria : string -  Ese el nombre del constructor de la geometria.
-                          Define la forma que tendra la muestra.
-                          
+  =========                        
   uno de los inputs es volumen. Este proviene de la salida de la funcion
   SimulationVolume. Es un dict de tres arrays de tres elemtos. Lo desempaqueto
   asi N, voxelSize, FOV = volumen. En cada caso sigo la convencion [z,y,x]
   
-  + N : int array      -  Numero de voxels en cada dimension
-  + voxelSize: fl.array-  Tamano de voxels en cada dimension en mm
-  + FOV: fl.array      -  Tamano del volumen simulado en cada dimension en mm
+  + N : int array x3       -  Numero de voxels en cada dimension
+  + voxelSize: fl.array x3 -  Tamano de voxels en cada dimension en mm
+  + FOV: fl.array x3       -  Tamano del volumen simulado en cada dimension en mm
+  
+  + matriz: np.array       -  Es la matriz de Nz*Ny*Nx que contiene el volumen 
+                              simulado y a la muestra. Ceros en vacio, Chi en 
+                              la muestra
+  + chi: float             -  Susceptibilidad magnetica del material                          
+  + geometria : string     -  Ese el nombre del constructor de la geometria.
+                              Define la forma que tendra la muestra.
+  
+  + medidas : array x3     -  Tamaño, en milimetros, de la muestra, o de un
+                              rectangulo que la contiene.
+  + N_muestra: intarray x3 -  Numero de voxels en cada dimension de rectangulo
+                              de las dimensiones self.medidas. [Nmz,Nmy,Nmx]
+  + muestra : array        -  Matriz Nmz*Nmy*Nmx que contiene la muestra. Esta
+                              matriz es insertada en self.matriz
   
   """
   
@@ -153,8 +160,19 @@ class Muestra(object):
     Nz, Ny, Nx = self.N
     matriz = np.zeros([Nz,Ny,Nx])
     
-    # guardo la variable matriz en el atributo matriz
-    self.matriz = matriz
+    Nmz, Nmy, Nmx = self.N_muestra    
+    # hago un slice sobre la matriz en el cual coloco la muestra. Defino indices
+    # slj: slice en j, [j_inicial, j_final+1]
+    slz = [int(Nz/2-Nmz/2), int(Nz/2+Nmz/2)]
+    sly = [int(Ny/2-Nmy/2), int(Ny/2+Nmy/2)]
+    slx = [int(Nx/2-Nmx/2), int(Nx/2+Nmx/2)]
+    
+    # reemplazo los valores de la muestra en la matriz de ceros:
+    matriz[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]] = self.muestra
+        
+    # guardo la variable matriz en el atributo matriz   
+    #self.matriz = matriz
+    return matriz
     
     
     
