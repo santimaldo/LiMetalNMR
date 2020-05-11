@@ -96,9 +96,10 @@ class Muestra(object):
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
     if np.min(FOV) < 2*np.max(medidas):
-      warnings.warn("\n============WARNING===============\
-                    \nOjo! Tal vez debas agrandar el FOV\
-                    \n==================================")
+      mensaje= "\n ============WARNING===============\
+               \n Ojo! Tal vez debas agrandar el FOV\
+               \n =================================="
+      warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
     # 2.2)---------------------------------------------------------------------
     # con este metodo seteo las dimensiones de la submatriz que contiene a la 
     # muestra.

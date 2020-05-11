@@ -10,6 +10,7 @@ Created on Thu May  7 12:18:27 2020
 import numpy as np
 import matplotlib.pyplot as plt
 from Muestra import *
+from Delta import *
 from SimulationVolume import *
 
 
@@ -57,6 +58,6 @@ muestra = Muestra(volumen, medidas=medidas)
 
 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
-#delta = Delta(muestra)
+delta = Delta(muestra)
 
 
