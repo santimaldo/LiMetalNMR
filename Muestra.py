@@ -37,7 +37,12 @@ class Muestra(object):
                               de las dimensiones self.medidas. [Nmz,Nmy,Nmx]
   + muestra : array        -  Matriz Nmz*Nmy*Nmx que contiene la muestra. Esta
                               matriz es insertada en self.matriz
-  
+  + slices : list          -  Continen los indices sobre los cuales debe 
+                              realizarse el slice para colocar la muestra. Es
+                              una lista de tres elementos [slz,sly,slx], donde                              
+                              cada uno de ellos es una lista con dos int
+                              slj=[j_inicial, j_final+1] que indican como hacer
+                              el slice en cada dimension.
   """
   
   # defino el chi por defecto
@@ -67,6 +72,9 @@ class Muestra(object):
     #   constructor de geometria es una lista de indices en los cuales el
     #   constructor de muestra debera colocar los valores de chi, devolviendo
     #   un array con de tamaño N_muestra_z*N_muestra_y*N_muestra_x.
+    #   2.4)
+    #   Defino en que indices de la matriz grande va ubicada la submatriz 
+    #   muestra. La mustra estara ubicada en el centro del FOV.
     # 3)CREACION DEL VOLUMEN DE SIMULACION
     #   Creo el array que define el volumen de simulacion. Lueg inserto en el
     #   el centro el array de la muestra
@@ -82,7 +90,8 @@ class Muestra(object):
     self.geometria = geometria
     self.medidas = medidas
     self.N_muestra = None
-    self.muestra = None    
+    self.muestra = None
+    self.slices = None
     # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
@@ -99,6 +108,9 @@ class Muestra(object):
     indices = self.construir_geometria()
     # creacion de self.muestra
     self.construir_muestra(indices)
+    # 2.4)---------------------------------------------------------------------
+    # definicion de los slices donde se debe colocar la muestra
+    self.definir_slices()
     # 3)_______________________________________________________________________
     self.construir_volumen()
   
@@ -153,19 +165,30 @@ class Muestra(object):
     self.muestra = muestra
     return 0
   #____________________________________________________________________________      
-  def construir_volumen(self):
+  def definir_slices(self):
     """
-    Este metodo es para crear la matriz y rellenarla con la muestra
+    Este metodo es para definir donde se debe colocar el subarray muestra, en
+    el array matriz, es decir, donde coloco la muestra dentro del volumen
     """
     Nz, Ny, Nx = self.N
-    matriz = np.zeros([Nz,Ny,Nx])
-    
     Nmz, Nmy, Nmx = self.N_muestra    
     # hago un slice sobre la matriz en el cual coloco la muestra. Defino indices
     # slj: slice en j, [j_inicial, j_final+1]
     slz = [int(Nz/2-Nmz/2), int(Nz/2+Nmz/2)]
     sly = [int(Ny/2-Nmy/2), int(Ny/2+Nmy/2)]
     slx = [int(Nx/2-Nmx/2), int(Nx/2+Nmx/2)]
+    self.slices = [slz,sly,slx]
+    return 0
+
+  #____________________________________________________________________________      
+  def construir_volumen(self):
+    """
+    Este metodo es para crear la matriz y rellenarla con la muestra
+    """
+    matriz = np.zeros(self.N)    
+    # hago un slice sobre la matriz en el cual coloco la muestra. Defino indices
+    # slj: slice en j, [j_inicial, j_final+1]
+    slz, sly, slx = self.slices
     
     # reemplazo los valores de la muestra en la matriz de ceros:
     matriz[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]] = self.muestra
@@ -173,7 +196,9 @@ class Muestra(object):
     # guardo la variable matriz en el atributo matriz   
     #self.matriz = matriz
     return matriz
-    
+  #____________________________________________________________________________      
+  #____________________________________________________________________________      
+  #____________________________________________________________________________      
     
     
 def bulk(Nmz,Nmy,Nmx):
