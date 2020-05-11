@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Muestra import *
 from Delta import *
+from Graficador import *
 from SimulationVolume import *
 
 
