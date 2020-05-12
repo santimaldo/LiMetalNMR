@@ -8,6 +8,7 @@ Created on Thu May  7 12:48:21 2020
 
 import numpy as np
 import warnings
+import Geometria
 
 class Muestra(object):
   """
@@ -48,7 +49,7 @@ class Muestra(object):
   # defino el chi por defecto
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
   
-  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li):
+  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
     # y el volumen simulado:
     # 1)OBTENCION DE INPUTS E INICIALIZACION
@@ -106,7 +107,7 @@ class Muestra(object):
     self.set_medidas()
     # 2.3)---------------------------------------------------------------------
     # obtengo los indices de los voxels "vivos"
-    indices = self.construir_geometria()
+    indices = self.construir_geometria(**geokwargs)
     # creacion de self.muestra
     self.construir_muestra(indices)
     # 2.4)---------------------------------------------------------------------
@@ -131,24 +132,24 @@ class Muestra(object):
     self.N_muestra = N_muestra
     return 0
   #____________________________________________________________________________  
-  def construir_geometria(self):
+  def construir_geometria(self, **geokwargs):
     """
     Este metodo es para crear la lista de indices que contienen el material.
     Son indices flattened, es decir, en lugar de ser tuplas (z,y,x) son un 
     numero entre 0 y (Nmz*Nmy*Nmx)-1
-    """
-    Nmz, Nmy, Nmx = self.N_muestra
-    
+    """    
     #<<<< aca llamo al constytructor de geometria, que me devuelve lista de
     # tuplas >>>>
-    if self.geometria == 'bulk': # el constructor por defecto es una funcion
-      tuplas = bulk(Nmz , Nmy, Nmx)
+    # en Geometria.py estan todas las funciones para crear geometrias
+    # construir es una funcion.
+    construir = Geometria.funciones(self.geometria)
+    tuplas = construir(self.N_muestra, self.voxelSize,**geokwargs)
       
     # convierto a array para que ravel lo acepte. La transpues es para que sea
     # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)
     indices = np.array(tuplas).T
     # convierto a indices planos
-    indices = np.ravel_multi_index(indices, (Nmz, Nmy, Nmx))
+    indices = np.ravel_multi_index(indices, self.N_muestra)
     return indices
   #____________________________________________________________________________  
   def construir_muestra(self, indices):
@@ -202,15 +203,5 @@ class Muestra(object):
   #____________________________________________________________________________      
     
     
-def bulk(Nmz,Nmy,Nmx):
-  """
-  es una funcion que devuelve las tuplas con los indices de todos los elementos
-  de una matriz Nmz*Nmy*Nmx
-  """
-  indices = []
-  for k in range(Nmz):
-    for j in range(Nmy):
-      for i in range(Nmx):
-        indices.append((k,j,i))
-  return indices
+
     

@@ -55,10 +55,16 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #muestra = Muestra(volumen, geometria='spikes1')
 medidas = [0.071, 10, 4]
-muestra = Muestra(volumen, medidas=medidas)
+muestra = Muestra(volumen, medidas=medidas, geometria='fdas')
 
 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 delta = Delta(muestra)
+
+#%% GRAFICOS-------------------------------------------------------------------
+gr = Graficador(muestra, delta)
+
+# slice en x central
+gr.mapa(completo=False)
 
 
