@@ -47,6 +47,9 @@ class Graficador(object):
     x = np.linspace(-Nx/2, Nx/2, Nx)*vsx
     
     self.zyx = [z,y,x]
+    self.z = z
+    self.y = y
+    self.x = x
     return 0
     
   def crear_coordenadas_muestra(self):
@@ -106,13 +109,15 @@ class Graficador(object):
    
     plt.figure(self.fignum)
     vmax = np.max([np.abs(np.max(f)), np.abs(np.min(f))])
-    norm = colors.Normalize(vmin=-vmax*0.5, vmax=vmax*0.5)
+    norm = colors.Normalize(vmin=-vmax*0.8, vmax=vmax*0.8)
     plt.pcolormesh(X, Y, f, cmap='seismic', norm=norm)
     # los label de los ejes dependen de que corte se haga
     xlab = [r'$x$ [mm]', r'$x$ [mm]', r'$y$ [mm]',  ]
     ylab = [r'$y$ [mm]', r'$z$ [mm]', r'$z$ [mm]',  ]
     plt.xlabel(xlab[dim])
     plt.ylabel(ylab[dim])
+    cbar = plt.colorbar()
+    cbar.set_label(r'$\delta [ppm]$')
 
     
     

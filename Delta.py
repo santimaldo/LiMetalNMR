@@ -49,7 +49,6 @@ class Delta(object):
     """
     defino un delta_r que es el recorte solo en la región de la muestra
     """
-    chi = self.muestra.chi
     slz,sly,slx = self.muestra.slices
     
     delta_r = self.delta[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]
@@ -57,8 +56,21 @@ class Delta(object):
     self.delta_r = delta_r
     return 0    
   
-  
+  def delta_r_xy(self):
+    """
+    delta evaluado en todo z, pero recortado a xy de la muestra
+    """
+    # hago cero todos los voxels en los cuales no hay muestra.
+    # self.muestra.muestra/self.muestra.chi es 0 en aire y 1 en muestra
+    slz,sly,slx = self.muestra.slices
+    
+    delta_r_xy = self.delta[:, sly[0]:sly[1], slx[0]:slx[1]]
+    return delta_r_xy
+    
   def delta_muestra(self):
+    """
+    delta evaluado solo en la mustra y cero afuera.
+    """
     # hago cero todos los voxels en los cuales no hay muestra.
     # self.muestra.muestra/self.muestra.chi es 0 en aire y 1 en muestra
     delta_muestra = self.delta_r*self.muestra.muestra/self.muestra.chi    
