@@ -19,14 +19,14 @@ class Delta(object):
   ATRIBUTOS
   + muestra : Muestra()   -  el objeto clase muestra definido en el main
   + delta   : array       -  es el array que devuelve calculateFieldShift
-  + delta_muestra : array -  es delta pero evaluado solo en la muestra
+  + delta_r : array -  es delta pero evaluado solo en la muestra
   """
   
   def __init__(self, muestra):
     
     self.muestra = muestra
     self.delta = None
-    self.delta_muestra = None
+    self.delta_r = None
     
     self.calcular()
     self.recortar()
@@ -47,18 +47,23 @@ class Delta(object):
   
   def recortar(self):
     """
-    defino un delta_muestra que es el recorte solo en la región de la muestra
+    defino un delta_r que es el recorte solo en la región de la muestra
     """
     chi = self.muestra.chi
     slz,sly,slx = self.muestra.slices
     
+    delta_r = self.delta[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]
     
-    delta_muestra = self.delta[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]
+    self.delta_r = delta_r
+    return 0    
+  
+  
+  def delta_muestra(self):
     # hago cero todos los voxels en los cuales no hay muestra.
     # self.muestra.muestra/self.muestra.chi es 0 en aire y 1 en muestra
-    delta_muestra = delta_muestra*self.muestra.muestra/self.muestra.chi
-    self.delta_muestra = delta_muestra
-    return 0    
+    delta_muestra = self.delta_r*self.muestra.muestra/self.muestra.chi    
+    return delta_muestra
+    
     
     
     

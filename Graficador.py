@@ -97,7 +97,7 @@ class Graficador(object):
       # como el corte puede ser en cualquier dimension, muevo la dimension de
       # corte al final, es decir de la posicion dim la paso a la posicion 2,
       # para finalmente poder hacer el slice asi: f = f[:,:,N_slice]
-      f = self.delta.delta_muestra
+      f = self.delta.delta_r
       f = np.moveaxis(f, dim, 2)
       f = f[:,:,N_slice]
       

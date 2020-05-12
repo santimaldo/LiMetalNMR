@@ -28,9 +28,9 @@ skindepth = 0.012 # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxelSize = [0.071/2, 0.25, 0.25]# mm
-#FOV = [0.714*30, 50.048, 50.048]
-N = [512, 64, 64]
+#voxelSize = [0.1, 0.1, 0.1]# mm
+FOV = [0.1, 0.1, 0.1]
+N = [64,64,64]
 #voxelSize = [0.006, 0.03, 0.08]# mm
 #Nz, Ny, Nx = [256, 128, 128]
 # con estos numeros, Nj*voxelSize_j queda
@@ -38,14 +38,9 @@ N = [512, 64, 64]
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N, 
 # FOV (field of view) o  voxelSize
-#N, voxelSize, FOV = SimulationVolume(voxelSize=voxelSize, N=N)
-#N, voxelSize, FOV = SimulationVolume(N=N, FOV=FOV)
 
-volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-
-#VSz, VSy, VSx = voxelSize
-#FOVz, FOVy, FOVx = FOV 
-#Nz, Ny, Nx = N
+#volumen = SimulationVolume(voxelSize=voxelSize, N=N)
+volumen = SimulationVolume(FOV=FOV, N=N)
 
 
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
@@ -54,8 +49,10 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #muestra = Muestra(volumen, geometria='spikes1')
-medidas = [0.071, 10, 4]
-muestra = Muestra(volumen, medidas=medidas, geometria='fdas')
+medidas = [0.05, 0.05, 0.05]
+# bulk:
+# muestra = Muestra(volumen, medidas=medidas, geometria='fdas')
+muestra = Muestra(volumen, medidas=medidas, geometria='spikes', ancho=3e-3, p=0.2)
 
 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
@@ -65,6 +62,6 @@ delta = Delta(muestra)
 gr = Graficador(muestra, delta)
 
 # slice en x central
-gr.mapa(completo=False)
+gr.mapa(dim=2, corte=0.45, completo=True)
 
 

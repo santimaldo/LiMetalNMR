@@ -109,12 +109,12 @@ if __name__=='__main__':
   """
   
   N = np.array([64, 64, 64])
-  voxelSize = np.array([1,1,1])
+  voxelSize = np.array([1e-3,1e-3,1e-3])
   
   geometria = 'spikes'
   constructor = funciones(geometria)
   
-  tuplas = constructor(N, voxelSize, ancho=3, p=0.20)
+  tuplas = constructor(N, voxelSize, ancho=3e-3, p=0.20)
   
   indices = np.array(tuplas).T
   # convierto a indices planos
