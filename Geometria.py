@@ -14,7 +14,9 @@ def funciones(geometria):
   
   funciones = {}
   funciones['bulk'] = bulk
-  funciones['spikes'] = spikes
+  funciones['sticks'] = sticks
+  funciones['arranged_sticks'] = arranged_sticks
+  funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -44,7 +46,7 @@ def bulk(N, voxelSize):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-def spikes(N, voxelSize, **geokwargs):
+def sticks(N, voxelSize, **geokwargs):
   """
   dendritas de en sentido vertical, apoyadas sobre la superficie
   """
@@ -55,14 +57,14 @@ def spikes(N, voxelSize, **geokwargs):
   Nmz,Nmy,Nmx = N
   vsz, vsy, vsx = voxelSize
   
-  # ancho_spikes
-  area_spikes = (ancho)**2
+  # ancho_sticks
+  area_sticks = (ancho)**2
   area = (Nmx*vsx)*(Nmy*vsy)
-  # si todas las spikes estuvieran separadas, entonces la proporcion cubierta
-  # seria p = (Ns*area_spikes)/area. Donde Ns es el numero de spikes. 
-  # Como las spikes si se pueden solapar, entonces esto es una aproximacion.
-  # Numerp de spikes:
-  Ns = p*area/area_spikes
+  # si todas las sticks estuvieran separadas, entonces la proporcion cubierta
+  # seria p = (Ns*area_sticks)/area. Donde Ns es el numero de sticks. 
+  # Como las sticks si se pueden solapar, entonces esto es una aproximacion.
+  # Numerp de sticks:
+  Ns = p*area/area_sticks
   
   # cuantos voxels debo usar
   nsx = int(ancho/vsx)
@@ -87,6 +89,117 @@ def spikes(N, voxelSize, **geokwargs):
 #------------------------------------------------------------------------------
 
 
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def arranged_sticks(N, voxelSize, **geokwargs):
+  """
+  2020-06-09
+  dendritas de 3x3 um2 en sedntido vertical, apoyadas sobre la superficie
+  ordenadas en un arreglo cuadrado:
+          x    x    x    x    
+          
+          x    x    x    x
+          
+          x    x    x    x
+          
+          x    x    x    x
+  la idea es usarlo con N=[Nmz, 28, 28] y voxelsize de 1 um
+  """
+  # extraigo los geokwargs:
+  ancho = 3e-3 # mm
+  
+  Nmz,Nmy,Nmx = N
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar
+  nsx = int(ancho/vsx)
+  nsy = int(ancho/vsy) 
+  
+  
+  indices = []
+  Nd_f = 4 # numero de dendritas por fila
+  ind_x = 3
+  for ii in range(Nd_f):
+    ind_y = 3
+    for jj in range(Nd_f):   
+      for iz in range(Nmz):
+        for iy in range(nsy):
+          for ix in range(nsx):
+            indices.append((iz,ind_y+iy, ind_x+ix))
+      ind_y+=6
+    ind_x+=6
+  return indices
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def trapped_arranged_sticks(N, voxelSize, **geokwargs):
+  """
+  2020-06-09
+  dendritas de 3x3 um2 en sedntido vertical, apoyadas sobre la superficie
+  ordenadas en un arreglo cuadrado, atrapadas entre estructra grande: 30 y 31 um
+  de ancho rodeando el arreglo. la region del arreglo debe ser 27x27 en xy
+  la idea es usarlo con N=[Nmz, 88, 88] y voxelsize de 1 um
+  """
+  # extraigo los geokwargs:
+  ancho = 3e-3 # mm
+  
+  Nmz,Nmy,Nmx = N
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar
+  nsx = int(ancho/vsx)
+  nsy = int(ancho/vsy) 
+  
+  
+  indices = []
+  Nd_f = 4 # numero de dendritas por fila
+  ind_x = 33
+  for ii in range(Nd_f):
+    ind_y = 33
+    for jj in range(Nd_f):   
+      for iz in range(Nmz):
+        for iy in range(nsy):
+          for ix in range(nsx):
+            indices.append((iz,ind_y+iy, ind_x+ix))
+      ind_y+=6
+    ind_x+=6
+    
+  # agrego las partes grandes:
+  # primero la s paredes que va de 0 a 30 & de 57 al final en x
+  # i.e las paredes y
+  for iz in range(Nmz):
+    for iy in range(Nmy-1):
+      for ix in range(30):        
+            indices.append((iz,iy,ix))
+            indices.append((iz,iy,ix+57))
+      ix+=1
+    iy+=1
+  iz+=1
+  
+  # luego las paredse en x
+  for iz in range(Nmz):
+    for iy in range(30):
+      for ix in range(27):        
+            indices.append((iz,iy,ix+30))
+            indices.append((iz,iy+57,ix+30))
+      ix+=1
+    iy+=1
+  iz+=1
+  
+  return indices
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+
+
+
 #class test(object):
 #  def __init__(self, geometria='bulk', N=[16,16,16], voxelSize=[1,1,1], **geokwargs):
 #    
@@ -107,14 +220,14 @@ if __name__=='__main__':
   """
   script para testear las geometrias
   """
-  
-  N = np.array([64, 64, 64])
+  # este N es el N de la muestra
+  N = np.array([28,88,88])
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
-  geometria = 'spikes'
+  geometria = 'trapped_arranged_sticks'
   constructor = funciones(geometria)
   
-  tuplas = constructor(N, voxelSize, ancho=3e-3, p=0.20)
+  tuplas = constructor(N, voxelSize)
   
   indices = np.array(tuplas).T
   # convierto a indices planos

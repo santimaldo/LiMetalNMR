@@ -29,7 +29,7 @@ class Delta(object):
     self.delta_r = None
     
     self.calcular()
-    self.recortar()
+#    self.recortar()
     
     
   def calcular(self):
