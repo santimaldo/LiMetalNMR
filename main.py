@@ -34,7 +34,9 @@ skindepth = 0.012 # profundida de penetracion, mm
 #FOV = [0.1, 0.1, 0.1]
 #N = [512,128,128]
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,256,256]
+#N = [128,64,64] # para arranged_sticks
+N = [256,256,256] # para trapped_arranged_sticks
+
 # con estos numeros, Nj*voxelSize_j queda
 #    z: 1.536 mm  ; y: 3.84 mm  ; x: 10.24 mm
 
@@ -53,8 +55,8 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #muestra = Muestra(volumen, geometria='spikes1')
 #medidas = [0.71, 4, 10]
 #microestructuras
-medidas = [0.1, 0.1, 0.1]
-medidas = [0.028,0.088,0.088]
+medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
+#medidas = [0.028,0.028,0.028] # para arranged_sticks
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 #muestra = Muestra(volumen, medidas=medidas, geometria='arranged_sticks')
@@ -69,13 +71,14 @@ delta = Delta(muestra)
 superposicion = Superposicion(muestra, delta)
 
 #%%
+
 v=5
-plt.figure(40000)
-plt.pcolormesh(superposicion.delta_sens[:,10,:], cmap='seismic', vmax=v, vmin=-v)
+plt.figure(20000)
+plt.pcolormesh(superposicion.delta_sens[:,125,:], cmap='seismic', vmax=v, vmin=-v)
 plt.colorbar()
 
-plt.figure(40001)
-plt.pcolormesh(superposicion.delta_sens[70,:,:], cmap='seismic', vmax=v, vmin=-v)
+plt.figure(20001)
+plt.pcolormesh(superposicion.[45,:,:], cmap='seismic', vmax=v, vmin=-v)
 plt.colorbar()
 
 #%%
