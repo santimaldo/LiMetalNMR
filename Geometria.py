@@ -281,27 +281,28 @@ if __name__=='__main__':
   """
   script para testear las geometrias
   """
-  # este N es el N de la muestra
+  # este N es el N de la muestra ejemplo
   N = np.array([28,88,88])
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
+  # 'geometria' es el nombre de la geometria que vamos a utilizar
+  # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
   geometria = 'distancia_constante'
   constructor = funciones(geometria)
   
+  # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
+  # en los cuales hay litio.
   tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3)
   
-  indices = np.array(tuplas).T
   # convierto a indices planos
-  #%%
+  indices = np.array(tuplas).T  
   indices = np.ravel_multi_index(indices, N)
-   
+  
+  # creo la matriz vacia, y coloco 1 en los indices que me da el constructor
   muestra = np.zeros(N)
-  # el constructor me da una lista de indices flattened
   #  put(array       , indices, valor)
   np.put(muestra, indices, 1)
-  
-  
-  
+ 
   #%%
   plt.figure(987654321)
   plt.subplot(2,2,1)
@@ -316,8 +317,3 @@ if __name__=='__main__':
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
   plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
-  
-  
-  
-  
-  
