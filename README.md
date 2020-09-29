@@ -1,11 +1,9 @@
-## calculateFieldShift
+# calculateFieldShift
 
 
-# Referencias
+## Referencias
 [1] Salomir et al, "A fast calculation method for magnetic field inhomogeneity due to an arbitrary distribution of bulk susceptibility"
 Concepts in Magnetic Resonance Part B: Magnetic Resonance Engineering, Volume 19B, Issue 1, pages 26-34, 2003
-
-
 
 [2] Cheng YCN, Neelavalli J, Haacke EM. "Limitations of calculating field distributions and magnetic susceptibilities in MRI using a Fourier
 based method". Phys Med Biol 2009;54:1169?1189
