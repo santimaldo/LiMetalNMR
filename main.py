@@ -45,8 +45,6 @@ N = [256,256,256] # para trapped_arranged_sticks
 
 volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #volumen = SimulationVolume(FOV=FOV, N=N)
-
-
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
 
 #Creo el objeto muestra. Le tengo que dar de entrada:
@@ -60,8 +58,9 @@ medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 #muestra = Muestra(volumen, medidas=medidas, geometria='arranged_sticks')
-muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks')
-
+muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks', paredes=False)
+#muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks')
+#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=12e-3, distancia=3e-3)
 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 delta = Delta(muestra)
@@ -69,16 +68,17 @@ delta = Delta(muestra)
 
 #%%
 superposicion = Superposicion(muestra, delta)
+s2 = Superposicion(muestra, delta)
 
 #%%
 
 v=5
 plt.figure(20000)
-plt.pcolormesh(superposicion.delta_sens[:,125,:], cmap='seismic', vmax=v, vmin=-v)
+plt.pcolormesh(superposicion.delta_sens[:,118,:], cmap='seismic', vmax=v, vmin=-v)
 plt.colorbar()
 
 plt.figure(20001)
-plt.pcolormesh(superposicion.[45,:,:], cmap='seismic', vmax=v, vmin=-v)
+plt.pcolormesh(superposicion.delta_sens[45,:,:], cmap='seismic', vmax=v, vmin=-v)
 plt.colorbar()
 
 #%%
@@ -94,6 +94,6 @@ gr = Graficador(muestra, delta)
 #%%
 # slice en x central
 gr.mapa()
-gr.mapa(dim=1, corte=0.6, completo=True)
+gr.mapa(dim=2, corte=0.6, completo=True)
 gr.mapa(dim=0, corte=0.6, completo=True)
 #gr.mapa(dim=0, corte=0.5, completo=False)

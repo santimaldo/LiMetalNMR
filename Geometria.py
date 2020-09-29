@@ -6,10 +6,11 @@ Created on Tue May 12 14:00:22 2020
 @author: santi
 """
 import numpy as np
+import matplotlib.pyplot as plt
 
 def funciones(geometria):
   """
-  toma la geometria, un strig, y elige la funcion
+  toma la geometria, un string, y elige la funcion
   """
   
   funciones = {}
@@ -17,6 +18,7 @@ def funciones(geometria):
   funciones['sticks'] = sticks
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
+  funciones['distancia_constante'] = distancia_constante
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -147,6 +149,11 @@ def trapped_arranged_sticks(N, voxelSize, **geokwargs):
   la idea es usarlo con N=[Nmz, 88, 88] y voxelsize de 1 um
   """
   # extraigo los geokwargs:
+  try:
+    paredes = geokwargs['paredes']
+  except:
+    paredes = True
+    
   ancho = 3e-3 # mm
   
   Nmz,Nmy,Nmx = N
@@ -169,30 +176,84 @@ def trapped_arranged_sticks(N, voxelSize, **geokwargs):
             indices.append((iz,ind_y+iy, ind_x+ix))
       ind_y+=6
     ind_x+=6
+
+  if paredes==True:    
+    # agrego las partes grandes:
+    # primero la s paredes que va de 0 a 30 & de 57 al final en x
+    # i.e las paredes y  
+    for iz in range(Nmz):
+      for iy in range(Nmy-1):
+        for ix in range(30):        
+              indices.append((iz,iy,ix))
+              indices.append((iz,iy,ix+57))
+        ix+=1
+      iy+=1
+    iz+=1
     
-  # agrego las partes grandes:
-  # primero la s paredes que va de 0 a 30 & de 57 al final en x
-  # i.e las paredes y
-  for iz in range(Nmz):
-    for iy in range(Nmy-1):
-      for ix in range(30):        
-            indices.append((iz,iy,ix))
-            indices.append((iz,iy,ix+57))
-      ix+=1
-    iy+=1
-  iz+=1
-  
-  # luego las paredse en x
-  for iz in range(Nmz):
-    for iy in range(30):
-      for ix in range(27):        
-            indices.append((iz,iy,ix+30))
-            indices.append((iz,iy+57,ix+30))
-      ix+=1
-    iy+=1
-  iz+=1
+    # luego las paredse en x
+    for iz in range(Nmz):
+      for iy in range(30):
+        for ix in range(27):        
+              indices.append((iz,iy,ix+30))
+              indices.append((iz,iy+57,ix+30))
+        ix+=1
+      iy+=1
+    iz+=1
   
   return indices
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def distancia_constante(N, voxelSize, **geokwargs):
+  """
+  2020-09-07
+  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
+  ordenadas en un arreglo cuadrado, con distancias constantes
+          x    x    x    x    
+          
+          x    x    x    x
+          
+          x    x    x    x
+          
+          x    x    x    x
+  """
+  # extraigo los geokwargs:
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+  
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar
+  nsx = int(ancho/vsx)
+  nsy = int(ancho/vsy)
+  # distancia en voxels:
+  ndx = int(distancia/vsx)
+  ndy = int(distancia/vsy)
+  
+  
+  indices = []
+  Nd_f = 4 # numero de dendritas por fila
+  ind_x = nsx # dejo un ancho de distancia hasta el borde
+  ii = jj = 0
+  n = 0
+  while ind_x<=(Nmx-2*nsx):      
+    ind_y = nsy
+    while ind_y<=(Nmy-2*nsy):
+      for iz in range(Nmz):
+        for iy in range(nsy):
+          for ix in range(nsx):
+            indices.append((iz,ind_y+iy, ind_x+ix))
+      ind_y+= ndy+nsy
+      n+=1
+    ind_x+= ndx+nsx
+  print('Area cubierta por dendritas: {}  um2'.format(n*area))
+  return indices
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -224,13 +285,14 @@ if __name__=='__main__':
   N = np.array([28,88,88])
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
-  geometria = 'trapped_arranged_sticks'
+  geometria = 'distancia_constante'
   constructor = funciones(geometria)
   
-  tuplas = constructor(N, voxelSize)
+  tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3)
   
   indices = np.array(tuplas).T
   # convierto a indices planos
+  #%%
   indices = np.ravel_multi_index(indices, N)
    
   muestra_flat = np.zeros(N)
