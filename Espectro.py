@@ -8,9 +8,18 @@ Created on Mon Sep  7 13:54:04 2020
 import numpy as np
 
 
-def espectro(matriz):
+def espectro(matriz, KS=258.9):
     """
     funcion que crea un espectro dada una matriz de valores de B0
+    
+    INPUT:
+      - matriz : array - Es el array del valor de delta solo en la region de la
+                         muestra que quiero que contribuya al espectro
+      - KS     : float - Es el Knight Shift. Su valor por defecto es 258.9, un
+                         valor que puse a ojo para que el bulk coincida con los
+                         experimentos. Colocando KS=0 veremos la desviacion
+                         respecto al campo de 7T. Si quiero hacerlo respecto al
+                         bulk debo poner KS=-superposicion.delta_in
     """
     datos = matriz[matriz!= 0].flatten()
     hist, bin_edges = np.histogram(datos, bins='auto')
@@ -23,12 +32,11 @@ def espectro(matriz):
     ###  FID ------------------------------------------------------------------
     
     ppm = 116.64
-    w = (bins+257.3)*2*np.pi*ppm
+    w = (bins+KS)*2*np.pi*ppm
     #w = (bins)*2*np.pi*ppm
     Pw = hist
     
     tau = np.linspace(0,1.024*16,2048)*1e-3
-
     
     T2est = 0.12*1e-3 # chequeado con una medida_ T2est = 0.12 us
     

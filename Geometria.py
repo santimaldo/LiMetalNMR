@@ -295,12 +295,12 @@ if __name__=='__main__':
   #%%
   indices = np.ravel_multi_index(indices, N)
    
-  muestra_flat = np.zeros(N)
+  muestra = np.zeros(N)
   # el constructor me da una lista de indices flattened
   #  put(array       , indices, valor)
-  np.put(muestra_flat, indices, 1)
-  # convierto en 3d array
-  muestra = np.reshape(muestra_flat, N)
+  np.put(muestra, indices, 1)
+  
+  
   
   #%%
   plt.figure(987654321)

@@ -20,7 +20,7 @@ from Graficador import *
 from SimulationVolume import *
 from Espectro import espectro
 
-path = '/home/santi/CuarenteDoctorado/LiMetal/simulaciones/2020-09-07_distancia_constante/'
+path = 'S:/temp/'
 
 #%%----------------------------------------------------------------------------  
 #------------------------------------------------------------------------------
@@ -45,44 +45,42 @@ medidas = [0.028,0.088,0.088]
 #%%
 # ACA VA EL LOOP
 
-distancias = [6, 9, 12, 15]
-lados = [3, 6, 9, 12, 15]
+distancias = [1, 3, 6, 9, 12, 15,18,21]
+lados = [1, 3, 6, 9, 12, 15]
 
-distancias = [18, 21]
-lados = [3, 6, 9, 12, 15]
 
 for distancia in distancias:
     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     print('++++++++++++++++++++++ distancia:  {} um+++++++++++++++++++++++++++++++'.format(distancia))
     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
     for lado in lados:
-        print('--------------------------------------------------------------')
+        print('---------------------d :{} um  -----------------------------------'.format(distancia))
         print('-------------------- lado:  {}  um--------------------------------'.format(lado))
-        print('--------------------------------------------------------------')
+        print('------------------------------------------------------------------')
         # CREACION DE LA MUESTRA-----------------------------------------------------    
         muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=lado*1e-3, distancia=distancia*1e-3)    
         # CREACION DEL OBJETO DELTA--------------------------------------------------
-        delta = Delta(muestra)
+#        delta = Delta(muestra)
         # SUPERPOSICION --------------------------------------------------
-        superposicion = Superposicion(muestra, delta)
+#        superposicion = Superposicion(muestra, delta)
         # espectros:---------------------------------------------------------------
         # -------------------------------------------------------------------------
-        del delta, muestra
-        matriz = superposicion.delta_sens # todo
-        ppmAxis, spec = espectro(matriz)
-        spec_data = np.array([ppmAxis, np.real(spec)]).T
-        np.savetxt(path+'dist{}um_lado{}um_spec.dat'.format(distancia, lado), spec_data)
-        #
-        matriz = superposicion.delta_sens[superposicion.z0:,:,:] # dendritas
-        ppmAxis, spec = espectro(matriz)
-        spec_data = np.array([ppmAxis, np.real(spec)]).T
-        np.savetxt(path+'dist{}um_lado{}um_spec_dend.dat'.format(distancia, lado), spec_data)
-        #
-        matriz = superposicion.delta_sens[:superposicion.z0,:,:] # bulk
-        ppmAxis, spec = espectro(matriz)
-        spec_data = np.array([ppmAxis, np.real(spec)]).T
-        np.savetxt(path+'dist{}um_lado{}um_spec_bulk.dat'.format(distancia, lado), spec_data)
-        del superposicion
+#        del delta, muestra
+#        matriz = superposicion.delta_sens # todo
+#        ppmAxis, spec = espectro(matriz)
+#        spec_data = np.array([ppmAxis, np.real(spec)]).T
+#        np.savetxt(path+'dist{}um_lado{}um_spec.dat'.format(distancia, lado), spec_data)
+#        #
+#        matriz = superposicion.delta_sens[superposicion.z0:,:,:] # dendritas
+#        ppmAxis, spec = espectro(matriz)
+#        spec_data = np.array([ppmAxis, np.real(spec)]).T
+#        np.savetxt(path+'dist{}um_lado{}um_spec_dend.dat'.format(distancia, lado), spec_data)
+#        #
+#        matriz = superposicion.delta_sens[:superposicion.z0,:,:] # bulk
+#        ppmAxis, spec = espectro(matriz)
+#        spec_data = np.array([ppmAxis, np.real(spec)]).T
+#        np.savetxt(path+'dist{}um_lado{}um_spec_bulk.dat'.format(distancia, lado), spec_data)
+#        del superposicion
         
         
     
