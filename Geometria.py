@@ -283,17 +283,18 @@ if __name__=='__main__':
   """
   # este N es el N de la muestra ejemplo
   N = np.array([28,88,88])
+  Nz, Ny, Nx = N
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
   geometria = 'distancia_constante'
-  constructor = funciones(geometria)
   
+  constructor = funciones(geometria)  
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3)
-  
+
   # convierto a indices planos
   indices = np.array(tuplas).T  
   indices = np.ravel_multi_index(indices, N)
@@ -304,16 +305,16 @@ if __name__=='__main__':
   np.put(muestra, indices, 1)
  
   #%%
-  plt.figure(987654321)
+  plt.figure(19875)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
-  plt.pcolormesh(muestra[:,:,int(N[2]/2)])
+  plt.pcolormesh(muestra[:,:,int(Nx/2)])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,int(N[1]/2),:])
+  plt.pcolormesh(muestra[:,int(Ny/2),:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
-  plt.pcolormesh(muestra[int(N[0]/2),:,:])
+  plt.pcolormesh(muestra[int(Nz/2),:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-  plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
+  plt.pcolormesh(muestra[:,:,int(Nx*3/4)])
