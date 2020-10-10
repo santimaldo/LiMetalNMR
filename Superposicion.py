@@ -1,142 +1,273 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar 20 20:01:18 2020
+Created on Mon May 11 14:04:31 2020
 
 @author: santi
 """
 
-"""
-Script para calcular el corrimiento del centro de una lamina.
-"""
-
-
-from calculateFieldShift import *
 import numpy as np
-import matplotlib.pyplot as plt
+import scipy.ndimage as ndimage
 
-
-# Parametros fisicos
-Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
-B0 = 7 # T
-skindepth = 0.012 # profundida de penetracion, mm
-
-
-# recordar que la convencion de python es {z,y,x}
-# elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
-# volumen simulado.
-#voxelSize = [0.071, 0.391, 0.391]# mm
-voxelSize = [0.040, 0.2, 0.2]# mm
-FOV = [0.714*30, 25, 25]
-N = [512, 128, 128]
-#voxelSize = [0.006, 0.03, 0.08]# mm
-#Nz, Ny, Nx = [256, 128, 128]
-# con estos numeros, Nj*voxelSize_j queda
-#    z: 1.536 mm  ; y: 3.84 mm  ; x: 10.24 mm
-
-# utilizo una funcion que dado dos argumentos define el restante. Ya sea N, 
-# FOV (field of view) o  voxelSize
-N, voxelSize, FOV = SimulationVolume(voxelSize=voxelSize, N=N)
-#N, voxelSize, FOV = SimulationVolume(N=N, FOV=FOV)
-VSz, VSy, VSx = voxelSize
-FOVz, FOVy, FOVx = FOV 
-Nz, Ny, Nx = N
-
-
-#%% CREACION DE LA LAMINA--------------------------------------------------------
-# primero defino las dimensiones del objeto: obj_dim, expresada en mm.
-obj_dim = [0.714, 10, 10]
-microest = [0.080, 0.4, 0.4]
-# Creo una matriz de ceros de tamaño Nz*Ny*Nx. esta matriz representa el 
-# volumen simulado. Donde hay un 1, hay material. Donde hay un 0, hay vacio.
-# El producto obj*Chi es la distribuion espacial de susceptibilidad magnetica.
-obj1 = np.zeros([Nz, Ny, Nx])
-obj2 = np.zeros([Nz, Ny, Nx])
-# Para representar la lamina, defino las posiciones en las que inicia y termina
-# la lamina en cada direccion.
-z_lamina = int(Nz/2+obj_dim[0]/VSz/2)
-objz = [0, z_lamina]
-objz = [int(Nz/2-obj_dim[0]/VSz/2), int(Nz/2+obj_dim[0]/VSz/2)]
-# el objeto esa situado en el centro de FOVxy
-objy = [int(Ny/2-obj_dim[1]/VSy/2), int(Ny/2+obj_dim[1]/VSy/2)]
-objx = [int(Nx/2-obj_dim[2]/VSx/2), int(Nx/2+obj_dim[2]/VSx/2)]
-# el objeto tiene el mismo tamaño que el FOVxy
-#objy = [0, Ny+1]
-#objx = [0, Nx+1]
-
-# objeto1: Lamina
-obj1[objz[0]:objz[1], objy[0]:objy[1], objx[0]:objx[1]] = 1
-
-# objeto2: 1 microestructura
-objz = [z_lamina, z_lamina+int(microest[0]/VSz)]
-objy = [int(Ny/2-microest[1]/VSy/2), int(Ny/2+microest[1]/VSy/2)]
-objx = [int(Nx/2-microest[2]/VSx/2), int(Nx/2+microest[2]/VSx/2)]
-obj2[objz[0]:objz[1]+1, objy[0]:objy[1]+1, objx[0]:objx[1]+1]=1
-
-# objeto3: la suma
-obj3 = obj1+obj2
-
-#%%----------------------------------------------------------------------------
-
-# sistema de coordenadas:
-z = np.linspace(0, Nz-1, Nz)*VSz
-y = np.linspace(-Ny/2 +1, Ny/2, Ny)*VSy
-x = np.linspace(-Nx/2 +1, Nx/2, Nx)*VSx
-
-delta1 = calculateFieldShift(obj1*Chi, voxelSize)*1e6
-delta2 = calculateFieldShift(obj2*Chi, voxelSize)*1e6
-delta3 = calculateFieldShift(obj3*Chi, voxelSize)*1e6
-
-
-
-
-#%% 
-plt.figure(2)
-x0 = int(Nx/2)
-y0 = int(Ny/2)
-
-#plt.plot(z, delta[:,y0+1,x0], '-')
-plt.plot(z, delta1[:,y0,x0], 'b-', label='Lámina')
-plt.plot(z, delta2[:,y0,x0], 'r-', label='Microestructura')
-plt.plot(z, delta3[:,y0,x0], 'k-', label='Objeto completo')
-plt.plot(z, delta1[:,y0,x0]+delta2[:,y0,x0], 'g--', label='Superposicion')
-plt.legend()
-#plt.plot(z, obj[:,y0,x0])
-plt.xlabel(r"$z$ [mm]")
-plt.ylabel(r"$\delta$ [ppm]")
-#plt.xlim([-0.1, 0.5])
-#plt.ylim([0,1.7])
-
-
-#%%
-splts = 3
-subplt = 1
-
-deltas = [delta1, delta2, delta3]
-
-plt.figure(3)
-for delta in deltas:
-  delta_slice = delta[:,:,int(Nx/2)]
-  vmax = np.max(np.max(delta_slice))
-  ax = plt.subplot(splts,1,subplt)
-  plt.pcolormesh(y,z, delta_slice, cmap='seismic', vmin=-vmax, vmax=vmax)
-  plt.xlabel(r"$y$ [mm]")
-  plt.ylabel(r"$z$ [mm]")
-  plt.xlim([-3, 3])
-  plt.ylim([8,14 ])
-  subplt += 1
+class Superposicion(object):
+  """
+  Esta clase representa la superposicion de los deltas bulk y microestructuras
   
-#%%
-# si hay diferencias, el maximo o minimo sera muy distinto de cero
-dif_max = np.max(np.max(np.max(delta3-delta2-delta1)))
-dif_min = np.min(np.min(np.min(delta3-delta2-delta1)))
+  INPUTS:
+    muestra : objeto de la clase Muestra.
+   
+  ATRIBUTOS
+  + muestra   : Muestra()   -  el objeto clase muestra definido en el main
+  + delta     : array       -  es el array que devuelve calculateFieldShift
+  + delta_in  : float       -  Al bulk lo aproximamos como una funcion esaclon.
+                              delta_in es el valor de delta dentro de la lamina
+                              de litio bulk
+  + delta_out : float       -  Al bulk lo aproximamos como una funcion esaclon.
+                              delta_out es el valor de delta fuera de la lamina
+                              de litio bulk
+  
+  + z0        : int         - el indice en la direccion z en la cual comienzan
+                              las dendritas. z0-1 es el ultimo indice donde hay 
+                              bulk
+  + slice     : list        - [[zi,zf], [yi,yf], [xi,xf]] Entre estos valores
+                              recorto la matriz de volumen para definir el 
+                              volumen en cual hago la superposicion.
+                              
+  + muestra_sup : array     - superposicion de la muestra (las dendritas), con 
+                              el bulk. Es decir, lleno de litio todo el volumen
+                              hasta z0-1
+  
+  
+  + delta_bulk : array      - Matriz con valores de delta generados por el bulk,
+                              es decir, la funcion escalon en z:
+                                delta_in  para 0  <  z  <=  z0-1
+                                delta_out para z0 <= z 
+  + delta_muestra : array   - Matriz con los valores de delta generados por las
+                              dendritas.
+  
+  + self.delta_sup : array  - Matriz con el delta superpuesto
+                                  delta_sup = delta_bulk + delta_muestra   
+  
+  + delta_sens : array      - Matriz con los valores de delta solo en las 
+                              regiones sensibles, es decir, las regiones que
+                              dan senal.
+  
+  # ESTO TODAVIA NO ESTA IMPLEMENTADO
+  para el efecto B1:
+  self.erosiones = None
+  self.tajadas = None
+  self.tajadas_delta = None
+  """
+  
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27):
+    
+    
+    self.muestra = muestra
+    self.delta = delta
+    self.delta_in = delta_in
+    self.delta_out = delta_out           
+    # el nuevo valor de indice en z en el cual empiezan las dendritas:
+    # [0:z0,:,:] --> bulk
+    # [z0: ,:,:] --> dendritas
+    self.z0 = int(36e-3/self.muestra.voxelSize[0])
+    self.slice = None
+    self.definir_slice()
+    
+    self.muestra_sup = None
+    self.superponer_muestra()
+    
+    self.delta_bulk = None
+    self.delta_muestra = None
+    self.crear_delta_bulk()    
+    self.crear_delta_muestra()
+    self.delta_sup =  self.delta_bulk + self.delta_muestra   
+    
+    self.delta_sens = None
+    self.crear_delta_sens()    
 
-#%%
-path = '/home/santi/CuarenteDoctorado/LiMetal/superposicion/'
+    self.areas()    
+    
+    # para el efecto B1:
+    self.erosiones = None
+    self.tajadas = None
+    self.tajadas_delta = None
+    
+  def definir_slice(self):
+    """
+    Este metodo es para definir donde cortar la matriz del volumen y de delta.
+    """    
+    slz,sly,slx = self.muestra.slices    
+    vsz,vsy,vsx = self.muestra.voxelSize
+    slz0 = slz[0] - self.z0
+    slz1 = slz[1]
+    sly0 = 0
+    sly1 = self.muestra.N[1]
+    slx0 = 0
+    slx1 = self.muestra.N[2] 
+    self.slice = [[slz0,slz1],[sly0,sly1],[slx0,slx1]]
+    return 0    
 
-datos_delta1 = np.array([z, delta1[:,y0,x0]]).T
-datos_delta3 = np.array([z, delta3[:,y0,x0]]).T
+    
+  def superponer_muestra(self):
+    """
+    Toma la matriz de la muestra, crea el volumen entero
+    y le agraga el bulk en la parte de abajo
+    """    
+    slz,sly,slx = self.slice
+    obj = self.muestra.construir_volumen()/self.muestra.chi
+    # recorto el volumen
+    obj = obj[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]
+    # lleno al objeto de 1 en todos los lugaras HASTA z0 (exclusivo)    
+    obj[0:self.z0,:,:] = 1     
+    
+    self.muestra_sup = obj
+    return 0
+  
+  
+  def crear_delta_bulk(self):
+    """
+    Crea el delta bulk como una funcion escalon
+    """        
+    slz,sly,slx = self.slice
+    # defino el z donde arranca la muestra
+    z0 = self.z0
+    # lleno al objeto de delta_in en todos los lugaras HASTA z0 (exclusivo)
+    # y de delta_out desde z0 en adelante
+    delta_bulk = np.zeros_like(self.muestra_sup)
+    delta_bulk[0:z0,:,:] = self.delta_in
+    delta_bulk[z0:,:,:] = self.delta_out
+    
+    self.delta_bulk = delta_bulk
+    return 0
+  
+  def crear_delta_muestra(self):
+    """
+    Crea el delta muestra recortando el delta, usando muestra.slices,
+    agregando los extras
+    """
+    slz,sly,slx = self.slice
+    delta_muestra = self.delta.delta[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]  
+    self.delta_muestra = delta_muestra
+    return 0        
+  
+  
+  def crear_delta_sens(self):
+    """
+    Usando erosion binaria, elijo 12 um hacia adentro
+    """        
+    vs = self.muestra.voxelSize
+    if not vs[0]==vs[1]==vs[2]:
+      print("=======================WARNING=============================")
+      print("los voxels deben ser CUBICOS para poder implementar la erosion binaria")
+      raise ValueError('los lados deben ser iguales!!!')        
+    vs = vs[0]
+    d = 0.012 # mm  
+    nd = int(d/vs)  
+    """
+    To find the edge pixels you could perform binary erosion on your mask, then XOR the result with your mask
+    """
+    obj = self.muestra_sup
+    mask = (obj == 1)
+    struct = ndimage.generate_binary_structure(3, 1)
+    struct = ndimage.iterate_structure(struct, nd)
+    erode = ndimage.binary_erosion(mask, struct)
+    vol_sens = mask ^ erode
+    # quito la parte de bulk profundo
+    z0 = self.z0
+    print("--se forzo a cero la señal de bulk mas prifundo que 12 um--")
+    vol_sens[0:z0-(nd),:,:] = 0    
+    self.delta_sens = vol_sens * self.delta_sup
+    
+  def areas(self):
+    """
+    calculos las areas (2D) "solo bulk", y "con dendritas". Ojo, no es el area 
+    total de bulk, ya que existe bulk entre las dendritas. Es solo como para tener
+    una idea orientativa. Tampoco es la superficie total, solo el area de litio
+    cubierta
+    """
+    vs = self.muestra.voxelSize
+    N = self.muestra.N
+    Nm = self.muestra.N_muestra
+    
+    area_total =  N[1]*vs[1] * N[0]*vs[0]
+    self.area_dendritas = Nm[1]*vs[1] * Nm[0]*vs[0]
+    self.area_bulk = area_total - self.area_dendritas
+    
+    print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
+    return self.area_bulk/self.area_dendritas
+    
 
-np.savetxt(path+'datos_lamina.dat', datos_delta1)
-np.savetxt(path+'datos_objeto.dat', datos_delta3)
 
+  def erosiones_consecutivas(self, n_slices):
+    """
+    Este metodo es para hacer muchas erosiones de 1 voxel, como para seleccionar
+    solo esa parte. de esta forma podemos manipular los distintos slices que 
+    plantean Ilott y Jerschow, segun el decaimiento de B1 dentro del metal
+    """
+    obj = self.muestra_sup
+    z0 = self.z0        
+    # inicializo las listas en las cuales guardo erosiones y slices
+    # erosion es el objeto quitando un voxel del borde, n veces
+    # slices es una tajada de un voxel, a cierta profundidad. 
+    erosiones = []
+    tajadas = []
+    
+    mask = (obj == 1)
+    struct = ndimage.generate_binary_structure(3, 1)
+    for n in range(n_slices):
+      # erosiono
+      erode = ndimage.binary_erosion(mask, struct)
+      # la erosion tambien se come los laterales del bulk, por eso los vuelvo a
+      # rellenar con 1. La tajada va estar exactamente en z0-n-1, los 1 se llenan
+      # hasta z0-n-2
+      erode[0:z0-n-1,:,:] = 1
+      # obtengo la tajada
+      vol_sens = mask ^ erode
+      # guardo
+      erosiones.append(erode)
+      tajadas.append(vol_sens)
+      # ahora el nuevo objeto a erosionar es el de la erosion anterior
+      mask = (erode==1)
+    self.erosiones = erosiones
+    self.tajadas = tajadas
+    return erosiones, tajadas
+    
+  def crear_tajadas_delta(self, n_slices):
+    """
+    En este metodo obtengo los slices de delta
+    """
+    no_existe = (self.tajadas_delta is None) or (len(self.tajadas_delta)!=n_slices)
+    ya_existe = (not self.tajadas_delta is None) and (len(self.tajadas_delta)==n_slices)
+    
+    if no_existe:  
+      erosiones, tajadas = self.erosiones_consecutivas(n_slices)
+      del erosiones
+      tajadas_delta = []
+      for tajada in tajadas:
+        delta = tajada * self.delta_sup
+        # quito la parte de bulk profundo
+        delta[0:self.z0-(n_slices),:,:] = 0
+        tajadas_delta.append(delta)
+      self.tajadas_delta = tajadas_delta
+    elif ya_existe:
+      print("slices_delta(n_slices) says: \n\t 'ya existia, así que \
+            no hice nada. Te devuelvo lo que estaba guardado'")
+    return self.tajadas_delta
+    
+    
+    
+  def get_delta_dendritas(self):
+    """
+    metodo que devuelve una matriz con los valores de delta, solo en la region
+    de la muestra, es decir, las dendritas
+    """
+    delta_muestra = self.delta_sens[superposicion.z0:,:,:] # dendritas    
+    return delta_muestra
+  
+  def get_delta_bulk(self):
+    """
+    metodo que devuelve una matriz con los valores de delta, solo en la region
+    de la muestra
+    """
+    delta_bulk = self.delta_sens[0:superposicion.z0,:,:] # bulk
+    return delta_bulk
