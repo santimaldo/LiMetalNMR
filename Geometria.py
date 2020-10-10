@@ -22,15 +22,12 @@ def funciones(geometria):
   if geometria in funciones:
     return funciones[geometria]
   else:
-    mensaje= "\n ============WARNING=====================\
-             \n La geometria solicitada no se encuentra.\
-             \n Por las dudas, te devuelvo un BULK.\
-             \n ========================================"
-    print(mensaje)
-    return funciones['bulk']
-    
-  
-
+      mensaje= "\n =====ERROR=en=funciones(geometria)============\
+               \n El input debe se un string con el nombre de la geometria.\
+               \n O bien, la geometria solicitada no se encuentra\
+                \n =============================================="
+      raise Exception(mensaje)
+      return 0
 #------------------------------------------------------------------------------
 def bulk(N, voxelSize):
   """
