@@ -261,7 +261,7 @@ class Superposicion(object):
     metodo que devuelve una matriz con los valores de delta, solo en la region
     de la muestra, es decir, las dendritas
     """
-    delta_muestra = self.delta_sens[superposicion.z0:,:,:] # dendritas    
+    delta_muestra = self.delta_sens[self.z0:,:,:] # dendritas    
     return delta_muestra
   
   def get_delta_bulk(self):
@@ -269,5 +269,5 @@ class Superposicion(object):
     metodo que devuelve una matriz con los valores de delta, solo en la region
     de la muestra
     """
-    delta_bulk = self.delta_sens[0:superposicion.z0,:,:] # bulk
+    delta_bulk = self.delta_sens[0:self.z0,:,:] # bulk
     return delta_bulk
