@@ -19,6 +19,7 @@ def funciones(geometria):
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
+  funciones['mask_1'] = mask_1
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -253,12 +254,59 @@ def distancia_constante(N, voxelSize, **geokwargs):
   return indices
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
+#mascaras 
+# def funciones(mascara):
+  
+  
+#   funciones = {}
+#   funciones['mask_1'] = mask_1
+#   if mascara in funciones:
+#     return funciones[mascara]
+#   else:
+#     mensaje= "\n ============WARNING=====================\
+#              \n La mascara solicitada no se encuentra.\
+#              \n Por las dudas, te devuelvo la mask_1.\
+#              \n ========================================"
+#     print(mensaje)
+#     return funciones['mask_1']
 
 
+
+#------------------------------------------------------------------------------
+def mask_1(N, voxelSize, **geokwargs):
+ """
+  2020 10/08
+  Intento de máscara con forma de anillo, dando distintas alturas en z 
+ """
+ # extraigo los geokwargs:
+ Rmax = geokwargs['R_max']
+ Rmin = geokwargs['R_min']
+ vs= voxelSize[0]
+  
+ Nmz,Nmy,Nmx = N
+ 
+ 
+ indices = []
+ 
+ ind_x = 0
+ ind_y = 0
+ ind_z = 0
+
+ ind_Rm = int(Rmin/vs)
+ ind_RM = int(Rmax/vs)
+ 
+
+ for ind_y in range(Nmy):
+     for ind_x in range(Nmx):
+         if (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 > ind_Rm and (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 < ind_RM: 
+             for iz in range(Nmz):
+                 indices.append((ind_z+iz, ind_y, ind_x))
+ return indices     
+
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 
 #class test(object):
@@ -274,27 +322,25 @@ def distancia_constante(N, voxelSize, **geokwargs):
 #    
 #    self.func(self.N, self.voxelSize, **geokwargs)
 #    
-#    return 0
-    
-    
+#    return 
+  
 if __name__=='__main__':
   """
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([28,88,88])
-  Nz, Ny, Nx = N
+  N = np.array([28,88,88])    
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
   geometria = 'distancia_constante'
+  constructor = funciones(geometria)
   
-  constructor = funciones(geometria)  
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3)
-
+  tuplas = constructor(N, voxelSize, ancho=3e-3, distancia=4e-3)
+  
   # convierto a indices planos
   indices = np.array(tuplas).T  
   indices = np.ravel_multi_index(indices, N)
@@ -303,18 +349,34 @@ if __name__=='__main__':
   muestra = np.zeros(N)
   #  put(array       , indices, valor)
   np.put(muestra, indices, 1)
+  
+  #intento de crear la máscara
+  mascara = 'mask_1'
+  constructor = funciones(mascara)
+  tuplas_mask = constructor(N, voxelSize, R_max=18e-3 , R_min= 10e-3)
+  indices_mask = np.array(tuplas_mask).T
+  indices_mask = np.ravel_multi_index(indices_mask, N)
+  
+  mask = np.zeros(N)   
+  np.put(mask, indices_mask, 1)
+  #finalmente el objeto con la mascara seria
+  
+  muestra_mask= muestra*mask
+  
  
   #%%
-  plt.figure(19875)
+  muestra = muestra_mask
+  plt.figure(987654321)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
-  plt.pcolormesh(muestra[:,:,int(Nx/2)])
+  plt.pcolormesh(muestra[:,:,int(N[2]/2)])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,int(Ny/2),:])
+  plt.pcolormesh(muestra[:,int(N[1]/2),:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
-  plt.pcolormesh(muestra[int(Nz/2),:,:])
+  plt.pcolormesh(muestra[int(N[0]/2),:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-  plt.pcolormesh(muestra[:,:,int(Nx*3/4)])
+  plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
+  
