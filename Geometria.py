@@ -20,6 +20,7 @@ def funciones(geometria):
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
   funciones['mask_1'] = mask_1
+  funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -254,28 +255,10 @@ def distancia_constante(N, voxelSize, **geokwargs):
   return indices
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#mascaras 
-# def funciones(mascara):
-  
-  
-#   funciones = {}
-#   funciones['mask_1'] = mask_1
-#   if mascara in funciones:
-#     return funciones[mascara]
-#   else:
-#     mensaje= "\n ============WARNING=====================\
-#              \n La mascara solicitada no se encuentra.\
-#              \n Por las dudas, te devuelvo la mask_1.\
-#              \n ========================================"
-#     print(mensaje)
-#     return funciones['mask_1']
-
-
-
 #------------------------------------------------------------------------------
 def mask_1(N, voxelSize, **geokwargs):
  """
-  2020 10/08
+  2020-10-08
   Intento de máscara con forma de anillo, dando distintas alturas en z 
  """
  # extraigo los geokwargs:
@@ -294,20 +277,61 @@ def mask_1(N, voxelSize, **geokwargs):
 
  ind_Rm = int(Rmin/vs)
  ind_RM = int(Rmax/vs)
- 
 
  for ind_y in range(Nmy):
      for ind_x in range(Nmx):
-         if (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 > ind_Rm and (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 < ind_RM: 
+         if (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 > ind_Rm**2 and (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 < ind_RM**2: 
              for iz in range(Nmz):
-                 indices.append((ind_z+iz, ind_y, ind_x))
+                 indices.append((iz, ind_y, ind_x))
  return indices     
 
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+def cilindritos_dist_cte(N, voxelSize, **geokwargs):
+  """ 2020-10-16
+  Creo cilindritos a distancia constante entre sí, la idea es que el 
+  parámetro ancho sea el diametro del cilindro   """  
+ 
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  nsy = int(ancho/vsy)
+  # distancia en voxels entre los cilindros:
+  ndx = int(distancia/vsx)
+  ndy = int(distancia/vsy)
+  
+  
+  indices = []
+  ind_x = 2*nsx # dejo un ancho de distancia hasta el borde
+  n = 0
+  while ind_x<=(Nmx-2*nsx):      
+    ind_y = 2*nsy
+    while ind_y<=(Nmy-2*nsy):
+      for iy in range(nsy):
+          for ix in range(nsx):
+              if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                  for iz in range(Nmz):
+                      indices.append((iz,ind_y+iy, ind_x+ix))
+      ind_y+= ndy+nsy
+      n+=1
+    ind_x+= ndx+nsx
+  return indices
 
+  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 #class test(object):
 #  def __init__(self, geometria='bulk', N=[16,16,16], voxelSize=[1,1,1], **geokwargs):
@@ -329,17 +353,17 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([28,88,88])    
+  N = np.array([128,256,256])    
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'distancia_constante'
+  geometria = 'cilindritos_dist_cte'
   constructor = funciones(geometria)
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  tuplas = constructor(N, voxelSize, ancho=3e-3, distancia=4e-3)
+  tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
   
   # convierto a indices planos
   indices = np.array(tuplas).T  
@@ -353,7 +377,7 @@ if __name__=='__main__':
   #intento de crear la máscara
   mascara = 'mask_1'
   constructor = funciones(mascara)
-  tuplas_mask = constructor(N, voxelSize, R_max=18e-3 , R_min= 10e-3)
+  tuplas_mask = constructor(N, voxelSize, R_max=40e-3 , R_min= 10e-3)
   indices_mask = np.array(tuplas_mask).T
   indices_mask = np.ravel_multi_index(indices_mask, N)
   
@@ -365,7 +389,7 @@ if __name__=='__main__':
   
  
   #%%
-  muestra = muestra_mask
+  #muestra = muestra_mask
   plt.figure(987654321)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
