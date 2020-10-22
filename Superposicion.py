@@ -271,7 +271,7 @@ class Superposicion(object):
     """
     delta_bulk = self.delta_sens[0:self.z0,:,:] # bulk
     return delta_bulk
-  
+
 #------------------------------------------------------------------------------
   def Crear_B1(self):
       """

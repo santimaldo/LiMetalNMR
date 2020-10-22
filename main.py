@@ -33,7 +33,7 @@ skindepth = 0.012 # profundida de penetracion, mm
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
 #N = [128,64,64] # para arranged_sticks
-N = [256,256,256] # para trapped_arranged_sticks
+N = [256,512,512] # para trapped_arranged_sticks
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N, 
 # FOV (field of view) o  voxelSize
@@ -51,6 +51,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
 #medidas = [0.028,0.028,0.028] # para arranged_sticks
 medidas = [0.032,0.128,0.128] # para arranged_sticks
+#medidas = [0.064,0.128,0.128] # 
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 # otros
@@ -66,6 +67,7 @@ delta = Delta(muestra)
 
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
+#superposicion = Superposicion(muestra, delta, z0=224e-3)
 
 
 #%%

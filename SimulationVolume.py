@@ -45,3 +45,8 @@ def SimulationVolume(N=None, voxelSize=None, FOV=None):
   print('Volumen de simulacion (convencion z,y,x):')
   print('N: '+ sN + ' | voxelSize:  ' + sVS + ' | FOV:  '+ sFOV)
   return N, voxelSize, FOV  
+
+
+  
+  
+  
