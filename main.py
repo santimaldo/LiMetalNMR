@@ -48,21 +48,23 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #microestructuras
-medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
+#medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
 #medidas = [0.028,0.028,0.028] # para arranged_sticks
+medidas = [0.032,0.128,0.128] # para arranged_sticks
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 # otros
 #muestra = Muestra(volumen, medidas=medidas, geometria='arranged_sticks')
-muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks', paredes=False)
+#muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks', paredes=False)
 #muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks')
-#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=12e-3, distancia=13e-3)
-
+#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
+#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
+muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=5e-3, porcentaje=20) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
 
-#%% SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
+# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
 
 
@@ -93,22 +95,22 @@ gr.mapa(dim=0, corte=0.6, completo=True)
 ppmAxis, spec = espectro(superposicion.delta_sens)
 ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk() ) 
 ppmAxis, spec_dend = espectro(superposicion.get_delta_dendritas() )
-
+#%%
 plt.figure(123456)
 plt.plot(ppmAxis, spec_bulk, 'b'  , linewidth=3, label='bulk')
 plt.plot(ppmAxis, spec_dend, 'r'  , linewidth=3, label='dendritas')
-plt.plot(ppmAxis, spec     , 'k--', linewidth=3, label='total')
+plt.plot(ppmAxis, spec     , 'k', linewidth=3, label='total')
 plt.xlabel(r'$^7$Li Chemical Shift [ppm]')
 plt.xlim([ppmAxis[-1], ppmAxis[0]])
 plt.legend()
 
-## espectro normalizado de las dos regiones:
-#plt.figure(12345)
-#plt.plot(ppmAxis, spec_dend/np.max(spec_dend), 'r'  , linewidth=3, label='dendritas (normalizado)')
-#plt.plot(ppmAxis, spec_bulk/np.max(spec_bulk), 'b'  , linewidth=3, label='bulk (normalizado)')
-#plt.xlabel(r'$^7$Li Chemical Shift [ppm]')
-#plt.xlim([ppmAxis[-1], ppmAxis[0]])
-#plt.legend()
+# espectro normalizado de las dos regiones:
+plt.figure(12345)
+plt.plot(ppmAxis, spec_dend/np.max(spec_dend), 'r'  , linewidth=3, label='dendritas (normalizado)')
+plt.plot(ppmAxis, spec_bulk/np.max(spec_bulk), 'b'  , linewidth=3, label='bulk (normalizado)')
+plt.xlabel(r'$^7$Li Chemical Shift [ppm]')
+plt.xlim([ppmAxis[-1], ppmAxis[0]])
+plt.legend()
 
 
 

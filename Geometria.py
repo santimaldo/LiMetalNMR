@@ -19,6 +19,7 @@ def funciones(geometria):
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
+  funciones['porcentaje_palos'] = porcentaje_palos
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -248,6 +249,75 @@ def distancia_constante(N, voxelSize, **geokwargs):
     ind_x+= ndx+nsx
   print('Area cubierta por dendritas: {}  um2'.format(n*area))
   return indices
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def porcentaje_palos(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
+  """
+  2020-10-14
+  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
+  en posiciones aleatorias hasta cubrir un cierto porcentaje
+  """
+  # extraigo los geokwargs:
+  ancho  = geokwargs['ancho']
+  porcentaje = geokwargs['porcentaje']
+  p = porcentaje/100
+    
+  Nmz,Nmy,Nmx = N
+  vsz, vsy, vsx = voxelSize
+  
+  
+  if altura is None:
+    altura = vsz*Nmz
+    print ("altura de dendritas: {} um".format(altura))
+  elif altura>vsz*Nmz:
+    altura = vsz*Nmz
+    print ("WARNING!!! la altura de dendritas solicitada es superior \
+           a la medida de la muestra. Retransformando a altura = {} um".format(altura))
+    
+  # cuantos voxels debo usar
+  nsx = int(ancho/vsx)
+  nsy = int(ancho/vsy)
+  nsz = int(altura/vsz)
+  
+  area = nsx*nsy
+  AreaTotal = Nmx*Nmy
+  # determino cuantas dendritas voy a crear en un principio
+  Nd = int(AreaTotal*p/area)
+  print(area, AreaTotal, Nd)
+  
+  n = 0
+  indices = []
+  while n<10:
+    for iterador in range(Nd):
+      ind_y = np.random.randint(0,Nmy-nsy+1)
+      ind_x = np.random.randint(0,Nmx-nsx+1)          
+      for iz in range(nsz):
+        for iy in range(nsy):
+          for ix in range(nsx):
+            indices.append((iz,ind_y+iy, ind_x+ix))
+    # armo la muestra para chequear que cubri bien el area:          
+    indices_array = np.array(indices).T  
+    indices_array = np.ravel_multi_index(indices_array, N)    
+    muestra = np.zeros(N)
+    np.put(muestra, indices_array, 1)
+    # calulo el area cubierta
+    areaCubierta = np.sum(muestra[1,:,:])
+    pCubierto = areaCubierta/AreaTotal
+    print(pCubierto*100, p*100)
+    
+    if abs(pCubierto-p)*100<tolerancia:
+      break
+    if p<pCubierto:
+      print("Ups... nos pasamos...")
+      break
+    areaPorCubrir = p*AreaTotal - areaCubierta
+    Nd = int(areaPorCubrir/area)
+    n+=1
+  print("Porcentaje cubierto: {:.3f} %".format(pCubierto*100))
+  return indices
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -279,18 +349,19 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([28,88,88])
+  N = np.array([32,128,128])
   Nz, Ny, Nx = N
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'distancia_constante'
+  geometria = 'porcentaje_palos'
   
   constructor = funciones(geometria)  
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3)
+  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  tuplas = constructor(N, voxelSize, ancho=5e-3, porcentaje=20) # para 'porcentaje_palos'
 
   # convierto a indices planos
   indices = np.array(tuplas).T  

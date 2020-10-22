@@ -15,6 +15,7 @@ class Superposicion(object):
   
   INPUTS:
     muestra : objeto de la clase Muestra.
+    delta   : objeto de la clase Duestra.
    
   ATRIBUTOS
   + muestra   : Muestra()   -  el objeto clase muestra definido en el main
@@ -28,7 +29,7 @@ class Superposicion(object):
   
   + z0        : int         - el indice en la direccion z en la cual comienzan
                               las dendritas. z0-1 es el ultimo indice donde hay 
-                              bulk
+                              bulk. Por defecto es 60um,
   + slice     : list        - [[zi,zf], [yi,yf], [xi,xf]] Entre estos valores
                               recorto la matriz de volumen para definir el 
                               volumen en cual hago la superposicion.
@@ -59,17 +60,18 @@ class Superposicion(object):
   self.tajadas_delta = None
   """
   
-  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27):
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, skindepth=12e-3):
     
     
     self.muestra = muestra
     self.delta = delta
     self.delta_in = delta_in
-    self.delta_out = delta_out           
+    self.delta_out = delta_out
+    self.skindepth = skindepth           
     # el nuevo valor de indice en z en el cual empiezan las dendritas:
     # [0:z0,:,:] --> bulk
     # [z0: ,:,:] --> dendritas
-    self.z0 = int(36e-3/self.muestra.voxelSize[0])
+    self.z0 = int(z0/self.muestra.voxelSize[0])
     self.slice = None
     self.definir_slice()
     
@@ -196,8 +198,7 @@ class Superposicion(object):
     print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
     return self.area_bulk/self.area_dendritas
     
-
-
+    
   def erosiones_consecutivas(self, n_slices):
     """
     Este metodo es para hacer muchas erosiones de 1 voxel, como para seleccionar
@@ -255,7 +256,6 @@ class Superposicion(object):
     return self.tajadas_delta
     
     
-    
   def get_delta_dendritas(self):
     """
     metodo que devuelve una matriz con los valores de delta, solo en la region
@@ -271,3 +271,59 @@ class Superposicion(object):
     """
     delta_bulk = self.delta_sens[0:self.z0,:,:] # bulk
     return delta_bulk
+  
+#------------------------------------------------------------------------------
+  def Crear_B1(self):
+      """
+      Mediante erosiones de 1 voxel vamos creando una matriz de B1
+      """
+      obj = self.muestra_sup
+      z0 = self.z0        
+      vs = self.muestra.voxelSize[0]
+      B1 = np.zeros_like(obj)
+      # esto es para las erosiones:      
+      mask = (obj == 1)
+      struct = ndimage.generate_binary_structure(3, 1)      
+      # hago suficientes slices como para llegar a una profundidad de 5xSkinDepth
+      # es decir, 60um
+      n_slices = int(5*self.skindepth/vs)
+      for n in range(n_slices):
+        # erosiono:
+        erode = ndimage.binary_erosion(mask, struct)
+        # la erosion tambien se come los laterales del bulk, por eso los vuelvo a
+        # rellenar con 1. La tajada va estar exactamente en z0-n-1, los 1 se llenan
+        # hasta z0-n-2
+        erode[0:z0-n-1,:,:] = 1
+        # obtengo la tajada
+        tajada = mask ^ erode
+        # voy llenando las capas con los valores de B1. la variable de profundidad
+        # es (n+1)*vs/2, ya que en la primer tajada n=0 y la profundidad es de la
+        # mitad del voxelsize (si tomo el centro del voxel)
+        B1 = B1 + tajada*np.exp(-(n+1)*vs/2/self.skindepth)        
+        # ahora el nuevo objeto a erosionar es el de la erosion anterior
+        mask = (erode==1)
+            
+      return B1
+    
+
+  def B1B0(self):
+    """
+    creo el histograma B1-B0 para simular la secuencia de Jerschow
+    """
+    
+    # la matriz r nos da la distancia al borde de cada voxel
+    # recordemos que B1 va como exp(-r/skindepth)
+    B1 = self.Crear_B1()
+    B0 = self.delta_sup()*self.muestra_sup
+
+    if B1.shape!=B0.shape:
+      mensaje= "\n =====ERROR=en=Superposicion.B1B0==============\
+               \n B1 y B0 tienen distintas dimensiones (shapes).\
+                \n =============================================="
+      raise Exception(mensaje)
+      return 0
+    
+    B1 = r.flatten()
+    B0 = B0.flatten()   
+    
+    
