@@ -21,6 +21,7 @@ def funciones(geometria):
   funciones['distancia_constante'] = distancia_constante
   funciones['mask_1'] = mask_1
   funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
+  funciones['cilindrito_prueba'] = cilindrito_prueba
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -332,6 +333,55 @@ def cilindritos_dist_cte(N, voxelSize, **geokwargs):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+def cilindrito_prueba(N, voxelSize, **geokwargs):
+  """ 2020-10-22
+  Creo un cilindrito torcido de prueba. Inicialmente crece derecho en z y
+  luego se tuerce en x  """   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+ 
+  
+  indices = []
+  ind_x = int((Nmx - nsx)/2) 
+  ind_y = int((Nmy - nsy)/2) 
+  ind_z = 0
+  n=0
+  while ind_z < int(Nmz/2) and n < 20:
+      for iy in range(nsy):
+          for ix in range(nsx):
+              if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                  indices.append((ind_z,ind_y+iy, ind_x+ix))
+      ind_z+=1
+      n+=1
+      print(n)
+  else:
+      print("entro al else")
+      while ind_z < Nmz:
+          for iy in range(nsy):
+              for ix in range(nsx):
+                  if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                      indices.append((ind_z,ind_y+iy, ind_x+ix))
+          ind_x+=2
+      ind_z+=1
+  return indices
+    
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 #class test(object):
 #  def __init__(self, geometria='bulk', N=[16,16,16], voxelSize=[1,1,1], **geokwargs):
@@ -358,7 +408,7 @@ if __name__=='__main__':
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'cilindritos_dist_cte'
+  geometria = 'cilindrito_prueba'
   constructor = funciones(geometria)
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
@@ -403,4 +453,6 @@ if __name__=='__main__':
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
   plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
+  plt.figure(555555555555555555555555555)
+  plt.pcolormesh(muestra[int(N[0]/2),:,:])
   
