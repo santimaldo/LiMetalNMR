@@ -18,8 +18,8 @@ class Superposicion(object):
     delta   : objeto de la clase Duestra.
    
   ATRIBUTOS
-  + muestra   : Muestra()   -  el objeto clase muestra definido en el main
-  + delta     : array       -  es el array que devuelve calculateFieldShift
+  + muestra   : Muestra()   -  el objeto clase Muestra definido en el main
+  + delta     : Delta()     -  el objeto clase Delta definido en el main
   + delta_in  : float       -  Al bulk lo aproximamos como una funcion esaclon.
                               delta_in es el valor de delta dentro de la lamina
                               de litio bulk
@@ -49,15 +49,6 @@ class Superposicion(object):
   + self.delta_sup : array  - Matriz con el delta superpuesto
                                   delta_sup = delta_bulk + delta_muestra   
   
-  + delta_sens : array      - Matriz con los valores de delta solo en las 
-                              regiones sensibles, es decir, las regiones que
-                              dan senal.
-  
-  # ESTO TODAVIA NO ESTA IMPLEMENTADO
-  para el efecto B1:
-  self.erosiones = None
-  self.tajadas = None
-  self.tajadas_delta = None
   """
   
   def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, skindepth=12e-3):
@@ -83,7 +74,8 @@ class Superposicion(object):
     self.crear_delta_bulk()    
     self.crear_delta_muestra()
     self.delta_sup =  self.delta_bulk + self.delta_muestra       
-    
+  
+  #--- Metodos -------------------------------------------------------------------  
   def definir_slice(self):
     """
     Este metodo es para definir donde cortar la matriz del volumen y de delta.
@@ -102,7 +94,7 @@ class Superposicion(object):
     self.slice = [[slz0,slz1],[sly0,sly1],[slx0,slx1]]
     return 0    
 
-    
+  #-------------------------------------------------------------------------------      
   def superponer_muestra(self):
     """
     Toma la matriz de la muestra, crea el volumen entero
@@ -117,7 +109,7 @@ class Superposicion(object):
     self.muestra_sup = obj
     return 0
   
-  
+  #-------------------------------------------------------------------------------      
   def crear_delta_bulk(self):
     """
     Crea el delta bulk como una funcion escalon
@@ -133,7 +125,7 @@ class Superposicion(object):
     
     self.delta_bulk = delta_bulk
     return 0
-  
+  #-------------------------------------------------------------------------------      
   def crear_delta_muestra(self):
     """
     Crea el delta muestra recortando el delta, usando muestra.slices,
@@ -142,10 +134,8 @@ class Superposicion(object):
     slz,sly,slx = self.slice
     delta_muestra = self.delta.delta[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]  
     self.delta_muestra = delta_muestra
-    return 0        
-  
-  
-      
+    return 0            
+  #-------------------------------------------------------------------------------            
   def areas(self):
     """
     calculos las areas (2D) "solo bulk", y "con dendritas". Ojo, no es el area 
@@ -164,8 +154,9 @@ class Superposicion(object):
     #print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
     return self.area_bulk/self.area_dendritas
     
-    
-  # getters:    
+  #-------------------------------------------------------------------------------        
+  # getters:   
+  #-------------------------------------------------------------------------------      
   def get_delta_dendritas(self):
     """
     metodo que devuelve una matriz con los valores de delta, solo en la region
@@ -173,11 +164,12 @@ class Superposicion(object):
     """
     delta_muestra = self.delta_sens[self.z0:,:,:] # dendritas    
     return delta_muestra
-  
+  #-------------------------------------------------------------------------------      
   def get_delta_bulk(self):
     """
     metodo que devuelve una matriz con los valores de delta, solo en la region
     de la muestra
     """
     delta_bulk = self.delta_sens[0:self.z0,:,:] # bulk
-    return delta_bulk    
+    return delta_bulk
+  #-------------------------------------------------------------------------------      
