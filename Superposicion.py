@@ -75,24 +75,14 @@ class Superposicion(object):
     self.slice = None
     self.definir_slice()
     
-    self.muestra_sup = None
+    self.muestra_sup = None    
     self.superponer_muestra()
     
     self.delta_bulk = None
     self.delta_muestra = None
     self.crear_delta_bulk()    
     self.crear_delta_muestra()
-    self.delta_sup =  self.delta_bulk + self.delta_muestra   
-    
-    self.delta_sens = None
-    self.crear_delta_sens()    
-
-    self.areas()    
-    
-    # para el efecto B1:
-    self.erosiones = None
-    self.tajadas = None
-    self.tajadas_delta = None
+    self.delta_sup =  self.delta_bulk + self.delta_muestra       
     
   def definir_slice(self):
     """
@@ -100,7 +90,10 @@ class Superposicion(object):
     """    
     slz,sly,slx = self.muestra.slices    
     vsz,vsy,vsx = self.muestra.voxelSize
-    slz0 = slz[0] - self.z0
+    slz0 = slz[0] - self.z0    
+    if slz0 < 0:
+      print('WARNING!!!!!  puede que haya poca profundidad de bulk ! ')
+      slz0 = 0
     slz1 = slz[1]
     sly0 = 0
     sly1 = self.muestra.N[1]
@@ -121,7 +114,6 @@ class Superposicion(object):
     obj = obj[slz[0]:slz[1], sly[0]:sly[1], slx[0]:slx[1]]
     # lleno al objeto de 1 en todos los lugaras HASTA z0 (exclusivo)    
     obj[0:self.z0,:,:] = 1     
-    
     self.muestra_sup = obj
     return 0
   
@@ -153,33 +145,7 @@ class Superposicion(object):
     return 0        
   
   
-  def crear_delta_sens(self):
-    """
-    Usando erosion binaria, elijo 12 um hacia adentro
-    """        
-    vs = self.muestra.voxelSize
-    if not vs[0]==vs[1]==vs[2]:
-      print("=======================WARNING=============================")
-      print("los voxels deben ser CUBICOS para poder implementar la erosion binaria")
-      raise ValueError('los lados deben ser iguales!!!')        
-    vs = vs[0]
-    d = 0.012 # mm  
-    nd = int(d/vs)  
-    """
-    To find the edge pixels you could perform binary erosion on your mask, then XOR the result with your mask
-    """
-    obj = self.muestra_sup
-    mask = (obj == 1)
-    struct = ndimage.generate_binary_structure(3, 1)
-    struct = ndimage.iterate_structure(struct, nd)
-    erode = ndimage.binary_erosion(mask, struct)
-    vol_sens = mask ^ erode
-    # quito la parte de bulk profundo
-    z0 = self.z0
-    print("--se forzo a cero la señal de bulk mas prifundo que 12 um--")
-    vol_sens[0:z0-(nd),:,:] = 0    
-    self.delta_sens = vol_sens * self.delta_sup
-    
+      
   def areas(self):
     """
     calculos las areas (2D) "solo bulk", y "con dendritas". Ojo, no es el area 
@@ -195,67 +161,11 @@ class Superposicion(object):
     self.area_dendritas = Nm[1]*vs[1] * Nm[0]*vs[0]
     self.area_bulk = area_total - self.area_dendritas
     
-    print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
+    #print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
     return self.area_bulk/self.area_dendritas
     
     
-  def erosiones_consecutivas(self, n_slices):
-    """
-    Este metodo es para hacer muchas erosiones de 1 voxel, como para seleccionar
-    solo esa parte. de esta forma podemos manipular los distintos slices que 
-    plantean Ilott y Jerschow, segun el decaimiento de B1 dentro del metal
-    """
-    obj = self.muestra_sup
-    z0 = self.z0        
-    # inicializo las listas en las cuales guardo erosiones y slices
-    # erosion es el objeto quitando un voxel del borde, n veces
-    # slices es una tajada de un voxel, a cierta profundidad. 
-    erosiones = []
-    tajadas = []
-    
-    mask = (obj == 1)
-    struct = ndimage.generate_binary_structure(3, 1)
-    for n in range(n_slices):
-      # erosiono
-      erode = ndimage.binary_erosion(mask, struct)
-      # la erosion tambien se come los laterales del bulk, por eso los vuelvo a
-      # rellenar con 1. La tajada va estar exactamente en z0-n-1, los 1 se llenan
-      # hasta z0-n-2
-      erode[0:z0-n-1,:,:] = 1
-      # obtengo la tajada
-      vol_sens = mask ^ erode
-      # guardo
-      erosiones.append(erode)
-      tajadas.append(vol_sens)
-      # ahora el nuevo objeto a erosionar es el de la erosion anterior
-      mask = (erode==1)
-    self.erosiones = erosiones
-    self.tajadas = tajadas
-    return erosiones, tajadas
-    
-  def crear_tajadas_delta(self, n_slices):
-    """
-    En este metodo obtengo los slices de delta
-    """
-    no_existe = (self.tajadas_delta is None) or (len(self.tajadas_delta)!=n_slices)
-    ya_existe = (not self.tajadas_delta is None) and (len(self.tajadas_delta)==n_slices)
-    
-    if no_existe:  
-      erosiones, tajadas = self.erosiones_consecutivas(n_slices)
-      del erosiones
-      tajadas_delta = []
-      for tajada in tajadas:
-        delta = tajada * self.delta_sup
-        # quito la parte de bulk profundo
-        delta[0:self.z0-(n_slices),:,:] = 0
-        tajadas_delta.append(delta)
-      self.tajadas_delta = tajadas_delta
-    elif ya_existe:
-      print("slices_delta(n_slices) says: \n\t 'ya existia, así que \
-            no hice nada. Te devuelvo lo que estaba guardado'")
-    return self.tajadas_delta
-    
-    
+  # getters:    
   def get_delta_dendritas(self):
     """
     metodo que devuelve una matriz con los valores de delta, solo en la region
@@ -270,60 +180,4 @@ class Superposicion(object):
     de la muestra
     """
     delta_bulk = self.delta_sens[0:self.z0,:,:] # bulk
-    return delta_bulk
-
-#------------------------------------------------------------------------------
-  def Crear_B1(self):
-      """
-      Mediante erosiones de 1 voxel vamos creando una matriz de B1
-      """
-      obj = self.muestra_sup
-      z0 = self.z0        
-      vs = self.muestra.voxelSize[0]
-      B1 = np.zeros_like(obj)
-      # esto es para las erosiones:      
-      mask = (obj == 1)
-      struct = ndimage.generate_binary_structure(3, 1)      
-      # hago suficientes slices como para llegar a una profundidad de 5xSkinDepth
-      # es decir, 60um
-      n_slices = int(5*self.skindepth/vs)
-      for n in range(n_slices):
-        # erosiono:
-        erode = ndimage.binary_erosion(mask, struct)
-        # la erosion tambien se come los laterales del bulk, por eso los vuelvo a
-        # rellenar con 1. La tajada va estar exactamente en z0-n-1, los 1 se llenan
-        # hasta z0-n-2
-        erode[0:z0-n-1,:,:] = 1
-        # obtengo la tajada
-        tajada = mask ^ erode
-        # voy llenando las capas con los valores de B1. la variable de profundidad
-        # es (n+1)*vs/2, ya que en la primer tajada n=0 y la profundidad es de la
-        # mitad del voxelsize (si tomo el centro del voxel)
-        B1 = B1 + tajada*np.exp(-(n+1)*vs/2/self.skindepth)        
-        # ahora el nuevo objeto a erosionar es el de la erosion anterior
-        mask = (erode==1)
-            
-      return B1
-    
-
-  def B1B0(self):
-    """
-    creo el histograma B1-B0 para simular la secuencia de Jerschow
-    """
-    
-    # la matriz r nos da la distancia al borde de cada voxel
-    # recordemos que B1 va como exp(-r/skindepth)
-    B1 = self.Crear_B1()
-    B0 = self.delta_sup()*self.muestra_sup
-
-    if B1.shape!=B0.shape:
-      mensaje= "\n =====ERROR=en=Superposicion.B1B0==============\
-               \n B1 y B0 tienen distintas dimensiones (shapes).\
-                \n =============================================="
-      raise Exception(mensaje)
-      return 0
-    
-    B1 = r.flatten()
-    B0 = B0.flatten()   
-    
-    
+    return delta_bulk    
