@@ -310,9 +310,11 @@ class Medicion(object):
     # cargo el histograma:
     X, Y, H2D = self.histograma    
     #FID-----------------------------------------------------------------------
-    ppm = 116.6 # Hz
+    ppm = 116.641899 # Hz
     T2est = 0.14*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
-    t = np.linspace(0,1.024*16,2048)*1e-3
+    dw = 5e-6 # sacado de los experimentos. Esto da un SW=857ppm aprox
+    NP = 4096 # experimentalmente usamos 2048, pero con 4096 sale mas lindo
+    t = np.arange(NP)*dw    
     fid = np.zeros_like(t).astype(complex)    
     for j in range((Y[:,0]).size):                
         beta_j = Y[j,0] 
@@ -325,13 +327,6 @@ class Medicion(object):
           # fid
           fid += H2D[j,i]*signal*np.exp(1j*w *t - t/T2est)      
     #FOURIER-------------------------------------------------------------------
-    NP = t.size
-    dw = t[1]-t[0]
-    # sw = 1/(2*dw)  # EN REALIDAD EL SW DEBE SER ASI. PERO CUANDO HAGO ESTO,EL
-    # ESPECTRO ME QUEDA EN LA MITAD DE DONDE DEBERIA ESTAR. SI PONGO sw = 1/(dw)
-    # EL ANCHO ESPECTRAL ESTA SOBREESTIMADO POR UN FACTOR 2
-    sw = 1/(2*dw) # Hz
-    #freq = np.arange(NP)*sw/(NP-1)-sw/2  
     freq = np.fft.fftshift(np.fft.fftfreq(NP, d=dw))
     ppmAxis = freq/ppm    
     spec = np.fft.fftshift(np.fft.fft(fid))
