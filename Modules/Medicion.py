@@ -8,6 +8,8 @@ Created on Mon Sep  7 13:54:04 2020
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimage
+import os.path as path
+
 
 class Medicion(object):
   """
@@ -290,10 +292,16 @@ class Medicion(object):
     # de acuerdo a la secuencia, elegimos el archivo de signal intensity
     sp = ['sp', 'singlepulse', 'single_pulse', 'single']
     if secuencia.lower() in sp:
-      file = 'SinglePulse/SinglePulse_k{:.2f}.dat'.format(k)
+      file = '/SinglePulse/SinglePulse_k{:.2f}.dat'.format(k)
     elif secuencia.lower() == 'smc':
       file = 'SMC/SMC_N{:d}_k{:.2f}.dat'.format(N,k)
     
+    if not path.exists(loadpath+file):
+      loadpath = '../DataBases'
+      if not path.exists(loadpath+file):
+        msg = 'No existe el archivo con la senal en funcion de k.'
+        raise Exception(msg)
+            
     SignalIntensity = np.loadtxt(loadpath+file, dtype=complex) ### NOTA: reemplazar archivos por dtype=float!!!!
     
     Beta = SignalIntensity[:,0]
@@ -303,7 +311,7 @@ class Medicion(object):
     X, Y, H2D = self.histograma    
     #FID-----------------------------------------------------------------------
     ppm = 116.6 # Hz
-    T2est = 0.12*1e-3 # chequeado con una medida_ T2est = 0.12 us    
+    T2est = 0.14*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
     t = np.linspace(0,1.024*16,2048)*1e-3
     fid = np.zeros_like(t).astype(complex)    
     for j in range((Y[:,0]).size):                
@@ -317,12 +325,14 @@ class Medicion(object):
           # fid
           fid += H2D[j,i]*signal*np.exp(1j*w *t - t/T2est)      
     #FOURIER-------------------------------------------------------------------
-    ZF = t.size
+    NP = t.size
     dw = t[1]-t[0]
-    sw = 1/dw
-    freq = np.zeros(ZF)
-    for ll in range(ZF):
-        freq[ll]=(ll-1)*sw/(ZF-1)-sw/2    
+    # sw = 1/(2*dw)  # EN REALIDAD EL SW DEBE SER ASI. PERO CUANDO HAGO ESTO,EL
+    # ESPECTRO ME QUEDA EN LA MITAD DE DONDE DEBERIA ESTAR. SI PONGO sw = 1/(dw)
+    # EL ANCHO ESPECTRAL ESTA SOBREESTIMADO POR UN FACTOR 2
+    sw = 1/(2*dw) # Hz
+    #freq = np.arange(NP)*sw/(NP-1)-sw/2  
+    freq = np.fft.fftshift(np.fft.fftfreq(NP, d=dw))
     ppmAxis = freq/ppm    
     spec = np.fft.fftshift(np.fft.fft(fid))
     # corrijo la fase:
