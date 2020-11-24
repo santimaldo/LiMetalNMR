@@ -312,7 +312,8 @@ class Medicion(object):
         msg = 'No existe el archivo con la senal en funcion de k.'
         raise Exception(msg)
 
-    SignalIntensity = np.loadtxt(loadpath+file, dtype=complex) ### NOTA: reemplazar archivos por dtype=float!!!!
+    #SignalIntensity = np.loadtxt(loadpath+file, dtype=complex) ### NOTA: reemplazar archivos por dtype=float!!!!
+    SignalIntensity = np.loadtxt(loadpath+file)
 
     Beta = SignalIntensity[:,0]
     SignalIntensity = SignalIntensity[:,1]

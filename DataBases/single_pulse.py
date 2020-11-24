@@ -4,6 +4,12 @@
 Created on Fri Jun 12 20:31:53 2020
 
 @author: santi
+
+Este script consiste en simular la senal que da un nucleo (o un voxel) de litio
+cuando es excitado con un cierto tiempo de pulso
+
+
+Nota: no se tiene en cuenta off-resonance
 """
 
 import numpy as np
@@ -18,31 +24,31 @@ def pulse(rhoi, br, k):
     Iz = 1/2*np.array([[3,0,0,0],[0,1,0,0],[0,0,-1,0],[0,0,0,-3]])
 
     alpha = k*np.pi*np.exp(-br)
-    
+
     arg = 1j*alpha*(Ix*np.cos(br)+Iy*np.sin(br))
     P1 = expm(-arg)
     P2 = expm( arg)
     rhof = P1.dot(rhoi.dot(P2))
-    
+
     return rhof
 
 def evolucion(rho, t, T1, T2, rho0=None):
     if rho0 is None:
         Iz = 1/2*np.array([[3,0,0,0],[0,1,0,0],[0,0,-1,0],[0,0,0,-3]])
-        rho0 = Iz        
-    # separo la matriz densidad en parte diagonal y no diagonal    
+        rho0 = Iz
+    # separo la matriz densidad en parte diagonal y no diagonal
     diag = rho * np.diag(np.ones(4))
     nodiag = rho - diag
     # coherecencias decaen
-    E_nodiag = nodiag*np.exp(-t/T2)    
+    E_nodiag = nodiag*np.exp(-t/T2)
     # diagonal va al equilibrio
     E_diag = (diag-rho0)*np.exp(-t/T1) + rho0
-    
+
     return E_diag + E_nodiag
 
 #%%
-savepath = "./SinglePulse/"    
-    
+savepath = "./SinglePulse/"
+
 r3 = np.sqrt(3)
 Ix = 0.5*np.array([[0,r3,0,0],[r3,0,2,0],[0,2,0,r3],[0,0,r3,0]])
 Iy = 1/(2j)*np.array([[0,r3,0,0],[-r3,0,2,0],[0,-2,0,r3],[0,0,-r3,0]])
@@ -58,20 +64,16 @@ rho0 = Iz
 #rho0 =np.zeros((4,4))
 #rho0[0,0] = 1
 
-
-Delta = 800e-6
 T2 = 600e-6
 T1 = 170e-3
-
 #w = 0
-
 N = 16
 b = 1/12
 r_list = np.linspace(0, int(8/b-1), 1024)
-# evanesencia: B1 = B10*beta = B10 * exp(-r/12um) 
+# evanesencia: B1 = B10*beta = B10 * exp(-r/12um)
 beta = np.exp(-b*r_list)
-k_list = np.arange(0, 3, 0.1)
-#k_list = np.array([1])
+k_list = np.arange(0, 2.1, 0.1)
+k_list[0] = 0.08 # pulso de pi/12
 
 
 #"""
@@ -79,7 +81,6 @@ k_list = np.arange(0, 3, 0.1)
 #"""
 #r_list = np.arange(0.25, 24, 0.5)
 #k_list = np.exp(b*r_list)
-
 
 Sx = np.zeros((r_list.size, k_list.size)).astype('complex')
 Sy = np.zeros((r_list.size, k_list.size)).astype('complex')
@@ -89,42 +90,42 @@ My = np.zeros((r_list.size, k_list.size)).astype('complex')
 for kk in range(k_list.size):
   k = k_list[kk]
   print('k = %s'%k)
-  for rr in range(r_list.size):    
-    
+  for rr in range(r_list.size):
+
     r = r_list[rr]
-    
-    br = b*r    
+
+    br = b*r
     rho = rho0
     t = 0
-    
+
     rho = pulse(rho, br, k)
-      
+
     # valor de expectacion luego de la secuencia
     mx = np.trace(rho.dot(Ix)) #* np.exp(-t/T1)
     my = np.trace(rho.dot(Iy)) #* np.exp(-t/T1)
-    
+
     # lo que llega a la bobina:
     # MEHRING
     sx = np.exp(-br)*(mx*np.cos(br)-my*np.sin(br))
     sy = np.exp(-br)*(my*np.cos(br)+mx*np.sin(br))
-    
+
     # RECIPROCITY
 #    b1x = np.exp(-br)*np.cos(br)
 #    b1y = np.exp(-br)*np.sin(br)
 #    sx  = b1x*mx
 #    sy  = b1y*my
-    
+
     Sx[rr,kk] = sx
     Sy[rr,kk] = sy
     Mx[rr,kk] = mx
     My[rr,kk] = my
-#  
-#  if k<=2:  
-#    S = -np.real(Sy[:,kk])+ 1j* np.real(Sx[:,kk])    
-#    datos = np.array([beta, S]).T
-#    np.savetxt(savepath+"SinglePulse_k{:.2f}.dat".format(k_list[kk]), datos)
+
+  if k<=2:
+    S = -np.real(Sy[:,kk])+ 1j* np.real(Sx[:,kk])
+    datos = np.array([beta, np.real(S), np.imag(S)]).T
+    np.savetxt(savepath+"SinglePulse_k{:.2f}.dat".format(k_list[kk]), datos)
 #%%
-#S = np.real(Sx)- 1j* np.real(Sy)    
+#S = np.real(Sx)- 1j* np.real(Sy)
 S = -np.real(Sy)+ 1j* np.real(Sx)
 plt.figure(431)
 plt.plot(beta, np.real(S), '-')
@@ -137,7 +138,7 @@ plt.plot(beta, np.imag(S), '-')
 #np.savetxt("im_magnetiz.dat", np.real(My))
 #np.savetxt("r.dat", r_list)
 #np.savetxt("k.dat", k_list)
-#%%    
+#%%
 plt.figure(0)
 #plt.pcolormesh(k_list, r_list, np.ral(Sx+1j*Sy))
 #plt.pcolormesh(k_list, r_list, np.sqrt(np.abs(Sx-1j*Sy)))
