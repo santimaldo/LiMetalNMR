@@ -17,7 +17,7 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 
 
-#%%----------------------------------------------------------------------------  
+#%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
@@ -31,13 +31,12 @@ skindepth = 0.012 # profundida de penetracion, mm
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [128,64,64] # para trapped_arranged_sticks
+N = [256,256,256] # para trapped_arranged_sticks
 
-# utilizo una funcion que dado dos argumentos define el restante. Ya sea N, 
+# utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
 volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #volumen = SimulationVolume(FOV=FOV, N=N)
-
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -49,7 +48,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #medidas = [0.028,0.088,0.088] # para trapped_arranged_sticks
 #medidas = [0.028,0.028,0.028] # para arranged_sticks
 #medidas = [0.032,0.128,0.128] # para arranged_sticks
-medidas = [0.032,0.032,0.032] # 
+medidas = [0.032,0.128,0.128]
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 # otros
@@ -58,7 +57,7 @@ medidas = [0.032,0.032,0.032] #
 #muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks')
 #muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
 #muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
-muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=1e-3, porcentaje=10) # para 'porcentaje_palos'
+muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
@@ -71,12 +70,12 @@ superposicion = Superposicion(muestra, delta)
 medicion = Medicion(superposicion, volumen_medido='centro')
 
 
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.75, figure=153)
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=1, figure=153)
-
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
-datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.75, figure=153)
+#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=1, figure=153)
+#
+#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
+#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
 #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1  , figure=153)
@@ -98,7 +97,7 @@ datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
 
 
 #%% GRAFICOS-------------------------------------------------------------------
-gr = Graficador(muestra, delta)
+#gr = Graficador(muestra, delta)
 
 #%%
 # slice en x central
@@ -110,9 +109,9 @@ gr = Graficador(muestra, delta)
 #%% CREACION DEL ESPECTRO -----------------------------------------------------
 
 #ppmAxis, spec = espectro(superposicion.delta_sens)
-#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk()) 
+#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk())
 #ppmAxis, spec_dend = espectro(superposicion.get_delta_dendritas())
-#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk() , KS=-superposicion.delta_in) 
+#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk() , KS=-superposicion.delta_in)
 #ppmAxis, spec_dend = espectro(superposicion.get_delta_dendritas(), KS=-superposicion.delta_in )
 
 
@@ -134,3 +133,4 @@ gr = Graficador(muestra, delta)
 #
 #
 #
+
