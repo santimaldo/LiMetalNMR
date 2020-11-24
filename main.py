@@ -70,7 +70,7 @@ superposicion = Superposicion(muestra, delta)
 medicion = Medicion(superposicion, volumen_medido='centro')
 
 
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.75, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=1, figure=153)
 #
