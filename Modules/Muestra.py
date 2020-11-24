@@ -8,7 +8,7 @@ Created on Thu May  7 12:48:21 2020
 
 import numpy as np
 import warnings
-import Geometria
+import Modules.Geometria as Geometria
 
 class Muestra(object):
   """
@@ -48,6 +48,7 @@ class Muestra(object):
   
   # defino el chi por defecto
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
+  
   
   def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
@@ -93,6 +94,7 @@ class Muestra(object):
     self.N_muestra = None
     self.muestra = None
     self.slices = None
+    self.pCubierto = None
     # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
@@ -143,7 +145,12 @@ class Muestra(object):
     # en Geometria.py estan todas las funciones para crear geometrias
     # construir es una funcion.
     construir = Geometria.funciones(self.geometria)
-    tuplas = construir(self.N_muestra, self.voxelSize,**geokwargs)
+    _ = construir(self.N_muestra, self.voxelSize,**geokwargs)
+    try:
+    # esto es para las que me devuelven el p_cubierto
+      tuplas, self.pCubierto = _
+    except:
+      tuplas = _
       
     # convierto a array para que ravel lo acepte. La transpues es para que sea
     # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)

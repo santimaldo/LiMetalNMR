@@ -7,7 +7,7 @@ Created on Mon May 11 14:04:31 2020
 """
 
 import numpy as np
-import calculateFieldShift as cFS
+import Modules.calculateFieldShift as cFS
 
 class Delta(object):
   """
