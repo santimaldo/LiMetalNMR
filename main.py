@@ -31,7 +31,7 @@ skindepth = 0.012 # profundida de penetracion, mm
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,256,256] # para trapped_arranged_sticks
+N = [64,128,128] # para trapped_arranged_sticks
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -49,6 +49,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #medidas = [0.028,0.028,0.028] # para arranged_sticks
 #medidas = [0.032,0.128,0.128] # para arranged_sticks
 medidas = [0.032,0.128,0.128]
+medidas = [0.032,0.064,0.064]
 # bulk:
 #muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 # otros
