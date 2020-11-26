@@ -115,7 +115,6 @@ class Superposicion(object):
     """
     Crea el delta bulk como una funcion escalon
     """
-    slz,sly,slx = self.slice
     # defino el z donde arranca la muestra
     z0 = self.z0
     # lleno al objeto de delta_in en todos los lugaras HASTA z0 (exclusivo)
