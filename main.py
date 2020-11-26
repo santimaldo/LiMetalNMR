@@ -15,8 +15,10 @@ from Modules.Delta import *
 from Modules.Superposicion import *
 from Modules.Graficador import *
 from Modules.Medicion import *
+import time
 
-
+#t = time.time()
+#elapsed = time.time() - t
 #%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
