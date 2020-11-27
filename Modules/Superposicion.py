@@ -121,7 +121,7 @@ class Superposicion(object):
     # y de delta_out desde z0 en adelante
     delta_bulk = np.zeros_like(self.muestra_sup)
     delta_bulk[0:z0,:,:] = self.delta_in
-    delta_bulk[z0:,:,:] = self.delta_out
+    delta_bulk[z0: ,:,:] = self.delta_out
 
     self.delta_bulk = delta_bulk
     return 0
