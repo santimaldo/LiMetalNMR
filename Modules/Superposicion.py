@@ -8,6 +8,7 @@ Created on Mon May 11 14:04:31 2020
 
 import numpy as np
 import scipy.ndimage as ndimage
+from scipy.interpolate import interp1d
 
 class Superposicion(object):
   """
@@ -49,9 +50,17 @@ class Superposicion(object):
   + self.delta_sup : array  - Matriz con el delta superpuesto
                                   delta_sup = delta_bulk + delta_muestra
 
+  + radion  :  float        - Para superponer con un perfil y no una funcion
+                              escalon, debo decirle que perfil usar. Para ello,
+                              le digo a que radio (o distancia al centro) se 
+                              encuentra. Esto es porque los perfiles se
+                              obtuvieron en un electrodo disco.
+                              El radio esta expresado en MICROMETROS
+                              Por defecto es None, con lo cual el delta_bulk es
+                              una funcion escalon
   """
 
-  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3):
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None):
 
 
     self.muestra = muestra
@@ -67,10 +76,13 @@ class Superposicion(object):
 
     self.muestra_sup = None
     self.superponer_muestra()
+    print(self.muestra_sup.shape)
 
     self.delta_bulk = None
     self.delta_muestra = None
-    self.crear_delta_bulk()
+    
+    
+    self.crear_delta_bulk(radio)
     self.crear_delta_muestra()
     self.delta_sup =  self.delta_bulk + self.delta_muestra
 
@@ -111,19 +123,77 @@ class Superposicion(object):
     return 0
 
   #-------------------------------------------------------------------------------
-  def crear_delta_bulk(self):
+  def crear_delta_bulk(self, radio):
     """
-    Crea el delta bulk como una funcion escalon
+    Crea el delta bulk siguiendo el perfil de perturbacion del cambo simulado
+    con menor resolucion. Para ello se toman dos perfiles, in y out, y se colocan
+    en la matriz delta_bulk hasta z0 (in) y desde z0 hasta el final (out).
+    En caso de que se requiera una funcion escalon, el parametro radio debe
+    ser None
     """
     # defino el z donde arranca la muestra
     z0 = self.z0
     # lleno al objeto de delta_in en todos los lugaras HASTA z0 (exclusivo)
     # y de delta_out desde z0 en adelante
     delta_bulk = np.zeros_like(self.muestra_sup)
-    delta_bulk[0:z0,:,:] = self.delta_in
-    delta_bulk[z0: ,:,:] = self.delta_out
-
-    self.delta_bulk = delta_bulk
+    
+    if radio is None:
+      delta_bulk[0:z0,:,:] = self.delta_in
+      delta_bulk[z0: ,:,:] = self.delta_out
+      self.delta_bulk = delta_bulk
+      print("--- delta_muestra es una FUNCION ESCALON")
+    
+    else:
+      path = './DataBases/Bulk_perfiles/'
+      archivo = path + 'perfil_radio{}.{}'
+      # leo el perfil:
+      z_in, delta_in = np.loadtxt(archivo.format(radio,'in')).T
+      z_out, delta_out = np.loadtxt(archivo.format(radio,'out')).T
+      # chequeo que los z de los perfiles esten bien hechos
+      readme = ' Ver ./DataBases/Bulk_perfiles/readme.md'
+      if z_out[0]!=0 or z_in[0]!=0:
+        msg = 'ERROR! Los perfiles deben comenzar desde z=0.{}'.format(readme)
+        raise Exception(msg)
+      elif any(z_in>0):
+        msg = 'ERROR! El perfile IN debe tener valores negativos de z.{}'.format(readme)                
+        raise Exception(msg)
+      # defino algunas variables utiles
+      vsz,vsy,vsx = self.muestra.voxelSize #voxelSize de la muestra
+      VS = z_out[1]
+      Nin = z0
+      Nout = delta_bulk.shape[0] - z0      
+      zMAX = Nout * vsz
+      zMIN = - Nin * vsz      
+      # recorto los perfiles, para no hacer una interpolacion tan larga
+      delta_in  =  delta_in[z_in  >= (zMIN-VS)]
+      delta_out = delta_out[z_out <= (zMAX+VS)]
+      z_in  =  z_in[z_in   >= (zMIN-VS)]
+      z_out = z_out[z_out  <= (zMAX+VS)]      
+      print(VS)
+      print(z_in)
+      print(z_out)
+      # INTERPOLACION            
+      try: 
+        # la cubica no funciona cuando hay solo dos puntos. Por lo tanto,
+        # esto puede fallar cuando VS del perfil es muy grande
+        din  = interp1d(z_in , delta_in, 'cubic')
+      except:      
+        din  = interp1d(z_in , delta_in)
+      try:
+        dout = interp1d(z_out, delta_out, 'cubic')
+      except:  
+        dout = interp1d(z_out, delta_out)         
+      # CREO EL DELTA MUESTRA:
+      # El reshape es para poder multiplicar el vector con la matriz
+      # recordar que el delta se cuenta desde la superficie! por eso se da vuelta
+      # con el slicing [::-1]
+      zout= np.arange(0,Nout)*vsz
+      zin = np.arange(0,Nin)* (-vsz)
+      delta_bulk[0:z0,:,:] = din(zin)[::-1].reshape(Nin,1,1)
+      delta_bulk[z0: ,:,:] = dout(zout).reshape(Nout,1,1)
+      self.delta_bulk = delta_bulk
+      print("--- delta_muestra es un PERFIL")
+      
     return 0
   #-------------------------------------------------------------------------------
   def crear_delta_muestra(self):
