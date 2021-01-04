@@ -6,6 +6,10 @@ Created on Mon Sep  7 13:54:04 2020
 @author: santi
 """
 import numpy as np
+import matplotlib.pyplot as plt
+import scipy.ndimage as ndimage
+
+
 
 
 def espectro(matriz, KS=258.9):
@@ -61,3 +65,27 @@ def espectro(matriz, KS=258.9):
     
     return ppmAxis, np.real(spec)
 
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
