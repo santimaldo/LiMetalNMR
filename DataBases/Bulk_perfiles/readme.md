@@ -2,4 +2,5 @@ Los archivos _"perfil_radioXXX_Y.dat"_ corresponden a los perfiles de perfurbaci
 
 Las columnas de los archivos son:
   
-_z_ [mm]  |  $\delta$
+_z_ [mm]    |    delta [ppm]
+
