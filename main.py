@@ -57,8 +57,8 @@ delta = Delta(muestra)
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 #superposicion = Superposicion(muestra, delta)
-#superposicion = Superposicion(muestra, delta, radio=60) # si pongo 'radio', es porque lee de un perfil
-superposicion = Superposicion(muestra, delta, z0=84e-3)
+superposicion = Superposicion(muestra, delta, radio=666) # si pongo 'radio', es porque lee de un perfil
+#superposicion = Superposicion(muestra, delta, z0=84e-3)
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro')
