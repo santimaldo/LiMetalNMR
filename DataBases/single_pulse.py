@@ -72,9 +72,12 @@ b = 1/12
 r_list = np.linspace(0, int(8/b-1), 1024)
 # evanesencia: B1 = B10*beta = B10 * exp(-r/12um)
 beta = np.exp(-b*r_list)
+
+
 k_list = np.arange(0, 2.1, 0.1)
 k_list[0] = 0.08 # pulso de pi/12
 
+# k_list = np.array([0.5]) ### DESCOMENTAR ESTO PARA CREAR SOLO EL PULSO DE PI/2
 
 #"""
 #elijo cietos valores de k, sólo los  correspondientes a slices
