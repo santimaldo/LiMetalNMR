@@ -5,4 +5,4 @@ Las columnas de los archivos son:
 _z_ [mm]    |    delta [ppm]
 
 
-A modo de ejemplo, tenemos un perfil inventado en los archivos _"perfil_radio666.in"_ y _"perfil_radio666.out"_
+A modo de ejemplo, tenemos un perfil inventado en los archivos _"perfil_radio007.in"_ y _"perfil_radio007.out"_
