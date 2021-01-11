@@ -28,13 +28,11 @@ Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
 B0 = 7 # T
 skindepth = 0.012 # profundida de penetracion, mm
 
-
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,128,128] # para trapped_arranged_sticks
-
+N = [256,128,128] 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
 volumen = SimulationVolume(voxelSize=voxelSize, N=N)
@@ -42,7 +40,6 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-
 #Creo el objeto muestra. Le tengo que dar de entrada:
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
@@ -57,8 +54,7 @@ delta = Delta(muestra)
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 #superposicion = Superposicion(muestra, delta)
-superposicion = Superposicion(muestra, delta, radio=007, z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-#superposicion = Superposicion(muestra, delta, z0=84e-3)
+superposicion = Superposicion(muestra, delta, radio='007', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro')
