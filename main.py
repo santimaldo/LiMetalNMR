@@ -61,9 +61,19 @@ muestra = Muestra(volumen, medidas=medidas, geometria='trapped_arranged_sticks',
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
+<<<<<<< Updated upstream
 
 #%% SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
+=======
+#%%
+# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
+#superposicion = Superposicion(muestra, delta, z0=84e-3)
+superposicion = Superposicion(muestra, delta, radio='128', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+#%%
+#medicion = Medicion(superposicion, volumen_medido='completo')
+medicion = Medicion(superposicion, volumen_medido='centro')
+>>>>>>> Stashed changes
 
 
 #%%
