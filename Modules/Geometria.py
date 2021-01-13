@@ -19,23 +19,21 @@ def funciones(geometria):
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
-<<<<<<< HEAD:Geometria.py
   funciones['mask_1'] = mask_1
   funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
   funciones['cilindrito_prueba'] = cilindrito_prueba
-=======
-  funciones['porcentaje_palos'] = porcentaje_palos
-  funciones['porcentaje_lanzas'] = porcentaje_lanzas
->>>>>>> master:Modules/Geometria.py
   if geometria in funciones:
     return funciones[geometria]
   else:
-      mensaje= "\n =====ERROR=en=funciones(geometria)============\
-               \n El input debe se un string con el nombre de la geometria.\
-               \n O bien, la geometria solicitada no se encuentra\
-                \n =============================================="
-      raise Exception(mensaje)
-      return 0
+    mensaje= "\n ============WARNING=====================\
+             \n La geometria solicitada no se encuentra.\
+             \n Por las dudas, te devuelvo un BULK.\
+             \n ========================================"
+    print(mensaje)
+    return funciones['bulk']
+    
+  
+
 #------------------------------------------------------------------------------
 def bulk(N, voxelSize):
   """
@@ -256,11 +254,9 @@ def distancia_constante(N, voxelSize, **geokwargs):
     ind_x+= ndx+nsx
   print('Area cubierta por dendritas: {}  um2'.format(n*area))
   return indices
-
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-<<<<<<< HEAD:Geometria.py
 def mask_1(N, voxelSize, **geokwargs):
  """
   2020-10-08
@@ -364,7 +360,7 @@ def cilindrito_prueba(N, voxelSize, **geokwargs):
   ind_y = int((Nmy - nsy)/2) 
   ind_z = 0
   n=0
-  while ind_z < int(Nmz/2) and n < 20:
+  while ind_z < int(Nmz/2):
       for iy in range(nsy):
           for ix in range(nsx):
               if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
@@ -372,186 +368,21 @@ def cilindrito_prueba(N, voxelSize, **geokwargs):
       ind_z+=1
       n+=1
       print(n)
-  else:
-      print("entro al else")
-      while ind_z < Nmz:
-          for iy in range(nsy):
+
+  while ind_z < Nmz and ind_x < (Nmx-2*nsx):
+      for iy in range(nsy):
               for ix in range(nsx):
                   if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
                       indices.append((ind_z,ind_y+iy, ind_x+ix))
-          ind_x+=2
+      ind_x+=1
       ind_z+=1
+      n+=1
+      print(n)
   return indices
     
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-=======
-def porcentaje_palos(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
-  """
-  2020-10-14
-  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
-  en posiciones aleatorias hasta cubrir un cierto porcentaje
-  """
-  # extraigo los geokwargs:
-  ancho  = geokwargs['ancho']
-  porcentaje = geokwargs['porcentaje']
-  p = porcentaje/100
-    
-  Nmz,Nmy,Nmx = N
-  vsz, vsy, vsx = voxelSize  
-  
-  if altura is None:
-    altura = vsz*Nmz
-    print ("altura de dendritas: {} um".format(altura*1e3))
-  elif altura>vsz*Nmz:
-    altura = vsz*Nmz
-    print ("WARNING!!! la altura de dendritas solicitada es superior \
-           a la medida de la muestra. Retransformando a altura = {} um".format(altura))
-    
-  # cuantos voxels debo usar
-  nsx = int(ancho/vsx)
-  nsy = int(ancho/vsy)
-  nsz = int(altura/vsz)
-  
-  area = nsx*nsy
-  AreaTotal = Nmx*Nmy
-  # determino cuantas dendritas voy a crear en un principio
-  Nd = int(AreaTotal*p/area)
-  if Nd==0:
-    msj = 'Error!!! Las microestructuras son muy anchas o la densidad solicitada es muy chica!. Con solo una microestructura, se alcanza una densidad del {:.2f}%'.format(area/AreaTotal*100)
-    raise Exception(msj)
-  
-  n = 0
-  indices = []
-  while n<10:
-    for iterador in range(Nd):
-      ind_y = np.random.randint(0,Nmy-nsy+1)
-      ind_x = np.random.randint(0,Nmx-nsx+1)          
-      for iz in range(nsz):
-        for iy in range(nsy):
-          for ix in range(nsx):
-            indices.append((iz,ind_y+iy, ind_x+ix))            
-    # armo la muestra para chequear que cubri bien el area:          
-    indices_array = np.array(indices).T  
-    indices_array = np.ravel_multi_index(indices_array, N)    
-    muestra = np.zeros(N)
-    np.put(muestra, indices_array, 1)
-    # calulo el area cubierta
-    areaCubierta = np.sum(muestra[1,:,:])
-    pCubierto = areaCubierta/AreaTotal    
-    
-    if abs(pCubierto-p)*100<tolerancia:
-      break
-    if p<pCubierto:
-      print("Ups... nos pasamos...")
-      break
-    areaPorCubrir = p*AreaTotal - areaCubierta
-    Nd = int(areaPorCubrir/area)
-    print('cubierto:{:.2f}%, pongo {:d} estructuras para alcanzar el {:.2f}%'.format(pCubierto*100, Nd, p*100))
-    n+=1
-  print("Porcentaje cubierto: {:.3f} %".format(pCubierto*100))
-  return indices, pCubierto*100
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-def porcentaje_lanzas(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
-  """
-  2020-10-26
-  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
-  en posiciones aleatorias hasta cubrir un cierto porcentaje.
-  son lanzas porque en la punta terminan como flecha, no como rectangulos
-  """
-  # extraigo los geokwargs:
-  ancho  = geokwargs['ancho']
-  porcentaje = geokwargs['porcentaje']
-  p = porcentaje/100
-    
-  Nmz,Nmy,Nmx = N
-  vsz, vsy, vsx = voxelSize
-  
-  
-  if altura is None:
-    altura = vsz*Nmz
-    print ("altura de dendritas: {} um".format(altura*1e3))
-  elif altura>vsz*Nmz:
-    altura = vsz*Nmz
-    print ("WARNING!!! la altura de dendritas solicitada es superior \
-           a la medida de la muestra. Retransformando a altura = {} um".format(altura))
-    
-  # cuantos voxels debo usar
-  nsx = int(ancho/vsx)
-  nsy = int(ancho/vsy)
-  nsz = int(altura/vsz)
-  if nsx == 1:
-    nsz_punta = nsz
-    print('iiiiujiu')
-  elif nsx/2<nsz:
-    nsz_punta = int(nsx/2)
-  else:
-    nsz_punta = 2
-
-  area = nsx*nsy
-  AreaTotal = Nmx*Nmy
-  # determino cuantas dendritas voy a crear en un principio
-  Nd = int(AreaTotal*p/area)
-  if Nd==0:
-    msj = 'Error!!! Las microestructuras son muy anchas o la densidad solicitada es muy chica!. Con solo una microestructura, se alcanza una densidad del {:.2f}%'.format(area/AreaTotal*100)
-    raise Exception(msj)
-  print(nsz, nsz_punta)
- 
-  
-  n = 0
-  indices = []
-  while n<10:
-    for iterador in range(Nd):
-      ind_y = np.random.randint(0,Nmy-nsy+1)
-      ind_x = np.random.randint(0,Nmx-nsx+1)                
-      for iz in range(nsz_punta):
-        for iy in range(nsy):
-          for ix in range(nsx):
-            indices.append((iz,ind_y+iy, ind_x+ix))
-      n_spear = 1 # iterador para la punta de la estructura            
-      for iz in range(nsz_punta,nsz):
-        for iy in range(n_spear, nsy-n_spear):
-          for ix in range(n_spear, nsx-n_spear):            
-            indices.append((iz,ind_y+iy, ind_x+ix))            
-        n_spear+=1     
-    # armo la muestra para chequear que cubri bien el area:          
-    indices_array = np.array(indices).T  
-    indices_array = np.ravel_multi_index(indices_array, N)    
-    muestra = np.zeros(N)
-    np.put(muestra, indices_array, 1)
-    # calulo el area cubierta
-    areaCubierta = np.sum(muestra[1,:,:])
-    pCubierto = areaCubierta/AreaTotal
-    print(pCubierto*100, p*100)
-    
-    if abs(pCubierto-p)*100<tolerancia:
-      break
-    if p<pCubierto:
-      print("Ups... nos pasamos...")
-      break
-    areaPorCubrir = p*AreaTotal - areaCubierta
-    Nd = int(areaPorCubrir/area)
-    n+=1
-  print("Porcentaje cubierto: {:.3f} %".format(pCubierto*100))
-  return indices
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-
-
->>>>>>> master:Modules/Geometria.py
 
 #class test(object):
 #  def __init__(self, geometria='bulk', N=[16,16,16], voxelSize=[1,1,1], **geokwargs):
@@ -573,33 +404,18 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-<<<<<<< HEAD:Geometria.py
   N = np.array([128,256,256])    
-=======
-  N = np.array([32,128,128])
-  Nz, Ny, Nx = N
->>>>>>> master:Modules/Geometria.py
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-<<<<<<< HEAD:Geometria.py
   geometria = 'cilindrito_prueba'
   constructor = funciones(geometria)
-=======
-  geometria = 'porcentaje_lanzas'
->>>>>>> master:Modules/Geometria.py
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-<<<<<<< HEAD:Geometria.py
   tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
   
-=======
-  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
-
->>>>>>> master:Modules/Geometria.py
   # convierto a indices planos
   indices = np.array(tuplas).T  
   indices = np.ravel_multi_index(indices, N)
@@ -637,12 +453,7 @@ if __name__=='__main__':
   plt.pcolormesh(muestra[int(N[0]/2),:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-<<<<<<< HEAD:Geometria.py
   plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
   plt.figure(555555555555555555555555555)
   plt.pcolormesh(muestra[int(N[0]/2),:,:])
   
-=======
-#  plt.pcolormesh(muestra[:,:,int(Nx*3/4)])
-  plt.pcolormesh(muestra[-1,:,:])
->>>>>>> master:Modules/Geometria.py
