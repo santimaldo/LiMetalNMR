@@ -22,6 +22,7 @@ def funciones(geometria):
   funciones['mask_1'] = mask_1
   funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
   funciones['cilindrito_prueba'] = cilindrito_prueba
+  funciones['cilindritos_inclinados'] = cilindritos_inclinados
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -367,7 +368,6 @@ def cilindrito_prueba(N, voxelSize, **geokwargs):
                   indices.append((ind_z,ind_y+iy, ind_x+ix))
       ind_z+=1
       n+=1
-      print(n)
 
   while ind_z < Nmz and ind_x < (Nmx-2*nsx):
       for iy in range(nsy):
@@ -377,9 +377,78 @@ def cilindrito_prueba(N, voxelSize, **geokwargs):
       ind_x+=1
       ind_z+=1
       n+=1
-      print(n)
   return indices
     
+##########################################################################
+
+def cilindritos_inclinados(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  Es la generalización a distancia cte del cilindrito de prueba"""   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  
+  indices = []
+  
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           while ind_z < int(Nmz/2):    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+                  n+=1
+                  #print('n_arriba',n)
+              ind_z+=1 
+           ind_y+= nsy + ndy
+           print(ind_y)
+     ind_x+= nsx + ndx
+  
+  ind_x = 2*nsx     
+  while ind_x <= (Nmx-2*nsx):  
+      ind_y = 2*nsy
+      while ind_y<= (Nmy -2*nsy):
+          ind_suma=0
+          ind_z = int(Nmz/2)
+          while ind_z < Nmz and ind_x + ind_suma < (Nmx-2*nsx):
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix+ind_suma))
+                  n+=1
+                  #print('n_abajo',n)
+              ind_suma+=1
+                  
+              
+              ind_z+=1
+          ind_y+= nsy + ndy
+      ind_x+= nsx + ndx
+  return indices
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -409,7 +478,7 @@ if __name__=='__main__':
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'cilindrito_prueba'
+  geometria = 'cilindritos_inclinados'
   constructor = funciones(geometria)
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
@@ -447,13 +516,16 @@ if __name__=='__main__':
   plt.pcolormesh(muestra[:,:,int(N[2]/2)])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,int(N[1]/2),:])
+  plt.pcolormesh(muestra[:,113,:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
   plt.pcolormesh(muestra[int(N[0]/2),:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
   plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
-  plt.figure(555555555555555555555555555)
+  plt.figure(50)
+  plt.pcolormesh(muestra[int(N[0]/4),:,:])
+  plt.figure(51)
   plt.pcolormesh(muestra[int(N[0]/2),:,:])
-  
+  plt.figure(52)
+  plt.pcolormesh(muestra[int(N[0]/2)+1,:,:])
