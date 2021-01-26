@@ -155,7 +155,7 @@ class Superposicion(object):
         msg = 'ERROR! Los perfiles deben comenzar desde z=0.{}'.format(readme)
         raise Exception(msg)
       elif any(z_in>0):
-        msg = 'ERROR! El perfile IN debe tener valores negativos de z.{}'.format(readme)                
+        msg = 'ERROR! El perfiles IN debe tener valores negativos de z.{}'.format(readme)                
         raise Exception(msg)
       # defino algunas variables utiles
       vsz,vsy,vsx = self.muestra.voxelSize #voxelSize de la muestra
