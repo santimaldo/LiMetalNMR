@@ -18,7 +18,7 @@ from Modules.Medicion import *
 import time
 
 #t = time.time()
-#elapsed = time.time() - t  
+#elapsed = time.time() - t
 #%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -46,40 +46,40 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #microestructuras
 medidas = [0.032,0.064,0.064]
 
-muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
-#muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
+#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
+muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
-#<<<<<<< HEAD
-#<<<<<<< Updated upstream
+<<<<<<< HEAD
+<<<<<<< Updated upstream
 
 #%% SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
-#=======
+=======
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 #superposicion = Superposicion(muestra, delta, z0=84e-3)
-#superposicion = Superposicion(muestra, delta, radio='186', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+superposicion = Superposicion(muestra, delta, radio='128', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro')
-#>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 
-#=======
-#>>>>>>> master
+=======
+>>>>>>> master
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-#superposicion = Superposicion(muestra, delta, z0=84e-3, delta_in=-8.614860948911854166, delta_out=7.349113258713176222)
-superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+#superposicion = Superposicion(muestra, delta)
+superposicion = Superposicion(muestra, delta, radio='007', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro')
 
 
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111) 
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
 #datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
 #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
