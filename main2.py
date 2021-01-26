@@ -60,10 +60,38 @@ delta = Delta(muestra)
 #%%
 
 #espectro con la tita de heavyside
+#Quiero superponer el espectro de la tita de heavyside con la del radio central en el electrodo
+
+espectros_tita = []
 superposicion = Superposicion(muestra, delta, z0=84e-3, delta_in=-8.614860948911854166, delta_out=7.349113258713176222)
 medicion = Medicion(superposicion, volumen_medido='centro')
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
 
+
+espectros_tita.append([ppmAxis,spec])
+
+espectros_R = []
+
+superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+medicion = Medicion(superposicion, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+
+espectros_R.append([ppmAxis,spec])
+
+
+espectro_tita = espectros_tita[0]
+espectro_R = espectros_R[0]
+
+plt.figure(40)
+ax = plt.subplot(111)
+ax.plot(espectro_tita[0],espectro_tita[1],'-', linewidth=2, label='Función escalón')
+ax.plot(espectro_R[0],espectro_R[1],'-',linewidth=2, label=' Perfil en R = 0mm')
+plt.xlim(left=350,right=150)
+plt.xlabel('[ppm]')
+plt.ylabel('Comparación de espectros')
+ax.legend()
+
+#%%
 #espectros con los perfiles
 RADIO = '000'
 radios = ['000','300','450','580']
@@ -142,8 +170,8 @@ where_tita = where_000
 #%%
 plt.figure(51)
 ax = plt.subplot(111)
-ax.plot([0,3,4.5,5.8],[249.910,250.332,251.168,253.260],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[249.910,249.910,249.910,249.910],marker='o',markersize=5, label=' Tita de heavyside')
+ax.plot([0,3,4.5,5.8],[0,250.332-249.910,251.168-249.910,253.260-249.910],marker='o', markersize=8, label=' Perfiles')
+ax.plot([0,3,4.5,5.8],[0,0,0,0],marker='o',markersize=5, label=' Tita de heavyside')
 plt.xlabel('Radio del electrodo [mm]')
 plt.ylabel('Desplazamiento de máximos según el perfil utilizado [ppm]')
 plt.title('Posición de los máximos según el radio')
@@ -160,6 +188,14 @@ plt.ylabel('Desplazamiento rel. a la posición del pico tita de havyside')
 plt.title('Posición de los máximos según el radio')
 ax.legend()
 
+plt.figure(53)
+ax = plt.subplot(111)
+ax.plot([0,3,4.5,5.8],[1563355.7600388995,1564291.2031659614,1568411.8392508423,1632141.8100303358],marker='o', markersize=8, label=' Perfiles')
+ax.plot([0,3,4.5,5.8],[1563355.7600388995,1563355.7600388995,1563355.7600388995,1563355.7600388995],marker='o',markersize=5, label=' Tita de heavyside')
+plt.xlabel('Radio del electrodo [mm]')
+plt.ylabel('Valor del máximo según el perfil utilizado')
+plt.title('Valor de los máximos según el radio')
+ax.legend()
 
 
 #%% GRAFICOS-------------------------------------------------------------------
