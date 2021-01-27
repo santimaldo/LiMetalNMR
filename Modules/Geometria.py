@@ -7,6 +7,7 @@ Created on Tue May 12 14:00:22 2020
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from oct2py import Oct2Py
 
 def funciones(geometria):
   """
@@ -446,13 +447,14 @@ if __name__=='__main__':
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'porcentaje_lanzas'
+  # geometria = 'porcentaje_lanzas'
+  geometria = 'distancia_constante'
   
   constructor = funciones(geometria)  
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
 
   # convierto a indices planos
   indices = np.array(tuplas).T  
@@ -478,3 +480,16 @@ if __name__=='__main__':
   plt.title('corte en 3/4 de x')
 #  plt.pcolormesh(muestra[:,:,int(Nx*3/4)])
   plt.pcolormesh(muestra[-1,:,:])
+  
+  #%%
+  tmpvol =np.zeros((Nz+5,Ny,Nx))
+  tmpvol[1:-4,:,:] = muestra
+  tmpvol[0,:,:] = 1
+  filename = './tmp.stl'
+  with Oct2Py() as oc:
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("Creando figura 3D. Esto puede demorar varios minutos...")
+    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+    oc.stlwrite(filename,fv)        # Save to binary .stl
+  print("       Listo!") 
+  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
