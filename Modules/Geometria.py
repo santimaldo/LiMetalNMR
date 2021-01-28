@@ -502,12 +502,13 @@ def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
            ind_y+= nsy + ndy
      ind_x+= nsx + ndx
   
-  ind_x = 2*nsx     
+  
+  i=0
+  ind_x = 2*nsx
   while ind_x <= (Nmx-2*nsx):  
-      ind_y = 2*nsy
-      while ind_y<= (Nmy -2*nsy):
-          ind_suma=0
-          for i in range(0,36,1): 
+          ind_y = 2*nsy
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma=0
               ind_z = Nz_random[i]
               print('ind_z',ind_z)
               while ind_z < Nmz and ind_x + ind_suma < (Nmx-2*nsx):
@@ -522,7 +523,9 @@ def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
               
                   ind_z+=1
               ind_y+= nsy + ndy
-      ind_x+= nsx + ndx
+              i=i+1
+              print('i',i)
+          ind_x+= nsx + ndx
   return indices
 
 #------------------------------------------------------------------------------
