@@ -23,6 +23,7 @@ def funciones(geometria):
   funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
   funciones['cilindrito_prueba'] = cilindrito_prueba
   funciones['cilindritos_inclinados'] = cilindritos_inclinados
+  funciones['cilindritos_aleatorios_1'] = cilindritos_aleatorios_1
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -449,6 +450,81 @@ def cilindritos_inclinados(N, voxelSize, **geokwargs):
       ind_x+= nsx + ndx
   return indices
 
+##############################################################################
+def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  A los cilindritos inclinados intento cambiarles el parámetro de altura a la
+  que comienza a inclinarse el cilindro"""   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  
+  indices = []
+  
+  Nz_random = []
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           Nz_rand = np.random.randint(0,N[0]+1)
+           Nz_random.append(Nz_rand)
+           print(Nz_rand)
+           while ind_z < Nz_rand:    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+                  n+=1
+                  #print('n_arriba',n)
+              ind_z+=1 
+           ind_y+= nsy + ndy
+     ind_x+= nsx + ndx
+  
+  ind_x = 2*nsx     
+  while ind_x <= (Nmx-2*nsx):  
+      ind_y = 2*nsy
+      while ind_y<= (Nmy -2*nsy):
+          ind_suma=0
+          for i in range(0,36,1): 
+              ind_z = Nz_random[i]
+              print('ind_z',ind_z)
+              while ind_z < Nmz and ind_x + ind_suma < (Nmx-2*nsx):
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy, ind_x+ix+ind_suma))
+                      n+=1
+                      #print('n_abajo',n)
+                  ind_suma+=1
+                  
+              
+                  ind_z+=1
+              ind_y+= nsy + ndy
+      ind_x+= nsx + ndx
+  return indices
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -478,7 +554,7 @@ if __name__=='__main__':
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'cilindritos_inclinados'
+  geometria = 'cilindritos_aleatorios_1'
   constructor = funciones(geometria)
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
@@ -510,7 +586,7 @@ if __name__=='__main__':
  
   #%%
   #muestra = muestra_mask
-  plt.figure(987654321)
+  plt.figure(50)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
   plt.pcolormesh(muestra[:,:,int(N[2]/2)])
@@ -523,9 +599,43 @@ if __name__=='__main__':
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
   plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
-  plt.figure(50)
-  plt.pcolormesh(muestra[int(N[0]/4),:,:])
-  plt.figure(51)
-  plt.pcolormesh(muestra[int(N[0]/2),:,:])
+  
+  
+  
+  fig, axs = plt.subplots(2, 2)
+  axs[0, 0].pcolormesh(muestra[:,:,int(37*N[2]/64)])
+  axs[0, 0].set_title('Corte en x')
+  axs[0, 1].pcolormesh(muestra[:,int(N[1]/2),:])
+  axs[0, 1].set_title('Corte en y')
+  axs[1, 0].pcolormesh(muestra[int(N[0]/4),:,:])
+  axs[1, 0].set_title('Corte a un cuarto de z')
+  axs[1, 1].pcolormesh(muestra[int(3*N[0]/4),:,:])
+  axs[1, 1].set_title('Corte a tres cuartos de z')
+
+  for ax in axs.flat:
+    ax.set(xlabel=' ', ylabel=' ')
+
+# Hide x labels and tick labels for top plots and y ticks for right plots.
+  for ax in axs.flat:
+    ax.label_outer()
+  
+    
+  
   plt.figure(52)
-  plt.pcolormesh(muestra[int(N[0]/2)+1,:,:])
+  plt.pcolormesh(muestra[int(N[0]/4),:,:])
+  
+  plt.figure(53)
+  plt.pcolormesh(muestra[:,41,:])
+  
+  plt.figure(54)
+  plt.pcolormesh(muestra[int(3*N[0]/4),:,:])
+  #%%
+  # Gráfico #3D
+  #fig = plt.figure(60)
+  #ax = fig.gca(projection='3d')
+  #x = np.linspace(0,99,100)
+  #ax.voxels(muestra, facecolors='k', edgecolor='k')
+
+
+
+plt.show()
