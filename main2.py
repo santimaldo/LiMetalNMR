@@ -83,8 +83,8 @@ espectro_R = espectros_R[0]
 
 plt.figure(40)
 ax = plt.subplot(111)
-ax.plot(espectro_tita[0],espectro_tita[1],'-', linewidth=2, label='Función escalón')
-ax.plot(espectro_R[0],espectro_R[1],'-',linewidth=2, label=' Perfil en R = 0mm')
+ax.plot(espectro_tita[0],espectro_tita[1],'-', linewidth=7, label='Función escalón')
+ax.plot(espectro_R[0],espectro_R[1],'.',linewidth=1, label=' Perfil en R = 0mm')
 plt.xlim(left=350,right=150)
 plt.xlabel('[ppm]')
 plt.ylabel('Comparación de espectros')
@@ -139,8 +139,8 @@ ax.legend()
 plt.figure(51)
 ax = plt.subplot(111)
 ax.plot([0,3,4.5,5.8],[0,250.332-249.910,251.168-249.910,253.260-249.910],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[0,0,0,0],marker='o',markersize=5, label=' Tita de heavyside')
-plt.xlabel('Radio del electrodo [mm]')
+ax.plot([0,3,4.5,5.8],[0,0,0,0],'-',linewidth=2, label=' Tita de heavyside')
+plt.xlabel('Radio [mm]')
 plt.ylabel('Desplazamiento absoluto de máximos según el perfil utilizado [ppm]')
 plt.title('Posición de los máximos según el radio')
 plt.title('Posición de los máximos según el radio')
@@ -149,8 +149,8 @@ ax.legend()
 plt.figure(53)
 ax = plt.subplot(111)
 ax.plot([0,3,4.5,5.8],[1563355.7600388995,1564291.2031659614,1568411.8392508423,1632141.8100303358],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[1563355.7600388995,1563355.7600388995,1563355.7600388995,1563355.7600388995],marker='o',markersize=5, label=' Tita de heavyside')
-plt.xlabel('Radio del electrodo [mm]')
+ax.plot([0,3,4.5,5.8],[1563355.7600388995,1563355.7600388995,1563355.7600388995,1563355.7600388995],'-',linewidth=2, label=' Tita de heavyside')
+plt.xlabel('Radio [mm]')
 plt.ylabel('Valor del máximo según el perfil utilizado')
 plt.title('Valor de los máximos según el radio')
 ax.legend()
@@ -184,27 +184,6 @@ print('where_580=',where_580)
 where_tita = where_000
 #El maximo para el espectro de heavyside se encuentra (exactamente) en el mismo lugar 
 #que el del espectro para R=0mm
-#%%
-plt.figure(51)
-ax = plt.subplot(111)
-ax.plot([0,3,4.5,5.8],[249.910,250.332,251.168,253.260],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[249.910,249.910,249.910,249.910],marker='o',markersize=5, label=' Tita de heavyside')
-plt.xlabel('Radio del electrodo [mm]')
-plt.ylabel('Desplazamiento de máximos según el perfil utilizado [ppm]')
-plt.title('Posición de los máximos según el radio')
-ax.legend()
-
-
-
-plt.figure(52)
-ax = plt.subplot(111)
-ax.plot([0,3,4.5,5.8],[249.910/249.910,250.332/249.910,251.168/249.910,253.260/249.910],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[249.910/249.910,249.910/249.910,249.910/249.910,249.910/249.910],marker='o',markersize=5, label=' Tita de heavyside')
-plt.xlabel('Radio del electrodo [mm]')
-plt.ylabel('Desplazamiento rel. a la posición del pico tita de havyside')
-plt.title('Posición de los máximos según el radio')
-ax.legend()
-
 
 
 #%% GRAFICOS-------------------------------------------------------------------

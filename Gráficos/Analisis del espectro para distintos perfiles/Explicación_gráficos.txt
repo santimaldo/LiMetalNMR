@@ -1,0 +1,13 @@
+Explicación de los gráficos:
+- El grafico 40 es una superposición de los espectros utilizando la función escalon y el 
+perfil correspondiente a R=0mm.
+- El gráfico 50 es una superposición de los espectros utilizando los distintos perfiles
+para los radios indicados del electrodo.
+- El gráfico 51 indica el desplazamiento de los picos máximos en los espectros utilizando
+como origen la posición del pico obtenido por la función escalón o por el perfil R=0mm 
+(la posición es la misma).
+- El gráfico 53 indica la diferencia de intensidad de los máximos al utilizar los 
+distintos perfiles. 
+
+La geometría utilizada para generar estos espectros es Cilindros_a_dist_cte, está en la
+carpeta de geometrías.
