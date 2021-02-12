@@ -9,15 +9,33 @@ Created on Thu May  7 12:18:27 2020
 
 import numpy as np
 import matplotlib.pyplot as plt
-from Muestra import *
-from Delta import *
-from Superposicion import *
-from Graficador import *
-from SimulationVolume import *
-from Espectro import espectro
-from Medicion import *
+from Modules.Muestra import *
+from Modules.Delta import *
+from Modules.Superposicion import *
+from Modules.Graficador import *
+from Modules.SimulationVolume import *
+from Modules.Medicion import *
 import time
+from oct2py import Oct2Py
 
+# funcion para crear la figura 3D
+def exportar_3D(matriz, archivo):
+  print(" -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  ")
+  print("Creando figura 3D. Esto puede demorar varios minutos...")
+  Nz, Nx, Ny = matriz.shape
+  tmpvol =np.zeros((Nz+5,Ny,Nx))
+  tmpvol[1:-4,:,:] = matriz
+  filename = archivo+'.stl'
+  with Oct2Py() as oc:
+    oc.addpath('./Modules/')
+    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+    oc.stlwrite(filename,fv)        # Save to binary .stl
+  # octave.addpath('\\Modules')
+  # fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+  # octave.stlwrite(filename,fv)        # Save to binary .stl
+  
+  print("       Listo!") 
+  print(" -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  ")
 
 #%%----------------------------------------------------------------------------  
 #------------------------------------------------------------------------------
@@ -43,13 +61,12 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 
 #%% LOOP
 
-anchos = np.array([1,5,10,20,40])*1e-3
-alturas = np.array([10,25,50,75,100,128])*1e-3
-porcentajes = np.array([10,30,50,70,90])
+anchos = np.array([1,10,40])*1e-3       # milimetros
+alturas = np.array([10,30])*1e-3      # milimetros
+porcentajes = np.array([10,50,80])    # %
+# lista con listas de los parametros que quiero guardar como objeto 3D
+exportar3d = [[1e-3,10e-3,50],[40e-3,10e-3,50]]
 
-
-porcentajes = np.array([75])
-anchos = np.array([40])*1e-3
 
 n_total = anchos.size * alturas.size * porcentajes.size
 
@@ -57,12 +74,10 @@ n_total = anchos.size * alturas.size * porcentajes.size
 t0 = time.time()
 
 
-
-
 nn=0
 for ancho in anchos:
   for h in alturas:
-    for porcentaje in porcentajes:
+    for porcentaje in porcentajes:      
       nn+=1
       print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -93,92 +108,49 @@ for ancho in anchos:
       regiones = ['', '-microestructuras', '-bulk']  
       # -------- centro--------------------------------------------------------------    
       for region in regiones:
-        # ..... SP ......
-        path = './Espectros/centro_aleatorias_palo/SP/'
+        ### secuencia: ..... SP ......
+        savepath = "./Espectros/centro_aleatorias_palo/SP/"
         k = 0.5
         medicion = Medicion(superposicion, volumen_medido='centro{}'.format(region))            
         ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=k)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'centro{}_h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), k)
-        np.savetxt(path+file, datos)
-        # ..... SMC .....
-        path = './Espectros/centro_aleatorias_palo/SMC/'
-        k_list = [1, 1.1, 1.2, 1.3, 1.5, 2.0]
-        N=16                  
-        for k in k_list:        
-          ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , k=k, N=N)
-          datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-          file = 'centro{}_h{:d}_ancho{:d}_dens{:d}_SMC_N{:d}_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), N, k)
-          np.savetxt(path+file, datos)      
+        np.savetxt(savepath+file, datos)
+        # para algunos casos en particular, guardo figura 3D volumen medido, pero solo cuando la region es completa
+        if region=='':
+          if [ancho,h,porcentaje] in exportar3d:
+            exportar_3D(medicion.get_volumen_medido(), savepath+file)        
+        ### secuencia: ..... SMC .....
+        # savepath = './Espectros/centro_aleatorias_palo/SMC/'
+        # k_list = [1, 1.1, 1.2, 1.3, 1.5, 2.0]
+        # N=16                  
+        # for k in k_list:        
+        #   ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , k=k, N=N)
+        #   datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        #   file = 'centro{}_h{:d}_ancho{:d}_dens{:d}_SMC_N{:d}_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), N, k)
+        #   np.savetxt(savepath+file, datos)      
       # --------completo-------------------------------------------------------------
-#      for region in regiones:
-#        # ..... SP ......
-#        path = './Espectros/completo/SP/'
-#        k = 0.5
-#        medicion = Medicion(superposicion, volumen_medido='completo{}'.format(region))            
-#        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=k)
-#        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#        file = 'completo{}_h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), k)
-#        np.savetxt(path+file, datos)
-#        # ..... SMC .....
-#        path = './Espectros/completo/SMC/'
-#        k_list = [1, 1.1, 1.2, 1.3, 1.5, 2.0]
-#        N=16                  
-#        for k in k_list:        
-#          ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , k=k, N=N)
-#          datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#          file = 'completo{}_h{:d}_ancho{:d}_dens{:d}_SMC_N{:d}_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), N, k)
-#          np.savetxt(path+file, datos)              
+      ### En esta parte tambien guardamos el espectro teniendo en cuenta la geometria completa, no solo el centro
+      # for region in regiones:
+      #   ..... SP ......
+      #   savepath = './Espectros/completo/SP/'
+      #   k = 0.5
+      #   medicion = Medicion(superposicion, volumen_medido='completo{}'.format(region))            
+      #   ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=k)
+      #   datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+      #   file = 'completo{}_h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), k)
+      #   np.savetxt(savepath+file, datos)
+      #   ## ..... SMC .....
+      #   savepath = './Espectros/completo/SMC/'
+      #   k_list = [1, 1.1, 1.2, 1.3, 1.5, 2.0]
+      #   N=16                  
+      #   for k in k_list:        
+      #     ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , k=k, N=N)
+      #     datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+      #     file = 'completo{}_h{:d}_ancho{:d}_dens{:d}_SMC_N{:d}_k{:.2f}'.format(region,int(h*1e3), int(ancho*1e3), int(porcentaje), N, k)
+      #     np.savetxt(savepath+file, datos)              
       # -----------------------------------------------------------------------------
       duracion = (time.time()-t0)/60  - elapsed 
-      del muestra, delta, superposicion, medidas   # libero RAM
+      del muestra, delta, superposicion, medidas   # libero RAM    
       print('tiempo en este paso: {:.2f} min'.format(duracion))        
 #%%
-
-#v=5
-#plt.figure(20000)
-#plt.pcolormesh(superposicion.delta_sens[:,64,:], cmap='seismic', vmax=v, vmin=-v)
-#plt.colorbar()
-##%%
-#plt.figure(20001)
-#plt.pcolormesh(superposicion.delta_sens[65,:,:], cmap='seismic', vmax=v, vmin=-v)
-#plt.colorbar()
-
-
-#%% GRAFICOS-------------------------------------------------------------------
-#gr = Graficador(muestra, delta)
-
-#%%
-# slice en x central
-#gr.mapa()
-#gr.mapa(dim=2, corte=0.5, completo=True)
-#gr.mapa(dim=0, corte=0.6, completo=True)
-#gr.mapa(dim=0, corte=0.5, completo=False)
-
-#%% CREACION DEL ESPECTRO -----------------------------------------------------
-
-#ppmAxis, spec = espectro(superposicion.delta_sens)
-#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk()) 
-#ppmAxis, spec_dend = espectro(superposicion.get_delta_dendritas())
-#ppmAxis, spec_bulk = espectro(superposicion.get_delta_bulk() , KS=-superposicion.delta_in) 
-#ppmAxis, spec_dend = espectro(superposicion.get_delta_dendritas(), KS=-superposicion.delta_in )
-
-
-#plt.figure(123456)
-#plt.plot(ppmAxis, spec_bulk, 'b'  , linewidth=3, label='bulk')
-#plt.plot(ppmAxis, spec_dend, 'r'  , linewidth=3, label='dendritas')
-#plt.plot(ppmAxis, spec     , 'k', linewidth=3, label='total')
-#plt.xlabel(r'$^7$Li Chemical Shift [ppm]')
-#plt.xlim([ppmAxis[-1], ppmAxis[0]])
-#plt.legend()
-
-# espectro normalizado de las dos regiones:
-#plt.figure(12345)
-#plt.plot(ppmAxis, spec_dend/np.max(spec_dend), 'r'  , linewidth=3, label='dendritas (normalizado)')
-#plt.plot(ppmAxis, spec_bulk/np.max(spec_bulk), 'b'  , linewidth=3, label='bulk (normalizado)')
-#plt.xlabel(r'$^7$Li Chemical Shift [ppm]')
-#plt.xlim([ppmAxis[-1], ppmAxis[0]])
-#plt.legend()
-#
-#
-#

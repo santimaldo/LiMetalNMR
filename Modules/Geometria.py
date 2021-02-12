@@ -218,6 +218,10 @@ def distancia_constante(N, voxelSize, **geokwargs):
           x    x    x    x
   """
   # extraigo los geokwargs:
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
   ancho = geokwargs['ancho']
   distancia = geokwargs['distancia']
   area = ancho*ancho
@@ -250,7 +254,11 @@ def distancia_constante(N, voxelSize, **geokwargs):
       n+=1
     ind_x+= ndx+nsx
   print('Area cubierta por dendritas: {}  um2'.format(n*area))
-  return indices
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -454,6 +462,10 @@ if __name__=='__main__':
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  
+  
+  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  tuplas, extra_info = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3, extra_info=True) # para 'distancia_constante'
   # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
 
   # convierto a indices planos
@@ -482,6 +494,8 @@ if __name__=='__main__':
   plt.pcolormesh(muestra[-1,:,:])
   
   #%%
+  import os
+  os.chdir("S:\Doctorado\pyprogs\calculateFieldShift\Modules")
   tmpvol =np.zeros((Nz+5,Ny,Nx))
   tmpvol[1:-4,:,:] = muestra
   tmpvol[0,:,:] = 1
