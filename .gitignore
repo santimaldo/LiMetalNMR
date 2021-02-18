@@ -4,3 +4,6 @@
 # ignore all .dat files
 *.dat
 
+# ignore all .svg files
+*.svg
+
