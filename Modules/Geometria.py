@@ -7,6 +7,7 @@ Created on Tue May 12 14:00:22 2020
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from oct2py import Oct2Py
 
 def funciones(geometria):
   """
@@ -454,7 +455,7 @@ def cilindritos_inclinados(N, voxelSize, **geokwargs):
 ##############################################################################
 def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
   """ 2021-01-21
-  A los cilindritos inclinados intento cambiarles el parámetro de altura a la
+  A los cilindritos inclinados les cambio el parámetro de altura a la
   que comienza a inclinarse el cilindro"""   
   
   ancho = geokwargs['ancho']
@@ -532,8 +533,10 @@ def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
 ##############################################################################
 def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   """ 2021-01-21
-  A los cilindritos inclinados intento cambiarles el parámetro de altura a la
-  que comienza a inclinarse el cilindro"""   
+  A los cilindritos inclinados les cambio la dirección de forma aleatoria 
+  siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección"""   
   
   ancho = geokwargs['ancho']
   distancia = geokwargs['distancia']
@@ -543,7 +546,7 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   print(N)
   vsz, vsy, vsx = voxelSize
    
-  # cuantos voxels debo usar por cilindro aproximadamente
+  # cuantos voxels debo usar por cilindro 
   R = int(ancho/(2*vsx))
   print(R)
   nsx = int(ancho/vsx)
@@ -555,10 +558,16 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   ndy = int(distancia/vsy)
   print(ndy)
   
+  #Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar 
+  #la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
+  #hasta una altura Nz_random_1 que para cada cilindro toma valores random de 0
+  #a Nz/3, luego en el segundo bloque tienen la posibilidad de inclinarse y frenar
+  #a otra altura random Nz_random_2 y finalmente en el tercer bloque vuelven a tener
+  #la posibilidad de inclinarse sin recordar la inclinación anterior necesariamente.
   
   indices = []
   
-  Nz_random = []
+  Nz_random_1 = []
    
   n=0
   
@@ -567,52 +576,101 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
      ind_y = 2*nsy
      while ind_y<= (Nmy -2*nsy):
            ind_z = 0
-           Nz_rand = np.random.randint(0,N[0]+1)
-           Nz_random.append(Nz_rand)
+           Nz_rand_1 = np.random.randint(0,int(N[0]/3)+1)
+           Nz_random_1.append(Nz_rand_1)
            #print(Nz_rand)
-           while ind_z < Nz_rand:    
+           while ind_z < Nz_rand_1:    
               for iy in range(nsy):
                   for ix in range(nsx):
                       if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
                           indices.append((ind_z,ind_y+iy, ind_x+ix))
-                  n+=1
-                  #print('n_arriba',n)
               ind_z+=1 
            ind_y+= nsy + ndy
      ind_x+= nsx + ndx
   
+  
+  Nz_random_2 = []
+  ind_x_lista = []
+  ind_y_lista = []
+  ind_suma_x_lista = []
+  ind_suma_y_lista = []
   
   i=0
   ind_x = 2*nsx
   while ind_x <= (Nmx-2*nsx):  
           ind_y = 2*nsy
           while ind_y<= (Nmy -2*nsy):
-              rand_tita=np.random.rand(1,1)*2*np.pi
-              print('rand_tita',rand_tita)
               ind_suma_y=0
               ind_suma_x=0
-              ind_z = Nz_random[i]
+              ind_z = Nz_random_1[i]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              print('ind_suma_rand_y',ind_suma_rand_y)
               #print('ind_z',ind_z)
-              while ind_z < Nmz and ind_x + ind_suma_x < (Nmx-2*nsx) and ind_y + ind_suma_y < (Nmy-2*nsy):
+              Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
+              #Nz_random_2.append(Nz_rand_2)
+              while ind_z < Nz_rand_2 and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                          
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              print('ind_y',ind_y)
+              ind_y_lista.append(ind_y)                
+              ind_suma_y_lista.append(ind_suma_y)
+              print('ind_suma_y_lista',ind_suma_y)
+              ind_suma_x_lista.append(ind_suma_x)
+              print('ind_suma_x_lista',ind_suma_x)
+              i=i+1
+              print('i',i)
+              print(ind_z)
+              Nz_random_2.append(ind_z)
+              ind_y+= nsy + ndy 
+          print('ind_x',ind_x)
+          ind_x_lista.append(ind_x)
+          ind_x+= nsx + ndx
+  j=0
+  ind_x = ind_x_lista[j]
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = ind_y_lista[j]
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=ind_suma_y_lista[j]
+              ind_suma_x=ind_suma_x_lista[j]
+              ind_z = Nz_random_2[j]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              while ind_z < N[0] and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx-1 and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy-1:
                   for iy in range(nsy):
                       for ix in range(nsx):
                           if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
                               indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
                       n+=1
                       #print('n_abajo',n)
-                  ind_suma_x+=abs(np.cos(rand_tita))
-                  ind_suma_y+=abs(np.sin(rand_tita))
+                      
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
                   print('ind_suma_y',ind_suma_y)
                   
               
                   ind_z+=1
               ind_y+= nsy + ndy
-              i=i+1
-              #print('i',i)
-          ind_x+= nsx + ndx
+              j=j+1
+              print('j',j)
+          ind_x+= nsx + ndx        
+          
+          
   return indices
 
-# El codigo no anda porque los indices tiene que ser enteros, no reales. 
+
+ 
 
 
 #------------------------------------------------------------------------------
@@ -639,12 +697,13 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([128,256,256])    
+  N = np.array([128,256,256])
+  Nz,Ny,Nx = N   
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  geometria = 'cilindritos_aleatorios_1'
+  geometria = 'cilindritos_aleatorios_2'
   constructor = funciones(geometria)
   
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
@@ -679,23 +738,23 @@ if __name__=='__main__':
   plt.figure(50)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
-  plt.pcolormesh(muestra[:,:,int(N[2]/2)])
+  plt.pcolormesh(muestra[:,:,128])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,113,:])
+  plt.pcolormesh(muestra[:,128,:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
-  plt.pcolormesh(muestra[int(N[0]/2),:,:])
+  plt.pcolormesh(muestra[60,:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-  plt.pcolormesh(muestra[:,:,int(N[2]*3/4)])
+  plt.pcolormesh(muestra[:,:,192])
   
   
   
   fig, axs = plt.subplots(2, 2)
-  axs[0, 0].pcolormesh(muestra[:,:,int(37*N[2]/64)])
+  axs[0, 0].pcolormesh(muestra[:,:,220])
   axs[0, 0].set_title('Corte en x')
-  axs[0, 1].pcolormesh(muestra[:,77,:])
+  axs[0, 1].pcolormesh(muestra[:,220,:])
   axs[0, 1].set_title('Corte en y')
   axs[1, 0].pcolormesh(muestra[int(N[0]/4),:,:])
   axs[1, 0].set_title('Corte a un cuarto de z')
@@ -719,10 +778,10 @@ if __name__=='__main__':
   
   plt.figure(54)
   plt.pcolormesh(muestra[int(3*N[0]/4),:,:])
-  #%%
+  # #%%
   
-  # muestra_con_mascara = muestra*mask
-  # muestra = muestra_con_mascara
+  # #muestra_con_mascara = muestra*mask
+  # #muestra = muestra_con_mascara
   # # #Gráfico #3D
   # fig = plt.figure(60)
   # ax = fig.gca(projection='3d')
@@ -730,18 +789,18 @@ if __name__=='__main__':
   # ax.voxels(muestra, facecolors='k', edgecolor='k')
 #%%
 #%%
-  #tmpvol =np.zeros((Nz+5,Ny,Nx))
   
-   # #tmpvol[1:-4,:,:] = muestra
-   # #tmpvol[0,:,:] = 1
-   # #filename = './tmp.stl'
-   # with Oct2Py() as oc:
-   #   print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-   #   print("Creando figura 3D. Esto puede demorar varios minutos...")
-   #   fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
-   #   oc.stlwrite(filename,fv)        # Save to binary .stl
-   # print("       Listo!") 
-   # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  tmpvol =np.zeros((Nz+5,Ny,Nx))
+  tmpvol[1:-4,:,:] = muestra
+  tmpvol[0,:,:] = 1
+  filename = './tmp.stl'
+  with Oct2Py() as oc:
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("Creando figura 3D. Esto puede demorar varios minutos...")
+    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+    oc.stlwrite(filename,fv)        # Save to binary .stl
+  print("       Listo!") 
+  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 
 plt.show()
