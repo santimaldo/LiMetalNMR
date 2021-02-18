@@ -1,5 +1,6 @@
 # ignore all .pyc files
 *.pyc
+*pycache*
 # ignore all .dat files
 *.dat
 # ignore all .stl files
