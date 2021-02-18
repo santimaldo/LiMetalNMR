@@ -20,7 +20,6 @@ def funciones(geometria):
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
-  funciones['mask_1'] = mask_1
   funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
   funciones['cilindrito_prueba'] = cilindrito_prueba
   funciones['cilindritos_inclinados'] = cilindritos_inclinados
@@ -225,6 +224,10 @@ def distancia_constante(N, voxelSize, **geokwargs):
           x    x    x    x
   """
   # extraigo los geokwargs:
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
   ancho = geokwargs['ancho']
   distancia = geokwargs['distancia']
   area = ancho*ancho
@@ -257,39 +260,11 @@ def distancia_constante(N, voxelSize, **geokwargs):
       n+=1
     ind_x+= ndx+nsx
   print('Area cubierta por dendritas: {}  um2'.format(n*area))
-  return indices
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-def mask_1(N, voxelSize, **geokwargs):
- """
-  2020-10-08
-  Intento de máscara con forma de anillo, dando distintas alturas en z 
- """
- # extraigo los geokwargs:
- Rmax = geokwargs['R_max']
- Rmin = geokwargs['R_min']
- vs= voxelSize[0]
-  
- Nmz,Nmy,Nmx = N
- 
- 
- indices = []
- 
- ind_x = 0
- ind_y = 0
- ind_z = 0
-
- ind_Rm = int(Rmin/vs)
- ind_RM = int(Rmax/vs)
-
- for ind_y in range(Nmy):
-     for ind_x in range(Nmx):
-         if (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 > ind_Rm**2 and (ind_x-Nmx/2)**2 + (ind_y-Nmy/2)**2 < ind_RM**2: 
-             for iz in range(Nmz):
-                 indices.append((iz, ind_y, ind_x))
- return indices     
-
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -703,13 +678,17 @@ if __name__=='__main__':
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
+
   geometria = 'cilindritos_aleatorios_2'
   constructor = funciones(geometria)
-  
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
-  
+  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  tuplas, extra_info = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3, extra_info=True) # para 'distancia_constante'
+  # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+
+
   # convierto a indices planos
   indices = np.array(tuplas).T  
   indices = np.ravel_multi_index(indices, N)

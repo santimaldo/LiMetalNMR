@@ -22,3 +22,9 @@ https://doi.org/10.1002/pssb.2220530150
 [5] Ilott, A. J., & Jerschow, A. (2017). Super-resolution surface microscopy of conductors using magnetic resonance. Scientific Reports, 7(1), 1-7.
 https://doi.org/10.1038/s41598-017-05429-3
 
+# Requerimientos
+
+- Numpy
+- Scipy
+- Matplotlib
+- Oct2py

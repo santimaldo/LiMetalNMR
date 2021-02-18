@@ -288,7 +288,7 @@ def UC(domain):
     center = center +  1./64.*domain[Sz,Sy,Sx]
 
     elapsed = time.time() - t
-    print('tiempo en UC:  ', elapsed)
+    # print('tiempo en UC:  ', elapsed)
     return center
 
 #------------------------------------------------------------------------------

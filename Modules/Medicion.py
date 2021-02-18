@@ -370,6 +370,8 @@ class Medicion(object):
     else:
       return  ppmAxis, spec
 
+  def get_volumen_medido(self):
+    return self.superposicion.muestra_sup*self.volumen_medido
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -410,6 +412,7 @@ def autophase(ppmAxis, spec):
     spec=-spec
   angle=angle[idx]
   return  spec, angle
+
 
 
 
