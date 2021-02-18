@@ -47,32 +47,15 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 medidas = [0.032,0.064,0.064]
 
 #muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
-muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2',ancho=16e-3, distancia=20e-3) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 
-#%% SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
+#%%
+# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
-=======
-#%%
-# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-#superposicion = Superposicion(muestra, delta, z0=84e-3)
-superposicion = Superposicion(muestra, delta, radio='128', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-#%%
-#medicion = Medicion(superposicion, volumen_medido='completo')
-medicion = Medicion(superposicion, volumen_medido='centro')
->>>>>>> Stashed changes
-
-
-=======
->>>>>>> master
-#%%
-# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-#superposicion = Superposicion(muestra, delta)
-superposicion = Superposicion(muestra, delta, radio='007', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+#superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro')

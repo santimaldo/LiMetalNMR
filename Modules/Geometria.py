@@ -512,7 +512,10 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
   también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
   el crecimiento cambia segun la sección"""   
-  
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
   ancho = geokwargs['ancho']
   distancia = geokwargs['distancia']
   area = ancho*ancho
@@ -641,9 +644,11 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
               print('j',j)
           ind_x+= nsx + ndx        
           
-          
-  return indices
-
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
 
  
 
@@ -683,9 +688,9 @@ if __name__=='__main__':
   constructor = funciones(geometria)
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
+  #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
   # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  tuplas, extra_info = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3, extra_info=True) # para 'distancia_constante'
+  tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
   # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
 
 
@@ -698,18 +703,6 @@ if __name__=='__main__':
   #  put(array       , indices, valor)
   np.put(muestra, indices, 1)
   
-  #intento de crear la máscara
-  mascara = 'mask_1'
-  constructor = funciones(mascara)
-  tuplas_mask = constructor(N, voxelSize, R_max=50e-3 , R_min= 0)
-  indices_mask = np.array(tuplas_mask).T
-  indices_mask = np.ravel_multi_index(indices_mask, N)
-  
-  mask = np.zeros(N)   
-  np.put(mask, indices_mask, 1)
-  #finalmente el objeto con la mascara seria
-  
-  muestra_mask= muestra*mask
   
  
   #%%
