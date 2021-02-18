@@ -1,8 +1,8 @@
 # ignore all .pyc files
 *.pyc
-
 # ignore all .dat files
 *.dat
-
+# ignore all .stl files
+*.stl
 # ignore all .svg files
 *.svg
