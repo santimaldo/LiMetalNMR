@@ -17,8 +17,8 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 import time
 
-#t = time.time()
-#elapsed = time.time() - t
+#inicio el reloj
+t0 = time.time()
 #%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ skindepth = 0.012 # profundida de penetracion, mm
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,128,128] 
+N = [256,512,512] 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
 volumen = SimulationVolume(voxelSize=voxelSize, N=N)
@@ -44,17 +44,18 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #microestructuras
-medidas = [0.032,0.064,0.064]
+medidas = [0.128,0.256,0.256]
 
-#muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=3e-3, distancia=3e-3)
-muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
+muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=16e-3, distancia=20e-3)
+# muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2',ancho=16e-3, distancia=20e-3) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
+
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 superposicion = Superposicion(muestra, delta)
-# superposicion = Superposicion(muestra, delta, radio='007', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+# superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
 medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
@@ -71,10 +72,5 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
 
 
-#%% GRAFICOS-------------------------------------------------------------------
-#gr = Graficador(muestra, delta)
-# slice en x central
-#gr.mapa()
-#gr.mapa(dim=2, corte=0.5, completo=True)
-#gr.mapa(dim=0, corte=0.6, completo=True)
-#gr.mapa(dim=0, corte=0.5, completo=False)
+elapsed = (time.time() - t0)/60
+print('---  tiempo: {:.2f} min'.format(elapsed))

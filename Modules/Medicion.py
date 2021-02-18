@@ -90,7 +90,7 @@ class Medicion(object):
     
     if stl_file: # si stl_file es un string, se evalua como True
       matriz = self.get_volumen_medido()
-      archivo = '../Outputs/{}'.format(stl_file)
+      archivo = stl_file
       Export3D.exportar_3D(matriz, archivo)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
