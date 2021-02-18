@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import scipy.ndimage as ndimage
 import os.path as path
+import Modules.Export3D as Export3D
 
 
 class Medicion(object):
@@ -22,6 +23,18 @@ class Medicion(object):
     Opcionales:
       . secuencia     : string       - opciones: 'SP', 'SMC'
       . k             : float
+      . stl_file      : strig        - Nombre del archivo que en el que se desea
+                                       guardar una figura 3D '.stl'. Si no se da
+                                       este argumento, la figura 3D no se exporta.
+                                       Estos archivos se guardan en el directorio
+                                       'Outputs'.
+                                       IMPORTANTE: no poner la extension '.stl'
+                                       ya que se pone automaticamente.
+                                         Ej: stl_file = 'cilindros/ancho16'
+                                       El archivo guardado es:
+                                         ~/Outputs/cilindros/ancho16.stl
+                                       La carpeta 'cilindros' debe ser creada
+                                       previamente.
     NO-IMPLEMENTADO: Argumentos con palabras clave que dependen de la secuencia (**seqkwargs)
     '
 
@@ -58,7 +71,7 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='centro', skindepth=skdp , **seqkwargs):
+  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='centro', skindepth=skdp , stl_file=False, **seqkwargs):
 
     self.superposicion = superposicion
     self.secuencia = secuencia
@@ -74,7 +87,11 @@ class Medicion(object):
     self.spec = None
     # el espectro no se crea por defecto. Hay que hacerlo
     #self.CearEspectro(k)
-
+    
+    if stl_file: # si stl_file es un string, se evalua como True
+      matriz = self.get_volumen_medido()
+      archivo = '../Outputs/{}'.format(stl_file)
+      Export3D.exportar_3D(matriz, archivo)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
