@@ -157,19 +157,22 @@ class Muestra(object):
     # tuplas >>>>
     # en Geometria.py estan todas las funciones para crear geometrias
     # construir es una funcion.
-    construir = Geometria.funciones(self.geometria)
-    _ = construir(self.N_muestra, self.voxelSize,**geokwargs)
+    constructor = Geometria.funciones(self.geometria)
+    _ = constructor(self.N_muestra, self.voxelSize,**geokwargs)
     try:
     # esto es para las que me devuelven el p_cubierto
       tuplas, self.pCubierto = _
     except:
       tuplas = _
 
-    # convierto a array para que ravel lo acepte. La transpues es para que sea
-    # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)
-    indices = np.array(tuplas).T
-    # convierto a indices planos
-    indices = np.ravel_multi_index(indices, self.N_muestra)
+    if tuplas is None:
+      indices = tuplas
+    else:
+      # convierto a array para que ravel lo acepte. La transpues es para que sea
+      # un arrat Nindices*3 (3 columnas correspondientes a z,y,x)
+      indices = np.array(tuplas).T
+      # convierto a indices planos
+      indices = np.ravel_multi_index(indices, self.N_muestra)
     return indices
   #____________________________________________________________________________
   def construir_muestra(self, indices):
@@ -179,9 +182,10 @@ class Muestra(object):
     """
     Nmz, Nmy, Nmx = self.N_muestra
     muestra_flat = np.zeros(Nmz*Nmy*Nmx)
-    # el constructor me da una lista de indices flattened
-    #  put(array       , indices, valor)
-    np.put(muestra_flat, indices, self.chi)
+    if indices is not None:      
+      # el constructor me da una lista de indices flattened
+      #  put(array       , indices, valor)
+      np.put(muestra_flat, indices, self.chi)
     # convierto en 3d array
     muestra = np.reshape(muestra_flat, (Nmz,Nmy,Nmx))
     self.muestra = muestra
