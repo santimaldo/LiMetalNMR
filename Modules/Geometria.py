@@ -41,17 +41,10 @@ def funciones(geometria):
 #------------------------------------------------------------------------------
 def bulk(N, voxelSize):
   """
-  es una funcion que devuelve las tuplas con los indices de todos los elementos
-  de una matriz Nmz*Nmy*Nmx
+  No hay microestructuras
   """
-  Nmz,Nmy,Nmx = N
-  
-  indices = []
-  for k in range(Nmz):
-    for j in range(Nmy):
-      for i in range(Nmx):
-        indices.append((k,j,i))
-  return indices
+  return None
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
