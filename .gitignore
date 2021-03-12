@@ -6,3 +6,6 @@
 
 # ignore all .svg files
 *.svg
+
+# ignore all .png files
+*.png

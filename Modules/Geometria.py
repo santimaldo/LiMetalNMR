@@ -25,6 +25,7 @@ def funciones(geometria):
   funciones['cilindritos_inclinados'] = cilindritos_inclinados
   funciones['cilindritos_aleatorios_1'] = cilindritos_aleatorios_1
   funciones['cilindritos_aleatorios_2'] = cilindritos_aleatorios_2
+  funciones['cilindritos_aleatorios_3'] = cilindritos_aleatorios_3
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -306,7 +307,13 @@ def cilindritos_dist_cte(N, voxelSize, **geokwargs):
       ind_y+= ndy+nsy
       n+=1
     ind_x+= ndx+nsx
-  return indices
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
+    
+
 
   
 #------------------------------------------------------------------------------
@@ -583,7 +590,7 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
               ind_z = Nz_random_1[i]
               ind_suma_rand_y= np.random.randint(0,3)-1
               ind_suma_rand_x= np.random.randint(0,3)-1
-              print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_suma_rand_y',ind_suma_rand_y)
               #print('ind_z',ind_z)
               Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
               #Nz_random_2.append(Nz_rand_2)
@@ -595,22 +602,22 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
                           
                   ind_suma_x+= ind_suma_rand_x
                   ind_suma_y+= ind_suma_rand_y
-                  print('ind_suma_y',ind_suma_y)
+                  #print('ind_suma_y',ind_suma_y)
                   
               
                   ind_z+=1
-              print('ind_y',ind_y)
+              #print('ind_y',ind_y)
               ind_y_lista.append(ind_y)                
               ind_suma_y_lista.append(ind_suma_y)
-              print('ind_suma_y_lista',ind_suma_y)
+              #print('ind_suma_y_lista',ind_suma_y)
               ind_suma_x_lista.append(ind_suma_x)
-              print('ind_suma_x_lista',ind_suma_x)
+              #print('ind_suma_x_lista',ind_suma_x)
               i=i+1
-              print('i',i)
-              print(ind_z)
+              #print('i',i)
+              #print(ind_z)
               Nz_random_2.append(ind_z)
               ind_y+= nsy + ndy 
-          print('ind_x',ind_x)
+          #print('ind_x',ind_x)
           ind_x_lista.append(ind_x)
           ind_x+= nsx + ndx
   j=0
@@ -635,13 +642,13 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
                       
                   ind_suma_x+= ind_suma_rand_x
                   ind_suma_y+= ind_suma_rand_y
-                  print('ind_suma_y',ind_suma_y)
+                  #print('ind_suma_y',ind_suma_y)
                   
               
                   ind_z+=1
               ind_y+= nsy + ndy
               j=j+1
-              print('j',j)
+              #print('j',j)
           ind_x+= nsx + ndx        
           
   lista_alturas = [1,2,3]
@@ -650,7 +657,154 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   else:
     return indices
 
+ ##############################################################################
+def cilindritos_aleatorios_3(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  A los cilindritos inclinados les cambio la dirección de forma aleatoria 
+  siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección"""   
+  #lo único que cambio de cilindritos_aleatorios_2 es que fijo la distancia 
+  #entre cilindritos sin importar el ancho de estos
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
  
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro 
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  #Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar 
+  #la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
+  #hasta una altura Nz_random_1 que para cada cilindro toma valores random de 0
+  #a Nz/3, luego en el segundo bloque tienen la posibilidad de inclinarse y frenar
+  #a otra altura random Nz_random_2 y finalmente en el tercer bloque vuelven a tener
+  #la posibilidad de inclinarse sin recordar la inclinación anterior necesariamente.
+
+  
+  indices = []
+  
+  Nz_random_1 = []
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           Nz_rand_1 = np.random.randint(0,int(N[0]/3)+1)
+           Nz_random_1.append(Nz_rand_1)
+           #print(Nz_rand)
+           while ind_z < Nz_rand_1:    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+              ind_z+=1 
+           ind_y+= ndy 
+     ind_x+= ndx 
+  
+  
+  Nz_random_2 = []
+  ind_x_lista = []
+  ind_y_lista = []
+  ind_suma_x_lista = []
+  ind_suma_y_lista = []
+  
+  i=0
+  ind_x = 2*nsx
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = 2*nsy
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=0
+              ind_suma_x=0
+              ind_z = Nz_random_1[i]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
+              #Nz_random_2.append(Nz_rand_2)
+              while ind_z < Nz_rand_2 and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                          
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              #print('ind_y',ind_y)
+              ind_y_lista.append(ind_y)                
+              ind_suma_y_lista.append(ind_suma_y)
+              #print('ind_suma_y_lista',ind_suma_y)
+              ind_suma_x_lista.append(ind_suma_x)
+              #print('ind_suma_x_lista',ind_suma_x)
+              i=i+1
+              #print('i',i)
+              #print(ind_z)
+              Nz_random_2.append(ind_z)
+              ind_y+= ndy 
+          #print('ind_x',ind_x)
+          ind_x_lista.append(ind_x)
+          ind_x+= ndx 
+  j=0
+  ind_x = ind_x_lista[j]
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = ind_y_lista[j]
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=ind_suma_y_lista[j]
+              ind_suma_x=ind_suma_x_lista[j]
+              ind_z = Nz_random_2[j]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              while ind_z < N[0] and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx-1 and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy-1:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                      n+=1
+                      #print('n_abajo',n)
+                      
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              ind_y+= ndy 
+              j=j+1
+              #print('j',j)
+          ind_x+= ndx        
+          
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
+
 
 
 #------------------------------------------------------------------------------
