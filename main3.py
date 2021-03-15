@@ -76,58 +76,33 @@ for geo in lista_geometrias:
 
 
     espectros_geo.append([ppmAxis,spec])
+ 
+#Armo el espectro del bulk y lo agrego a la lista
+muestra = Muestra(volumen, medidas=medidas, geometria = 'bulk')
+delta = Delta(muestra)
+superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3)
+medicion = Medicion(superposicion, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+
+espectros_geo.append([ppmAxis,spec])
 
 #Descomprimo la lista en los dos espectros
 espectro_geo_cc = espectros_geo[0] #cc= cilindritos a distancia constante
 espectro_geo_ca2 = espectros_geo[1] #ca2= cilindritos aleatorios 2
+espectro_geo_bulk = espectros_geo[2]
 
 #Los grafico en la misma figura para compararlos
 plt.figure(10)
 ax = plt.subplot(111)
 ax.plot(espectro_geo_cc[0],espectro_geo_cc[1],'-',linewidth=2, label=' Geometría: cilindros rectos')
 ax.plot(espectro_geo_ca2[0],espectro_geo_ca2[1],'-',linewidth=2, label=' Geometría: cilindros aleatorios')
+ax.plot(espectro_geo_bulk[0],espectro_geo_bulk[1],'-',linewidth=2, color='#b6b8b6' , label=' bulk')
 plt.xlim(left=350, right=150)
 plt.xlabel('[ppm]')
 plt.ylabel(' ')
-plt.title('Espectros para las distintas geometrías')
+plt.title('Espectros para las distintas geometrías (c36)') #c36 es la abreviación de 36 cilindros
 ax.legend()
 
-
-#%%
-# En el sgundo bloque mostramos la diferencia del espectro utilizando las 
-# mismas dos geometrías anteriores con la diferencia de que variamos los parametros
-#con tal de usar solo 4 cilindros ya que esto nos daría un pico más evidente hacia
-#la izquierda
-
-espectros_4 = []
-geo='cilindritos_dist_cte'
-lista_geometrias = ['cilindritos_dist_cte','cilindritos_aleatorios_2']
-
-for geo in lista_geometrias:
-    
-    muestra = Muestra(volumen, medidas=medidas, geometria = geo, ancho=16e-3, distancia=74e-3)
-    delta = Delta(muestra)
-    superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3)
-    medicion = Medicion(superposicion, volumen_medido='centro')
-    ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
-
-
-    espectros_4.append([ppmAxis,spec])
-
-#Descomprimo la lista en los dos espectros
-espectro_4_cc = espectros_4[0] #cc= cilindritos a distancia constante
-espectro_4_ca2 = espectros_4[1] #ca2= cilindritos aleatorios 2
-
-#Los grafico en la misma figura para compararlos
-plt.figure(20)
-ax = plt.subplot(111)
-ax.plot(espectro_4_cc[0],espectro_4_cc[1],'-',linewidth=2, label=' Geometría: cilindros rectos')
-ax.plot(espectro_4_ca2[0],espectro_4_ca2[1],'-',linewidth=2, label=' Geometría: cilindros aleatorios')
-plt.xlim(left=350, right=150)
-plt.xlabel('[ppm]')
-plt.ylabel(' ')
-plt.title('Espectros para las distintas geometrías')
-ax.legend()
 
 #%%
 #En este bloque voy a comparar un espectro producto de una misma geometría 
@@ -135,7 +110,7 @@ ax.legend()
 
 espectros_d = []
 dist=20e-3
-distancias = [20e-3,74e-3,120e-3,164e-3]
+distancias = [20e-3,30e-3,45e-3,74e-3,164e-3]
 
 
 
@@ -149,32 +124,68 @@ for dist in distancias:
 
     espectros_d.append([ppmAxis,spec])
     
+#Armo el espectro del bulk y lo agrego a la lista
+muestra = Muestra(volumen, medidas=medidas, geometria = 'bulk')
+delta = Delta(muestra)
+superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3)
+medicion = Medicion(superposicion, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+
+espectros_d.append([ppmAxis,spec])
+
+
 #Descomprimo la lista en los dos espectros
 espectro_d_d1 = espectros_d[0] 
 espectro_d_d2 = espectros_d[1] 
 espectro_d_d3 = espectros_d[2]
 espectro_d_d4 = espectros_d[3]
+espectro_d_d5 = espectros_d[4]
+espectro_d_d0 = espectros_d[5]
 
 #Los grafico en la misma figura para compararlos
 plt.figure(30)
 ax = plt.subplot(111)
 ax.plot(espectro_d_d1[0],espectro_d_d1[1],'-',linewidth=2, label=' #cilindros = 36')
-ax.plot(espectro_d_d2[0],espectro_d_d2[1],'-',linewidth=2, label=' #cilindros = 9')
-ax.plot(espectro_d_d3[0],espectro_d_d3[1],'-',linewidth=2, label=' #cilindros = no se')
-ax.plot(espectro_d_d4[0],espectro_d_d4[1],'-',linewidth=2, label=' #cilindros = 4')
+ax.plot(espectro_d_d2[0],espectro_d_d2[1],'-',linewidth=2, label=' #cilindros = 25')
+ax.plot(espectro_d_d3[0],espectro_d_d3[1],'-',linewidth=2, label=' #cilindros = 16')
+ax.plot(espectro_d_d4[0],espectro_d_d4[1],'-',linewidth=2, label=' #cilindros = 9')
+ax.plot(espectro_d_d5[0],espectro_d_d5[1],'-',linewidth=2, label=' #cilindros = 4')
+ax.plot(espectro_d_d0[0],espectro_d_d0[1],'-',linewidth=2, color='#b6b8b6' , label=' bulk')
 plt.xlim(left=350, right=150)
 plt.xlabel('[ppm]')
 plt.ylabel(' ')
-plt.title('Espectros para las distintas geometrías')
+plt.title('Espectros para distintas cantidades de cilindros en geo cc')
 ax.legend()   
     
+#%%
+#EXPORTACIÓN DE DATOS 
+#Exporto los arrays para abrirlos en el origin, deconvolucionarlos y analizar 
+#el desplazamiento de máximos en función de la cantidad de cilindros 
+#La notación es "datos_d4" corresponde a los datos de los cilindros con distancia 
+#tq tenemos 4 en el lado, osea que en total tenemos 16 cilindros.
+#Generalizando "datos_dn" corresponde a la geo con nxn cilindros.
+
+datos_d2 = np.array([espectro_d_d5[0],np.real(espectro_d_d5[1])]).T
+np.savetxt('datos_d2_cc.txt',datos_d2)
+
+datos_d3 = np.array([espectro_d_d4[0],np.real(espectro_d_d4[1])]).T
+np.savetxt('datos_d3_cc.txt',datos_d3)
+
+datos_d4 = np.array([espectro_d_d3[0],np.real(espectro_d_d3[1])]).T
+np.savetxt('datos_d4_cc.txt',datos_d4) 
+ 
+datos_d5 = np.array([espectro_d_d2[0],np.real(espectro_d_d2[1])]).T
+np.savetxt('datos_d5_cc.txt',datos_d5)
+
+datos_d6 = np.array([espectro_d_d1[0],np.real(espectro_d_d1[1])]).T
+np.savetxt('datos_d6_cc.txt',datos_d6)
 #%%
 #En este bloque voy a comparar un espectro producto de una misma geometría 
 #para cantidades distintas de cilindros. Vamos con la geo ca2
 
 espectros_d = []
 dist=20e-3
-distancias = [20e-3,74e-3,120e-3,164e-3]
+distancias = [20e-3,30e-3,45e-3,74e-3,164e-3]
 
 
 
@@ -187,25 +198,80 @@ for dist in distancias:
 
 
     espectros_d.append([ppmAxis,spec])
+
+#Armo el espectro del bulk y lo agrego a la lista
+muestra = Muestra(volumen, medidas=medidas, geometria = 'bulk')
+delta = Delta(muestra)
+superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3)
+medicion = Medicion(superposicion, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+
+espectros_d.append([ppmAxis,spec])
     
 #Descomprimo la lista en los dos espectros
 espectro_d_d1 = espectros_d[0] 
 espectro_d_d2 = espectros_d[1] 
 espectro_d_d3 = espectros_d[2]
 espectro_d_d4 = espectros_d[3]
+espectro_d_d5 = espectros_d[4]
+espectro_d_d0 = espectros_d[5]
 
 #Los grafico en la misma figura para compararlos
 plt.figure(40)
 ax = plt.subplot(111)
 ax.plot(espectro_d_d1[0],espectro_d_d1[1],'-',linewidth=2, label=' #cilindros = 36')
-ax.plot(espectro_d_d2[0],espectro_d_d2[1],'-',linewidth=2, label=' #cilindros = 9')
-ax.plot(espectro_d_d3[0],espectro_d_d3[1],'-',linewidth=2, label=' #cilindros = no se')
-ax.plot(espectro_d_d4[0],espectro_d_d4[1],'-',linewidth=2, label=' #cilindros = 4')
+ax.plot(espectro_d_d2[0],espectro_d_d2[1],'-',linewidth=2, label=' #cilindros = 25')
+ax.plot(espectro_d_d3[0],espectro_d_d3[1],'-',linewidth=2, label=' #cilindros = 16')
+ax.plot(espectro_d_d4[0],espectro_d_d4[1],'-',linewidth=2, label=' #cilindros = 9')
+ax.plot(espectro_d_d5[0],espectro_d_d5[1],'-',linewidth=2, label=' #cilindros = 4')
+ax.plot(espectro_d_d0[0],espectro_d_d0[1],'-',linewidth=2, color='#b6b8b6' , label=' bulk')
 plt.xlim(left=350, right=150)
 plt.xlabel('[ppm]')
 plt.ylabel(' ')
-plt.title('Espectros para las distintas geometrías')
+plt.title('Espectros para distintas cantidades de cilindros en geo ca2')
 ax.legend()   
+
+#%%
+#EXPORTACIÓN DE DATOS 
+#Exporto los arrays para abrirlos en el origin, deconvolucionarlos y analizar 
+#el desplazamiento de máximos en función de la cantidad de cilindros 
+#La notación es "datos_d4" corresponde a los datos de los cilindros con distancia 
+#tq tenemos 4 en el lado, osea que en total tenemos 16 cilindros.
+#Generalizando "datos_dn" corresponde a la geo con nxn cilindros.
+
+datos_d2 = np.array([espectro_d_d5[0],np.real(espectro_d_d5[1])]).T
+np.savetxt('datos_d2_ca2.txt',datos_d2)
+
+datos_d3 = np.array([espectro_d_d4[0],np.real(espectro_d_d4[1])]).T
+np.savetxt('datos_d3_ca2.txt',datos_d3)
+
+datos_d4 = np.array([espectro_d_d3[0],np.real(espectro_d_d3[1])]).T
+np.savetxt('datos_d4_ca2.txt',datos_d4) 
+ 
+datos_d5 = np.array([espectro_d_d2[0],np.real(espectro_d_d2[1])]).T
+np.savetxt('datos_d5_ca2.txt',datos_d5)
+
+datos_d6 = np.array([espectro_d_d1[0],np.real(espectro_d_d1[1])]).T
+np.savetxt('datos_d6_ca2.txt',datos_d6)
+
+#%%
+#Sección de gráficos del desplazamiento de los maximos segun la cantidad de 
+#cdilindros
+
+x = [4,9,16,25,36]
+f = [267.29-249.5,266.95-249.5,265.608-249.5,266.594-249.5,266.446-249.5]  #geo ca2
+g = [271.57-249.5,271.602-249.5,271.459-249.5,271.130-249.5,270.639-249.5] #geo cc
+
+
+plt.figure(41)
+ax = plt.subplot(111)
+ax.plot(x,f,marker='o', markersize=8, label=' Geometría ca2')
+ax.plot(x,g,marker='o', markersize=8, label=' Geometría cc')
+plt.xlabel('Cantidad de cilindros')
+plt.ylabel('Desplazamiento [ppm]')
+plt.title('Desplazamiento de los máximos respecto al máximo del bulk')
+ax.legend()
+
 
 #%%
 #En esta parte del código voy a graficar el espectro de la geo ca2 para 9 cilindros

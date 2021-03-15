@@ -267,7 +267,10 @@ def cilindritos_dist_cte(N, voxelSize, **geokwargs):
   """ 2020-10-16
   Creo cilindritos a distancia constante entre sí, la idea es que el 
   parámetro ancho sea el diametro del cilindro   """  
- 
+  try:
+   extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
   ancho = geokwargs['ancho']
   distancia = geokwargs['distancia']
   area = ancho*ancho

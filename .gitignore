@@ -7,6 +7,9 @@
 *.stl
 # ignore all .svg files
 *.svg
-
 # ignore all .png files
 *.png
+# ignore all .txt files
+*.txt
+# ignore all .opj files
+*.opj
