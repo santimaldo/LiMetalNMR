@@ -71,13 +71,13 @@ T1 = 170e-3
 
 #w = 0
 
-N = 30
+N = 64
 b = 1/12
 r_list = np.linspace(0, int(8/b-1), 1024)
 # evanesencia: B1 = B10*beta = B10 * exp(-r/12um)
 beta = np.exp(-b*r_list)
 k_list = np.arange(0.5, 3.1, 0.1)
-#k_list = np.array([1])
+k_list = np.array([1])
 
 
 #"""

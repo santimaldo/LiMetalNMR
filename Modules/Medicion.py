@@ -298,7 +298,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', KS=None, return_angle=False):
+  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', KS=None, return_angle=False, Norm=True):
     """
     Mediante el histograma 2D y teniendo como dato la amplitud de senal para
     cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes
@@ -368,12 +368,18 @@ class Medicion(object):
       plt.figure(figure)
       plt.subplot(1,2,1)
       plt.title('FID')
-      plt.plot(t*1e3, np.real(fid)/np.max(np.real(fid)), linewidth=2)
+      if Norm:
+        plt.plot(t*1e3, np.real(fid)/np.max(np.real(fid)), linewidth=2)
+      else:
+        plt.plot(t*1e3, np.real(fid), linewidth=2)        
       plt.xlabel('time [ms]')
       plt.yticks([])
       plt.subplot(1,2,2)
       plt.title('Spectrum')
-      plt.plot(ppmAxis, np.real(spec)/np.max(np.real(spec)), linewidth=2)
+      if Norm:
+        plt.plot(ppmAxis, np.real(spec)/np.max(np.real(spec)), linewidth=2)
+      else:
+        plt.plot(ppmAxis, np.real(spec), linewidth=2)              
       plt.xlabel('ppmAxis')
       if np.abs(KS)<100:
         plt.xlim([100,-100])
