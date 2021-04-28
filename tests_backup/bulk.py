@@ -66,9 +66,9 @@ skindepth = 0.012 # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxelSize = [0.071/2, 0.25, 0.25]# mm
+voxelSize = [0.03, 0.1, 0.1]# mm
 #FOV = [0.714*30, 50.048, 50.048]
-N = [512, 64, 128]
+N = [512, 128, 128]
 #voxelSize = [0.006, 0.03, 0.08]# mm
 #Nz, Ny, Nx = [256, 128, 128]
 # con estos numeros, Nj*voxelSize_j queda
@@ -85,7 +85,7 @@ Nz, Ny, Nx = N
 
 #%% CREACION DE LA LAMINA--------------------------------------------------------
 # primero defino las dimensiones del objeto: obj_dim, expresada en mm.
-obj_dim = [0.714, 4, 10]
+obj_dim = [0.714, 4, 4]
 
 # Creo una matriz de ceros de tamaño Nz*Ny*Nx. esta matriz representa el 
 # volumen simulado. Donde hay un 1, hay material. Donde hay un 0, hay vacio.
