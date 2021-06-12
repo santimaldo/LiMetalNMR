@@ -839,6 +839,7 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
   d = int(distancia/vsx)
   a = int(parametro_a/vsx)
 
+
   centros_CU = [(0,0),(0,d),(a,d/2),(2*a,0),(2*a,d)]
 
   Nceldas_x = int(Nmx/d)
@@ -860,7 +861,7 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
             # agrego las demas celdas en x, y
             for icx in range(Nceldas_x):
               for icy in range(Nceldas_y):                
-                indices.append((ind_z,ind_y+icy*2*a, ind_x+icx*d))          
+                indices.append((ind_z,ind_y+icy*2*a, ind_x+icx*d))
   return indices
   
 #------------------------------------------------------------------------------
@@ -887,6 +888,7 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
 #    
 #    return 
   
+#%%
 if __name__=='__main__':
   """
   script para testear las geometrias

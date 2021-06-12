@@ -98,9 +98,9 @@ class Muestra(object):
         # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
-    if np.min(FOV) < 2*np.max(medidas):
+    if any(np.array(FOV) < 2*np.array(medidas)):
       mensaje= "\n ============WARNING===============\
-               \n Ojo! Tal vez debas agrandar el FOV\
+               \n La muestra excede el 50% del FOV\
                \n =================================="
       warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
 
@@ -108,8 +108,7 @@ class Muestra(object):
     # microestructuras
     skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
     min_bulk = skdp*3
-    min_FOV = medidas[0] + 2*min_bulk # como la muestra se ubica al centro, lo que sobra arriba y abajo es lo mismo. Por eso va 2 veces min_bulk
-    print(min_FOV)
+    min_FOV = medidas[0] + 2*min_bulk # como la muestra se ubica al centro, lo que sobra arriba y abajo es lo mismo. Por eso va 2 veces min_bulk    
     if  FOV[0] < min_FOV :
       msg = "No hay suficiente FOV en z. Aumentar N[0]"
       raise Exception(msg)
