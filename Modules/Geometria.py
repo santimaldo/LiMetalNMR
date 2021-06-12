@@ -26,6 +26,7 @@ def funciones(geometria):
   funciones['cilindritos_aleatorios_1'] = cilindritos_aleatorios_1
   funciones['cilindritos_aleatorios_2'] = cilindritos_aleatorios_2
   funciones['cilindritos_aleatorios_3'] = cilindritos_aleatorios_3
+  funciones['cilindros_hexagonal'] = cilindros_hexagonal
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -308,13 +309,12 @@ def cilindritos_dist_cte(N, voxelSize, **geokwargs):
     return indices, lista_alturas
   else:
     return indices
-    
-
-
   
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+
+
 def cilindrito_prueba(N, voxelSize, **geokwargs):
   """ 2020-10-22
   Creo un cilindrito torcido de prueba. Inicialmente crece derecho en z y
@@ -801,6 +801,71 @@ def cilindritos_aleatorios_3(N, voxelSize, **geokwargs):
   else:
     return indices
 
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def cilindros_hexagonal(N, voxelSize, **geokwargs):
+  """ 2021-06-12
+  Creo cilindritos a distancia constante entre sí. Es decir, en un arreglo
+  hexagonal. La distancia se define centro a centro.
+  
+  Los parametros no son independientes, sino que tienen que cumplir ciertos
+  requisitos. A saber:
+    
+    Nmx = n * d    ,  con n entero
+    Nmy = m * 2a   ,  con m entero
+  
+  pero ademas, el parametro a debe ser tal que minimice el error de discretizar
+  d y a en la relacion:
+    
+    (d/2)**2 + a**2  = d**2
+    
+  En la carpeta DataBases, el archivo 'Hexagonal_parametro_a.dat', tiene los
+  valores de a optimos para cada d.
+  
+  d DEBE SER PAR
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+  centros_CU = [(0,0),(0,d),(a,d/2),(2*a,0),(2*a,d)]
+
+  Nceldas_x = int(Nmx/d)
+  Nceldas_y = int(Nmy/(2*a))
+  
+  indices = []  
+  R2 = R**2
+  for centro in centros_CU:
+    yc, xc = centro
+    xc = xc-0.5
+    yc = yc-0.5      
+    # recorro la celda unidad
+    for ind_x in range(d):      
+      for ind_y in range(2*a):
+        # solo guardo los xy del cilindro            
+        if (ind_x-xc)**2 +(ind_y-yc)**2 < R2:
+          # recorro en altura
+          for ind_z in range(Nmz):
+            # agrego las demas celdas en x, y
+            for icx in range(Nceldas_x):
+              for icy in range(Nceldas_y):                
+                indices.append((ind_z,ind_y+icy*2*a, ind_x+icx*d))          
+  return indices
+  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 
 #------------------------------------------------------------------------------
@@ -827,21 +892,22 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([128,256,256])
+  N = np.array([128,112,128])
   Nz,Ny,Nx = N   
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
 
-  geometria = 'cilindritos_aleatorios_2'
+  geometria = 'cilindros_hexagonal'
   constructor = funciones(geometria)
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
-  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
-  # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  #tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  #tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
+  #tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  tuplas = constructor(N, voxelSize, radio=9e-3, distancia=20e-3, parametro_a=17e-3) # para 'cilindros_hexagonal'
 
 
   # convierto a indices planos
@@ -856,73 +922,38 @@ if __name__=='__main__':
   
  
   #%%
-  #muestra = muestra_mask
+  
+  x0 = int(Nx/2)
+  y0 = int(Ny/2)
+  z0 = int(Nz/2)
+  x1 = int(3/4*Nx)
+  
+  
   plt.figure(50)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
-  plt.pcolormesh(muestra[:,:,128])
+  plt.pcolormesh(muestra[:,:,x0])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,128,:])
+  plt.pcolormesh(muestra[:,y0,:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
-  plt.pcolormesh(muestra[60,:,:])
+  plt.pcolormesh(muestra[z0,:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-  plt.pcolormesh(muestra[:,:,192])
-  
-  
-  
-  fig, axs = plt.subplots(2, 2)
-  axs[0, 0].pcolormesh(muestra[:,:,220])
-  axs[0, 0].set_title('Corte en x')
-  axs[0, 1].pcolormesh(muestra[:,220,:])
-  axs[0, 1].set_title('Corte en y')
-  axs[1, 0].pcolormesh(muestra[int(N[0]/4),:,:])
-  axs[1, 0].set_title('Corte a un cuarto de z')
-  axs[1, 1].pcolormesh(muestra[int(3*N[0]/4),:,:])
-  axs[1, 1].set_title('Corte a tres cuartos de z')
+  plt.pcolormesh(muestra[:,:,x1])
 
-  for ax in axs.flat:
-    ax.set(xlabel=' ', ylabel=' ')
-
-# Hide x labels and tick labels for top plots and y ticks for right plots.
-  for ax in axs.flat:
-    ax.label_outer()
-  
-    
-  
-  plt.figure(52)
-  plt.pcolormesh(muestra[int(N[0]/4),:,:])
-  
-  plt.figure(53)
-  plt.pcolormesh(muestra[:,41,:])
-  
-  plt.figure(54)
-  plt.pcolormesh(muestra[int(3*N[0]/4),:,:])
-  # #%%
-  
-  # #muestra_con_mascara = muestra*mask
-  # #muestra = muestra_con_mascara
-  # # #Gráfico #3D
-  # fig = plt.figure(60)
-  # ax = fig.gca(projection='3d')
-  # x = np.linspace(0,99,100)
-  # ax.voxels(muestra, facecolors='k', edgecolor='k')
-#%%
 #%%
   
-  tmpvol =np.zeros((Nz+5,Ny,Nx))
-  tmpvol[1:-4,:,:] = muestra
-  tmpvol[0,:,:] = 1
-  filename = './tmp.stl'
-  with Oct2Py() as oc:
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Creando figura 3D. Esto puede demorar varios minutos...")
-    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
-    oc.stlwrite(filename,fv)        # Save to binary .stl
-  print("       Listo!") 
-  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-
-plt.show()
+  # tmpvol =np.zeros((Nz+5,Ny,Nx))
+  # tmpvol[1:-4,:,:] = muestra
+  # tmpvol[0,:,:] = 1
+  # filename = './tmp.stl'
+  # with Oct2Py() as oc:
+  #   print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  #   print("Creando figura 3D. Esto puede demorar varios minutos...")
+  #   fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+  #   oc.stlwrite(filename,fv)        # Save to binary .stl
+  # print("       Listo!") 
+  # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  # plt.show()
