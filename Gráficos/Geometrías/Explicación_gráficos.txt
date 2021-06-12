@@ -1,0 +1,15 @@
+Se utiliza N=[128,256,256] convención (z,y,x), el radio de los cilindros es R=8um y
+la distancia entre cilindros es d=20um (para todos los casos). 
+
+Cilindtiros_dist_cte.svg son cilindros rectos a distancia constante entre ellos. 
+
+Cilindrito_prueba.svg es un cilindro inclinado en x a partir de z=Nz/2, se puede ver mejor en
+el gráfico 3D.
+
+Cilindritos_inclinados.svg es la generalización del cilindrito de prueba para una configuración
+a distancia constante. 
+
+Cilindros_inclinados.svg es el gráfico 3D correspondiente a la geometría cilindritos_inclinados
+pero es una imagen muy pesada de 100 MB. El código tarda en correr 7 minutos 
+(Los elementos del espacio total son aproximadamente 8.400.000) y termina siendo
+ mucho más ilustrativa el gráfico cilindrito_prueba_3D.svg ya que no se superpone todo

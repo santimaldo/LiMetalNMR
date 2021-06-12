@@ -32,7 +32,9 @@ skindepth = 0.012 # profundida de penetracion, mm
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,256,256] 
+
+N = [256,512,512] 
+
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
 volumen = SimulationVolume(voxelSize=voxelSize, N=N)
@@ -47,8 +49,9 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 medidas = [0.128,0.256,0.256]
 
 # muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=16e-3, distancia=20e-3)
-# muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2',ancho=16e-3, distancia=20e-3) 
-muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
+
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2',ancho=16e-3, distancia=20e-3) # para 'porcentaje_palos'
+
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
@@ -59,7 +62,7 @@ superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 #medicion = Medicion(superposicion, volumen_medido='completo')
-medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
+medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
 
 #%%
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)

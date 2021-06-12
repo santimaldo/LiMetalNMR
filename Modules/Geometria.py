@@ -20,17 +20,25 @@ def funciones(geometria):
   funciones['arranged_sticks'] = arranged_sticks
   funciones['trapped_arranged_sticks'] = trapped_arranged_sticks
   funciones['distancia_constante'] = distancia_constante
-  funciones['porcentaje_palos'] = porcentaje_palos
-  funciones['porcentaje_lanzas'] = porcentaje_lanzas
+  funciones['cilindritos_dist_cte'] = cilindritos_dist_cte
+  funciones['cilindrito_prueba'] = cilindrito_prueba
+  funciones['cilindritos_inclinados'] = cilindritos_inclinados
+  funciones['cilindritos_aleatorios_1'] = cilindritos_aleatorios_1
+  funciones['cilindritos_aleatorios_2'] = cilindritos_aleatorios_2
+  funciones['cilindritos_aleatorios_3'] = cilindritos_aleatorios_3
+  funciones['cilindros_hexagonal'] = cilindros_hexagonal
   if geometria in funciones:
     return funciones[geometria]
   else:
-      mensaje= "\n =====ERROR=en=funciones(geometria)============\
-               \n El input debe se un string con el nombre de la geometria.\
-               \n O bien, la geometria solicitada no se encuentra\
-                \n =============================================="
-      raise Exception(mensaje)
-      return 0
+    mensaje= "\n ============WARNING=====================\
+             \n La geometria solicitada no se encuentra.\
+             \n Por las dudas, te devuelvo un BULK.\
+             \n ========================================"
+    print(mensaje)
+    return funciones['bulk']
+    
+  
+
 #------------------------------------------------------------------------------
 def bulk(N, voxelSize):
   """
@@ -256,170 +264,613 @@ def distancia_constante(N, voxelSize, **geokwargs):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-def porcentaje_palos(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
-  """
-  2020-10-14
-  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
-  en posiciones aleatorias hasta cubrir un cierto porcentaje
-  """
-  # extraigo los geokwargs:
-  ancho  = geokwargs['ancho']
-  porcentaje = geokwargs['porcentaje']
-  p = porcentaje/100
-    
+def cilindritos_dist_cte(N, voxelSize, **geokwargs):
+  """ 2020-10-16
+  Creo cilindritos a distancia constante entre sí, la idea es que el 
+  parámetro ancho sea el diametro del cilindro   """  
+  try:
+   extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
   Nmz,Nmy,Nmx = N
-  vsz, vsy, vsx = voxelSize  
-  
-  if altura is None:
-    altura = vsz*Nmz
-    print ("altura de dendritas: {} um".format(altura*1e3))
-  elif altura>vsz*Nmz:
-    altura = vsz*Nmz
-    print ("WARNING!!! la altura de dendritas solicitada es superior \
-           a la medida de la muestra. Retransformando a altura = {} um".format(altura))
-    
-  # cuantos voxels debo usar
-  nsx = int(ancho/vsx)
-  nsy = int(ancho/vsy)
-  nsz = int(altura/vsz)
-  
-  area = nsx*nsy
-  AreaTotal = Nmx*Nmy
-  # determino cuantas dendritas voy a crear en un principio
-  Nd = int(AreaTotal*p/area)
-  if Nd==0:
-    msj = 'Error!!! Las microestructuras son muy anchas o la densidad solicitada es muy chica!. Con solo una microestructura, se alcanza una densidad del {:.2f}%'.format(area/AreaTotal*100)
-    raise Exception(msj)
-  
-  n = 0
-  indices = []
-  while n<10:
-    for iterador in range(Nd):
-      ind_y = np.random.randint(0,Nmy-nsy+1)
-      ind_x = np.random.randint(0,Nmx-nsx+1)          
-      for iz in range(nsz):
-        for iy in range(nsy):
-          for ix in range(nsx):
-            indices.append((iz,ind_y+iy, ind_x+ix))            
-    # armo la muestra para chequear que cubri bien el area:          
-    indices_array = np.array(indices).T  
-    indices_array = np.ravel_multi_index(indices_array, N)    
-    muestra = np.zeros(N)
-    np.put(muestra, indices_array, 1)
-    # calulo el area cubierta
-    areaCubierta = np.sum(muestra[1,:,:])
-    pCubierto = areaCubierta/AreaTotal    
-    
-    if abs(pCubierto-p)*100<tolerancia:
-      break
-    if p<pCubierto:
-      print("Ups... nos pasamos...")
-      break
-    areaPorCubrir = p*AreaTotal - areaCubierta
-    Nd = int(areaPorCubrir/area)
-    print('cubierto:{:.2f}%, pongo {:d} estructuras para alcanzar el {:.2f}%'.format(pCubierto*100, Nd, p*100))
-    n+=1
-  print("Porcentaje cubierto: {:.3f} %".format(pCubierto*100))
-  return indices, pCubierto*100
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-def porcentaje_lanzas(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
-  """
-  2020-10-26
-  dendritas de anchoXancho um2 en sedntido vertical, apoyadas sobre la superficie
-  en posiciones aleatorias hasta cubrir un cierto porcentaje.
-  son lanzas porque en la punta terminan como flecha, no como rectangulos
-  """
-  # extraigo los geokwargs:
-  ancho  = geokwargs['ancho']
-  porcentaje = geokwargs['porcentaje']
-  p = porcentaje/100
-    
-  Nmz,Nmy,Nmx = N
+  print(N)
   vsz, vsy, vsx = voxelSize
-  
-  
-  if altura is None:
-    altura = vsz*Nmz
-    print ("altura de dendritas: {} um".format(altura*1e3))
-  elif altura>vsz*Nmz:
-    altura = vsz*Nmz
-    print ("WARNING!!! la altura de dendritas solicitada es superior \
-           a la medida de la muestra. Retransformando a altura = {} um".format(altura))
-    
-  # cuantos voxels debo usar
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
   nsx = int(ancho/vsx)
   nsy = int(ancho/vsy)
-  nsz = int(altura/vsz)
-  if nsx == 1:
-    nsz_punta = nsz
-    print('iiiiujiu')
-  elif nsx/2<nsz:
-    nsz_punta = int(nsx/2)
+  # distancia en voxels entre los cilindros:
+  ndx = int(distancia/vsx)
+  ndy = int(distancia/vsy)
+  
+  
+  indices = []
+  ind_x = 2*nsx # dejo un ancho de distancia hasta el borde
+  n = 0
+  while ind_x<=(Nmx-2*nsx):      
+    ind_y = 2*nsy
+    while ind_y<=(Nmy-2*nsy):
+      for iy in range(nsy):
+          for ix in range(nsx):
+              if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                  for iz in range(Nmz):
+                      indices.append((iz,ind_y+iy, ind_x+ix))
+      ind_y+= ndy+nsy
+      n+=1
+    ind_x+= ndx+nsx
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
   else:
-    nsz_punta = 2
+    return indices
+  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
-  area = nsx*nsy
-  AreaTotal = Nmx*Nmy
-  # determino cuantas dendritas voy a crear en un principio
-  Nd = int(AreaTotal*p/area)
-  if Nd==0:
-    msj = 'Error!!! Las microestructuras son muy anchas o la densidad solicitada es muy chica!. Con solo una microestructura, se alcanza una densidad del {:.2f}%'.format(area/AreaTotal*100)
-    raise Exception(msj)
-  print(nsz, nsz_punta)
+
+def cilindrito_prueba(N, voxelSize, **geokwargs):
+  """ 2020-10-22
+  Creo un cilindrito torcido de prueba. Inicialmente crece derecho en z y
+  luego se tuerce en x  """   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
  
   
-  n = 0
   indices = []
-  while n<10:
-    for iterador in range(Nd):
-      ind_y = np.random.randint(0,Nmy-nsy+1)
-      ind_x = np.random.randint(0,Nmx-nsx+1)                
-      for iz in range(nsz_punta):
-        for iy in range(nsy):
+  ind_x = int((Nmx - nsx)/2) 
+  ind_y = int((Nmy - nsy)/2) 
+  ind_z = 0
+  n=0
+  while ind_z < int(Nmz/2):
+      for iy in range(nsy):
           for ix in range(nsx):
-            indices.append((iz,ind_y+iy, ind_x+ix))
-      n_spear = 1 # iterador para la punta de la estructura            
-      for iz in range(nsz_punta,nsz):
-        for iy in range(n_spear, nsy-n_spear):
-          for ix in range(n_spear, nsx-n_spear):            
-            indices.append((iz,ind_y+iy, ind_x+ix))            
-        n_spear+=1     
-    # armo la muestra para chequear que cubri bien el area:          
-    indices_array = np.array(indices).T  
-    indices_array = np.ravel_multi_index(indices_array, N)    
-    muestra = np.zeros(N)
-    np.put(muestra, indices_array, 1)
-    # calulo el area cubierta
-    areaCubierta = np.sum(muestra[1,:,:])
-    pCubierto = areaCubierta/AreaTotal
-    print(pCubierto*100, p*100)
-    
-    if abs(pCubierto-p)*100<tolerancia:
-      break
-    if p<pCubierto:
-      print("Ups... nos pasamos...")
-      break
-    areaPorCubrir = p*AreaTotal - areaCubierta
-    Nd = int(areaPorCubrir/area)
-    n+=1
-  print("Porcentaje cubierto: {:.3f} %".format(pCubierto*100))
+              if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                  indices.append((ind_z,ind_y+iy, ind_x+ix))
+      ind_z+=1
+      n+=1
+
+  while ind_z < Nmz and ind_x < (Nmx-2*nsx):
+      for iy in range(nsy):
+              for ix in range(nsx):
+                  if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                      indices.append((ind_z,ind_y+iy, ind_x+ix))
+      ind_x+=1
+      ind_z+=1
+      n+=1
   return indices
+    
+##########################################################################
+
+def cilindritos_inclinados(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  Es la generalización a distancia cte del cilindrito de prueba"""   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  
+  indices = []
+  
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           while ind_z < int(Nmz/2):    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+                  n+=1
+                  #print('n_arriba',n)
+              ind_z+=1 
+           ind_y+= nsy + ndy
+           print(ind_y)
+     ind_x+= nsx + ndx
+  
+  ind_x = 2*nsx     
+  while ind_x <= (Nmx-2*nsx):  
+      ind_y = 2*nsy
+      while ind_y<= (Nmy -2*nsy):
+          ind_suma=0
+          ind_z = int(Nmz/2)
+          while ind_z < Nmz and ind_x + ind_suma < (Nmx-2*nsx):
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix+ind_suma))
+                  n+=1
+                  #print('n_abajo',n)
+              ind_suma+=1
+                  
+              
+              ind_z+=1
+          ind_y+= nsy + ndy
+      ind_x+= nsx + ndx
+  return indices
+
+##############################################################################
+def cilindritos_aleatorios_1(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  A los cilindritos inclinados les cambio el parámetro de altura a la
+  que comienza a inclinarse el cilindro"""   
+  
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  
+  indices = []
+  
+  Nz_random = []
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           Nz_rand = np.random.randint(0,N[0]+1)
+           Nz_random.append(Nz_rand)
+           #print(Nz_rand)
+           while ind_z < Nz_rand:    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+                  n+=1
+                  #print('n_arriba',n)
+              ind_z+=1 
+           ind_y+= nsy + ndy
+     ind_x+= nsx + ndx
+  
+  
+  i=0
+  ind_x = 2*nsx
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = 2*nsy
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma=0
+              ind_z = Nz_random[i]
+              #print('ind_z',ind_z)
+              while ind_z < Nmz and ind_x + ind_suma < (Nmx-2*nsx):
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy, ind_x+ix+ind_suma))
+                      n+=1
+                      #print('n_abajo',n)
+                  ind_suma+=1
+                  
+              
+                  ind_z+=1
+              ind_y+= nsy + ndy
+              i=i+1
+              #print('i',i)
+          ind_x+= nsx + ndx
+  return indices
+
+##############################################################################
+def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  A los cilindritos inclinados les cambio la dirección de forma aleatoria 
+  siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección"""   
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro 
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  #Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar 
+  #la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
+  #hasta una altura Nz_random_1 que para cada cilindro toma valores random de 0
+  #a Nz/3, luego en el segundo bloque tienen la posibilidad de inclinarse y frenar
+  #a otra altura random Nz_random_2 y finalmente en el tercer bloque vuelven a tener
+  #la posibilidad de inclinarse sin recordar la inclinación anterior necesariamente.
+  
+  indices = []
+  
+  Nz_random_1 = []
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           Nz_rand_1 = np.random.randint(0,int(N[0]/3)+1)
+           Nz_random_1.append(Nz_rand_1)
+           #print(Nz_rand)
+           while ind_z < Nz_rand_1:    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+              ind_z+=1 
+           ind_y+= nsy + ndy
+     ind_x+= nsx + ndx
+  
+  
+  Nz_random_2 = []
+  ind_x_lista = []
+  ind_y_lista = []
+  ind_suma_x_lista = []
+  ind_suma_y_lista = []
+  
+  i=0
+  ind_x = 2*nsx
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = 2*nsy
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=0
+              ind_suma_x=0
+              ind_z = Nz_random_1[i]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
+              #Nz_random_2.append(Nz_rand_2)
+              while ind_z < Nz_rand_2 and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                          
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              #print('ind_y',ind_y)
+              ind_y_lista.append(ind_y)                
+              ind_suma_y_lista.append(ind_suma_y)
+              #print('ind_suma_y_lista',ind_suma_y)
+              ind_suma_x_lista.append(ind_suma_x)
+              #print('ind_suma_x_lista',ind_suma_x)
+              i=i+1
+              #print('i',i)
+              #print(ind_z)
+              Nz_random_2.append(ind_z)
+              ind_y+= nsy + ndy 
+          #print('ind_x',ind_x)
+          ind_x_lista.append(ind_x)
+          ind_x+= nsx + ndx
+  j=0
+  ind_x = ind_x_lista[j]
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = ind_y_lista[j]
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=ind_suma_y_lista[j]
+              ind_suma_x=ind_suma_x_lista[j]
+              ind_z = Nz_random_2[j]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              while ind_z < N[0] and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx-1 and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy-1:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                      n+=1
+                      #print('n_abajo',n)
+                      
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              ind_y+= nsy + ndy
+              j=j+1
+              #print('j',j)
+          ind_x+= nsx + ndx        
+          
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
+
+ ##############################################################################
+def cilindritos_aleatorios_3(N, voxelSize, **geokwargs):
+  """ 2021-01-21
+  A los cilindritos inclinados les cambio la dirección de forma aleatoria 
+  siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección"""   
+  #lo único que cambio de cilindritos_aleatorios_2 es que fijo la distancia 
+  #entre cilindritos sin importar el ancho de estos
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro 
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+  #Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar 
+  #la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
+  #hasta una altura Nz_random_1 que para cada cilindro toma valores random de 0
+  #a Nz/3, luego en el segundo bloque tienen la posibilidad de inclinarse y frenar
+  #a otra altura random Nz_random_2 y finalmente en el tercer bloque vuelven a tener
+  #la posibilidad de inclinarse sin recordar la inclinación anterior necesariamente.
+
+  
+  indices = []
+  
+  Nz_random_1 = []
+   
+  n=0
+  
+  ind_x = 2*nsx 
+  while ind_x <= (Nmx-2*nsx):
+     ind_y = 2*nsy
+     while ind_y<= (Nmy -2*nsy):
+           ind_z = 0
+           Nz_rand_1 = np.random.randint(0,int(N[0]/3)+1)
+           Nz_random_1.append(Nz_rand_1)
+           #print(Nz_rand)
+           while ind_z < Nz_rand_1:    
+              for iy in range(nsy):
+                  for ix in range(nsx):
+                      if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                          indices.append((ind_z,ind_y+iy, ind_x+ix))
+              ind_z+=1 
+           ind_y+= ndy 
+     ind_x+= ndx 
+  
+  
+  Nz_random_2 = []
+  ind_x_lista = []
+  ind_y_lista = []
+  ind_suma_x_lista = []
+  ind_suma_y_lista = []
+  
+  i=0
+  ind_x = 2*nsx
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = 2*nsy
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=0
+              ind_suma_x=0
+              ind_z = Nz_random_1[i]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
+              #Nz_random_2.append(Nz_rand_2)
+              while ind_z < Nz_rand_2 and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                          
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              #print('ind_y',ind_y)
+              ind_y_lista.append(ind_y)                
+              ind_suma_y_lista.append(ind_suma_y)
+              #print('ind_suma_y_lista',ind_suma_y)
+              ind_suma_x_lista.append(ind_suma_x)
+              #print('ind_suma_x_lista',ind_suma_x)
+              i=i+1
+              #print('i',i)
+              #print(ind_z)
+              Nz_random_2.append(ind_z)
+              ind_y+= ndy 
+          #print('ind_x',ind_x)
+          ind_x_lista.append(ind_x)
+          ind_x+= ndx 
+  j=0
+  ind_x = ind_x_lista[j]
+  while ind_x <= (Nmx-2*nsx):  
+          ind_y = ind_y_lista[j]
+          while ind_y<= (Nmy -2*nsy):
+              ind_suma_y=ind_suma_y_lista[j]
+              ind_suma_x=ind_suma_x_lista[j]
+              ind_z = Nz_random_2[j]
+              ind_suma_rand_y= np.random.randint(0,3)-1
+              ind_suma_rand_x= np.random.randint(0,3)-1
+              #print('ind_suma_rand_y',ind_suma_rand_y)
+              #print('ind_z',ind_z)
+              while ind_z < N[0] and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx-1 and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy-1:
+                  for iy in range(nsy):
+                      for ix in range(nsx):
+                          if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                              indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                      n+=1
+                      #print('n_abajo',n)
+                      
+                  ind_suma_x+= ind_suma_rand_x
+                  ind_suma_y+= ind_suma_rand_y
+                  #print('ind_suma_y',ind_suma_y)
+                  
+              
+                  ind_z+=1
+              ind_y+= ndy 
+              j=j+1
+              #print('j',j)
+          ind_x+= ndx        
+          
+  lista_alturas = [1,2,3]
+  if extra_info:
+    return indices, lista_alturas
+  else:
+    return indices
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+def cilindros_hexagonal(N, voxelSize, **geokwargs):
+  """ 2021-06-12
+  Creo cilindritos a distancia constante entre sí. Es decir, en un arreglo
+  hexagonal. La distancia se define centro a centro.
+  
+  Los parametros no son independientes, sino que tienen que cumplir ciertos
+  requisitos. A saber:
+    
+    Nmx = n * d    ,  con n entero
+    Nmy = m * 2a   ,  con m entero
+  
+  pero ademas, el parametro a debe ser tal que minimice el error de discretizar
+  d y a en la relacion:
+    
+    (d/2)**2 + a**2  = d**2
+    
+  En la carpeta DataBases, el archivo 'Hexagonal_parametro_a.dat', tiene los
+  valores de a optimos para cada d.
+  
+  d DEBE SER PAR
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+  centros_CU = [(0,0),(0,d),(a,d/2),(2*a,0),(2*a,d)]
+
+  Nceldas_x = int(Nmx/d)
+  Nceldas_y = int(Nmy/(2*a))
+  
+  indices = []  
+  R2 = R**2
+  for centro in centros_CU:
+    yc, xc = centro
+    xc = xc-0.5
+    yc = yc-0.5      
+    # recorro la celda unidad
+    for ind_x in range(d):      
+      for ind_y in range(2*a):
+        # solo guardo los xy del cilindro            
+        if (ind_x-xc)**2 +(ind_y-yc)**2 < R2:
+          # recorro en altura
+          for ind_z in range(Nmz):
+            # agrego las demas celdas en x, y
+            for icx in range(Nceldas_x):
+              for icy in range(Nceldas_y):                
+                indices.append((ind_z,ind_y+icy*2*a, ind_x+icx*d))          
+  return indices
+  
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
 
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 #class test(object):
 #  def __init__(self, geometria='bulk', N=[16,16,16], voxelSize=[1,1,1], **geokwargs):
@@ -434,32 +885,30 @@ def porcentaje_lanzas(N, voxelSize, tolerancia=0.5, altura=None, **geokwargs):
 #    
 #    self.func(self.N, self.voxelSize, **geokwargs)
 #    
-#    return 0
-    
-    
+#    return 
+  
 if __name__=='__main__':
   """
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([32,128,128])
-  Nz, Ny, Nx = N
+  N = np.array([128,112,128])
+  Nz,Ny,Nx = N   
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
-  # geometria = 'porcentaje_lanzas'
-  geometria = 'distancia_constante'
-  
-  constructor = funciones(geometria)  
+
+  geometria = 'cilindros_hexagonal'
+  constructor = funciones(geometria)
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
-  tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  
-  
-  # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  tuplas, extra_info = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3, extra_info=True) # para 'distancia_constante'
-  # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
+  #tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
+  #tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
+  #tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  tuplas = constructor(N, voxelSize, radio=9e-3, distancia=20e-3, parametro_a=17e-3) # para 'cilindros_hexagonal'
+
 
   # convierto a indices planos
   indices = np.array(tuplas).T  
@@ -469,34 +918,42 @@ if __name__=='__main__':
   muestra = np.zeros(N)
   #  put(array       , indices, valor)
   np.put(muestra, indices, 1)
+  
+  
  
   #%%
-  plt.figure(19875)
+  
+  x0 = int(Nx/2)
+  y0 = int(Ny/2)
+  z0 = int(Nz/2)
+  x1 = int(3/4*Nx)
+  
+  
+  plt.figure(50)
   plt.subplot(2,2,1)
   plt.title('corte en la mitad de x')
-  plt.pcolormesh(muestra[:,:,int(Nx/2)])
+  plt.pcolormesh(muestra[:,:,x0])
   plt.subplot(2,2,2)
   plt.title('corte en la mitad de y')
-  plt.pcolormesh(muestra[:,int(Ny/2),:])
+  plt.pcolormesh(muestra[:,y0,:])
   plt.subplot(2,2,3)
   plt.title('corte en la mitad de z')
-  plt.pcolormesh(muestra[int(Nz/2),:,:])
+  plt.pcolormesh(muestra[z0,:,:])
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
-#  plt.pcolormesh(muestra[:,:,int(Nx*3/4)])
-  plt.pcolormesh(muestra[-1,:,:])
+  plt.pcolormesh(muestra[:,:,x1])
+
+#%%
   
-  #%%
-  import os
-  os.chdir("S:\Doctorado\pyprogs\calculateFieldShift\Modules")
-  tmpvol =np.zeros((Nz+5,Ny,Nx))
-  tmpvol[1:-4,:,:] = muestra
-  tmpvol[0,:,:] = 1
-  filename = './tmp.stl'
-  with Oct2Py() as oc:
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Creando figura 3D. Esto puede demorar varios minutos...")
-    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
-    oc.stlwrite(filename,fv)        # Save to binary .stl
-  print("       Listo!") 
-  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  # tmpvol =np.zeros((Nz+5,Ny,Nx))
+  # tmpvol[1:-4,:,:] = muestra
+  # tmpvol[0,:,:] = 1
+  # filename = './tmp.stl'
+  # with Oct2Py() as oc:
+  #   print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  #   print("Creando figura 3D. Esto puede demorar varios minutos...")
+  #   fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+  #   oc.stlwrite(filename,fv)        # Save to binary .stl
+  # print("       Listo!") 
+  # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+  # plt.show()
