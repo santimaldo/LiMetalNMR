@@ -211,39 +211,46 @@ class Superposicion(object):
   #-------------------------------------------------------------------------------
   
   def superponer_laterales(self):
-    # redimensiono en la direccion y para poder usar roll y se se "simetrice"  
+    # redimensiono para poder usar roll y se se "simetrice"  
     Nmy = self.muestra.N_muestra[1]
     Nmx = self.muestra.N_muestra[2]
     
+    # y - - - - - - - - - - - - - - - - - - - - - 
     sly = int( (self.muestra.N[1] - 2*Nmy) / 2)
-    ini=sly
+    ini_y=sly
     if sly!=0:
-      fin = -sly
+      fin_y = -sly
     else:
-      fin = self.muestra.N[1]
-      
-    
+      fin_y = self.muestra.N[1]
+    # x - - - - - - - - - - - - - - - - - - - - - 
+    slx = int( (self.muestra.N[2] - 2*Nmx) / 2)
+    ini_x=slx
+    if slx!=0:
+      fin_x = -slx
+    else:
+      fin_x = self.muestra.N[2]
+    #   - - - - - - - - - - - - - - - - - - - - - 
     delta0 = self.delta_muestra
     # ahora voy sumando los corrimientos:
     # corro en y (tengo que redimensionar)
     delta1 = np.zeros_like(delta0)
-    delta1[:,ini:fin,:] = np.roll(delta0[:,ini:fin,:], Nmy, axis=1)
+    delta1[:,ini_y:fin_y,:] = np.roll(delta0[:,ini_y:fin_y,:], Nmy, axis=1)
     # corro en x
     delta2 = np.zeros_like(delta0)
-    delta2 = np.roll(delta0+delta1, Nmx, axis=2)
+    delta2[:,:,ini_x:fin_x]  = np.roll(delta0[:,:,ini_x:fin_x]+delta1[:,:,ini_x:fin_x] , Nmx, axis=2)
     
     # para chequear si va bien
-    import matplotlib.pyplot as plt
-    vmax = 0.7*np.max(np.abs(delta0))
-    plt.figure(5000)
-    plt.subplot(2,2,1)
-    plt.pcolormesh(delta0[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
-    plt.subplot(2,2,2)
-    plt.pcolormesh(delta1[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
-    plt.subplot(2,2,3)
-    plt.pcolormesh(delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
-    plt.subplot(2,2,4)
-    plt.pcolormesh(delta0[64,:,:]+delta1[64,:,:]+delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # import matplotlib.pyplot as plt
+    # vmax = 0.7*np.max(np.abs(delta0))
+    # plt.figure(5000)
+    # plt.subplot(2,2,1)
+    # plt.pcolormesh(delta0[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.subplot(2,2,2)
+    # plt.pcolormesh(delta1[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.subplot(2,2,3)
+    # plt.pcolormesh(delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.subplot(2,2,4)
+    # plt.pcolormesh(delta0[64,:,:]+delta1[64,:,:]+delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
     
     
     self.delta_muestra = delta0 + delta1 + delta2

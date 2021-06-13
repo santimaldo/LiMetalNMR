@@ -57,31 +57,43 @@ vsz,vsy,vsx = voxelSize
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
 h = 64
-d = 4
-a = get_param_a(d)
-# rMAX = d/2 - 1
-r = 1
-if r>(d/2-1): raise Exception("El radio elegido es muy grande")
 
-# calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
-# (sup max:  Nx/2*Ny/2)
-N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-N_celdas_y = (Ny/2)//(2*a)
+radios = [1,5,10,15,20,40,60]
 
-medidas = [h*vsz,N_celdas_y*(2*a)*vsy,N_celdas_x*d*vsx]
-distancia = d*vsx
-parametro_a = a*vsy
-radio = r*vsx
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
+densidades = np.zeros([10,len(radios)])
 
-# calculo densidad usando celda unidad
-
-A_mic  = np.sum(muestra.muestra[1,:int(2*a),:int(d)]/Chi) # la muestra vale Chi en el objeto
-A_tot  = 2*a*d
-A_bulk = A_tot-A_mic
-
-densidad = A_mic/A_tot
-
+nr = 0
+for r in radios:
+  semidistancias = np.linspace(r+1, Nx/8, 10)  # el maximo d posible es Nx/4
+  nd = 0
+  for semi_d in semidistancias:
+    d = int(semi_d)*2      
+    a = get_param_a(d)
+    # chequeo que este correcto     ### rMAX = d/2 - 1
+    if r>(d/2-1): raise Exception("El radio elegido es muy grande")
+            
+    # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
+    # (sup max:  Nx/2*Ny/2)
+    N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+    N_celdas_y = (Ny/2)//(2*a)
+    
+    medidas = [h*vsz,N_celdas_y*(2*a)*vsy,N_celdas_x*d*vsx]
+    distancia = d*vsx
+    parametro_a = a*vsy
+    radio = r*vsx
+    muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
+    
+    # calculo densidad usando celda unidad
+    
+    A_mic  = np.sum(muestra.muestra[1,:int(2*a),:int(d)]/Chi) # la muestra vale Chi en el objeto
+    A_tot  = 2*a*d
+    A_bulk = A_tot-A_mic
+    
+    densidad = A_mic/A_tot
+    
+    densidades[nd,nr] = densidad        
+    nd += 1
+  nr += 1
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
