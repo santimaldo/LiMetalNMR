@@ -113,7 +113,7 @@ for ind_h in range(len(alturas)):
       print('tiempo: {:.2f} min'.format(elapsed))
       if nnn>0:
         t_est = elapsed*(ntotal/nnn-1)
-        msj = 'tiempo restante estimado: {:.2f} min  =  {:.2f} '.format(t_est, t_est/60)
+        msj = 'tiempo restante estimado: {:.2f} min  =  {:.2f} h'.format(t_est, t_est/60)
         print(msj)
               
       a = get_param_a(d)            
@@ -175,6 +175,7 @@ for ind_h in range(len(alturas)):
         f.write('{:d}\t{:.2f}\t{:.2f}\t{:d}\t{:d}\t{:d}\n'.format(int(nnn), elapsed, elapsed_parcial,h,r,d))
 
       nnn+=1
-
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 elapsed = (time.time() - t0)/60
-print('---  tiempo: {:.2f} min'.format(elapsed))
+print('---  tiempo total: {:.2f} min = {:.2f} h'.format(elapsed, elapsed/60))
