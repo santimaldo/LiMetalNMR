@@ -6,8 +6,6 @@ Created on Tue May 12 14:00:22 2020
 @author: santi
 """
 import numpy as np
-import matplotlib.pyplot as plt
-from oct2py import Oct2Py
 
 def funciones(geometria):
   """
@@ -890,6 +888,9 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
   
 #%%
 if __name__=='__main__':
+  import matplotlib.pyplot as plt
+  from oct2py import Oct2Py
+
   """
   script para testear las geometrias
   """

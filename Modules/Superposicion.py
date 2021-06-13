@@ -6,6 +6,7 @@ Created on Mon May 11 14:04:31 2020
 @author: santi
 """
 
+
 import numpy as np
 import scipy.ndimage as ndimage
 from scipy.interpolate import interp1d
@@ -60,7 +61,7 @@ class Superposicion(object):
                               una funcion escalon
   """
 
-  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None):
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None, superposicion_lateral=False):
 
 
     self.muestra = muestra
@@ -83,9 +84,11 @@ class Superposicion(object):
     
     
     self.crear_delta_bulk(radio)
-    self.crear_delta_muestra()
+    self.crear_delta_muestra()        
+    if superposicion_lateral:
+      self.superponer_laterales()
+    
     self.delta_sup =  self.delta_bulk + self.delta_muestra
-
   #--- Metodos -------------------------------------------------------------------
   def definir_slice(self):
     """
@@ -140,7 +143,7 @@ class Superposicion(object):
     if radio is None:
       delta_bulk[0:z0,:,:] = self.delta_in
       delta_bulk[z0: ,:,:] = self.delta_out
-      self.delta_bulk = delta_bulk
+      self.delta_bulk = delta_bulk    
       print("--- delta_muestra es una FUNCION ESCALON")
     
     else:
@@ -206,6 +209,47 @@ class Superposicion(object):
     self.delta_muestra = delta_muestra
     return 0
   #-------------------------------------------------------------------------------
+  
+  def superponer_laterales(self):
+    # redimensiono en la direccion y para poder usar roll y se se "simetrice"  
+    Nmy = self.muestra.N_muestra[1]
+    Nmx = self.muestra.N_muestra[2]
+    
+    sly = int( (self.muestra.N[1] - 2*Nmy) / 2)
+    ini=sly
+    if sly!=0:
+      fin = -sly
+    else:
+      fin = self.muestra.N[1]
+      
+    
+    delta0 = self.delta_muestra
+    # ahora voy sumando los corrimientos:
+    # corro en y (tengo que redimensionar)
+    delta1 = np.zeros_like(delta0)
+    delta1[:,ini:fin,:] = np.roll(delta0[:,ini:fin,:], Nmy, axis=1)
+    # corro en x
+    delta2 = np.zeros_like(delta0)
+    delta2 = np.roll(delta0+delta1, Nmx, axis=2)
+    
+    # para chequear si va bien
+    import matplotlib.pyplot as plt
+    vmax = 0.7*np.max(np.abs(delta0))
+    plt.figure(5000)
+    plt.subplot(2,2,1)
+    plt.pcolormesh(delta0[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    plt.subplot(2,2,2)
+    plt.pcolormesh(delta1[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    plt.subplot(2,2,3)
+    plt.pcolormesh(delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    plt.subplot(2,2,4)
+    plt.pcolormesh(delta0[64,:,:]+delta1[64,:,:]+delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    
+    
+    self.delta_muestra = delta0 + delta1 + delta2
+    return 0
+    
+  #-------------------------------------------------------------------------------
   def areas(self):
     """
     calculos las areas (2D) "solo bulk", y "con dendritas". Ojo, no es el area
@@ -223,7 +267,7 @@ class Superposicion(object):
 
     #print('area_bulk/area_dendritas = %.2f'%(self.area_bulk/self.area_dendritas))
     return self.area_bulk/self.area_dendritas
-
+  
   #-------------------------------------------------------------------------------
   # getters:
   #-------------------------------------------------------------------------------

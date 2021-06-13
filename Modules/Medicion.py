@@ -35,7 +35,13 @@ class Medicion(object):
                                          ~/Outputs/cilindros/ancho16.stl
                                        La carpeta 'cilindros' debe ser creada
                                        previamente.
+      . borde_a_quitar : array-like(3) - Numero de voxels del borde que no deben
+                                        aportar al volumen sensible.
+                                        En el caso de z, solo se quitan del 
+                                        borde superior.
+                                        [borde_z, borde_y, borde_x]
     NO-IMPLEMENTADO: Argumentos con palabras clave que dependen de la secuencia (**seqkwargs)
+        
     '
 
   ATRIBUTOS
@@ -71,11 +77,13 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='centro', skindepth=skdp , stl_file=False, **seqkwargs):
+  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='centro', borde_a_quitar=[12,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
 
     self.superposicion = superposicion
     self.secuencia = secuencia
     self.skindepth = skindepth
+    self.skdp = int(skindepth/self.superposicion.muestra.voxelSize[0])
+    self.borde_a_quitar = borde_a_quitar
 
     self.volumen_medido = self.crear_volumen_medido(volumen_medido)
 
@@ -110,8 +118,12 @@ class Medicion(object):
       'centro-bulk'
       'completo'
       'completo-microestructuras'
-      'completo-bulk'
+      'completo-bulk'      
+      'sin-borde'
+      'sin-borde-microestructuras'
+      'sin-borde-bulk'
     """
+    borde_a_quitar = self.borde_a_quitar
     #-----------------------------------------centro
     if 'centro' in volumen_medido.lower():
       # primero creo un sistema de coordenadas
@@ -137,6 +149,24 @@ class Medicion(object):
         z0 = self.superposicion.z0
         condicion[0:z0,:,:]=False
       elif volumen_medido.lower() == 'completo-bulk'.lower():
+        z0 = self.superposicion.z0
+        condicion[z0:,:,:]=False
+    #-----------------------------------------quitando borde
+    elif 'sin-borde' in volumen_medido.lower():
+      condicion = (np.ones_like(self.superposicion.muestra_sup)==1)
+      # quito el borde                
+      bordez = int(self.borde_a_quitar[0])
+      bordey = int(self.borde_a_quitar[1])
+      bordex = int(self.borde_a_quitar[2])
+      condicion[-bordez:,:,:] = False
+      condicion[:,0:bordey,:] = False
+      condicion[:,-bordey:,:] = False
+      condicion[:,:,0:bordex] = False
+      condicion[:,:,-bordex:] = False
+      if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
+        z0 = self.superposicion.z0
+        condicion[0:z0,:,:]=False
+      elif 'bulk' in volumen_medido.lower():
         z0 = self.superposicion.z0
         condicion[z0:,:,:]=False
     #-------------------------------------------------
@@ -190,13 +220,16 @@ class Medicion(object):
         mask = (erode==1)
 
         ## GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN
-        #if n<9:
-          #plt.figure(666)
-          #plt.subplot(3,3,n+1)
-          #plt.pcolormesh(tajada[:,:,58])
+        # if n<9:
+        #   plt.figure(666)
+        #   plt.subplot(3,3,n+1)
+        #   plt.pcolormesh(tajada[64,:,:])
+        #   plt.figure(667)
+        #   plt.subplot(3,3,n+1)
+        #   plt.pcolormesh(tajada[:,:,128])
       beta = beta*self.volumen_medido # solo selecciono la parte del volumen medido
-      #plt.figure(666)
-      #plt.pcolormesh(beta[:,:,128])
+      # plt.figure(668)
+      # plt.pcolormesh(beta[64,:,:])
       return beta
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

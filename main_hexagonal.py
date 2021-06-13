@@ -81,12 +81,28 @@ delta = Delta(muestra)
 
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-superposicion = Superposicion(muestra, delta)
+# superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-#%%
-#medicion = Medicion(superposicion, volumen_medido='completo')
-medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
+superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 
+#%% grafico para chequear
+# fig1, ax1 = plt.subplots()
+# ax1.set_aspect('equal')
+# vmax = np.max(np.abs(superposicion.delta_sup[64,120:329,120:329]))
+# # ax1.pcolormesh(superposicion.delta_sup[64,120:392,120:392], cmap='seismic', vmin=-vmax, vmax=vmax)
+# ax1.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+
+plt.figure(53879531798321)
+z0 = 1
+vmax = np.max(np.abs(superposicion.delta_sup[z0,:,:]))
+plt.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+plt.colorbar()
+
+#%%
+# medicion = Medicion(superposicion, volumen_medido='completo')
+# medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
+# 'borde' son los voxels del borde que no aportaran a la senal. En el caso de z, es solo la parte superior
+medicion = Medicion(superposicion, volumen_medido='sin-borde', borde_a_quitar=[12,a,d/2])
 #%%
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
@@ -94,7 +110,7 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=
 #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
 #%%
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.1, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.2, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
