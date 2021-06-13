@@ -76,8 +76,7 @@ class Superposicion(object):
     self.definir_slice()
 
     self.muestra_sup = None
-    self.superponer_muestra()
-    print(self.muestra_sup.shape)
+    self.superponer_muestra()    
 
     self.delta_bulk = None
     self.delta_muestra = None
@@ -172,9 +171,9 @@ class Superposicion(object):
       delta_out = delta_out[z_out <= (zMAX+VS)]
       z_in  =  z_in[z_in   >= (zMIN-VS)]
       z_out = z_out[z_out  <= (zMAX+VS)]      
-      print(VS)
-      print(z_in)
-      print(z_out)
+      # print(VS)
+      # print(z_in)
+      # print(z_out)
       # INTERPOLACION            
       try: 
         # la cubica no funciona cuando hay solo dos puntos. Por lo tanto,
@@ -239,7 +238,7 @@ class Superposicion(object):
     delta2 = np.zeros_like(delta0)
     delta2[:,:,ini_x:fin_x]  = np.roll(delta0[:,:,ini_x:fin_x]+delta1[:,:,ini_x:fin_x] , Nmx, axis=2)
     
-    # para chequear si va bien
+    ### para chequear si va bien
     # import matplotlib.pyplot as plt
     # vmax = 0.7*np.max(np.abs(delta0))
     # plt.figure(5000)

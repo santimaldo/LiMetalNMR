@@ -24,8 +24,7 @@ def get_param_a(d):
   a = As[Ds==d][0]
   return a
 
-#inicio el reloj
-t0 = time.time()
+
 #%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -56,84 +55,126 @@ vsz,vsy,vsx = voxelSize
 
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
-h = 64
 
-radios = [1,5,10,15,20,40,60]
+radios = [1,3,5,10,20,40,60]
 
-densidades = np.zeros([10,len(radios)])
+distancias_r=[[4+2*jj for jj in range(8)]               ,\
+             [8,14,22,28,34,40,46,54]             ,\
+             [14,20,34,48,58,66,76,86]            ,\
+             [22,34,50,64,78,94,108,126]          ,\
+             #[42,46,50,56,62,68,78,94,110,126]          ,\
+             [62,70,78,86,94,102,110,126]         ,\
+             #[82,88,94,100,104,108,112,116,122,126]     ,\
+             [102,110,118,122,126]              ,\
+             [122,124,126]                              ]   
 
-nr = 0
-for r in radios:
-  semidistancias = np.linspace(r+1, Nx/8, 10)  # el maximo d posible es Nx/4
-  nd = 0
-  for semi_d in semidistancias:
-    d = int(semi_d)*2      
-    a = get_param_a(d)
-    # chequeo que este correcto     ### rMAX = d/2 - 1
-    if r>(d/2-1): raise Exception("El radio elegido es muy grande")
-            
-    # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
-    # (sup max:  Nx/2*Ny/2)
-    N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-    N_celdas_y = (Ny/2)//(2*a)
-    
-    medidas = [h*vsz,N_celdas_y*(2*a)*vsy,N_celdas_x*d*vsx]
-    distancia = d*vsx
-    parametro_a = a*vsy
-    radio = r*vsx
-    muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
-    
-    # calculo densidad usando celda unidad
-    
-    A_mic  = np.sum(muestra.muestra[1,:int(2*a),:int(d)]/Chi) # la muestra vale Chi en el objeto
-    A_tot  = 2*a*d
-    A_bulk = A_tot-A_mic
-    
-    densidad = A_mic/A_tot
-    
-    densidades[nd,nr] = densidad        
-    nd += 1
-  nr += 1
-#%% CREACION DEL OBJETO DELTA--------------------------------------------------
-# delta es la perturbacion de campo magnetico
-delta = Delta(muestra)
+alturas = [64,16,128]
 
-#%%
-# SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-# superposicion = Superposicion(muestra, delta)
-# superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 
-#%% grafico para chequear
-# fig1, ax1 = plt.subplots()
-# ax1.set_aspect('equal')
-# vmax = np.max(np.abs(superposicion.delta_sup[64,120:329,120:329]))
-# # ax1.pcolormesh(superposicion.delta_sup[64,120:392,120:392], cmap='seismic', vmin=-vmax, vmax=vmax)
-# ax1.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+radios = [5]
+distancias_r = [[20,50]]
+alturas = [50]
 
-plt.figure(53879531798321)
-z0 = 1
-vmax = np.max(np.abs(superposicion.delta_sup[z0,:,:]))
-plt.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
-plt.colorbar()
+nd = sum( [ len(dist) for dist in distancias_r])
+nr = len(radios)
+nh = len(alturas)
 
-#%%
-# medicion = Medicion(superposicion, volumen_medido='completo')
-# medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
-# 'borde' son los voxels del borde que no aportaran a la senal. En el caso de z, es solo la parte superior
-medicion = Medicion(superposicion, volumen_medido='sin-borde', borde_a_quitar=[12,a,d/2])
-#%%
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
-#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
+ntotal = nd*nr*nh
 
-#%%
-# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.1, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.2, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
 
-#%%
+savepath = './Outputs/Cilindros_hexagonal/'
+with open(savepath+'Densidades.dat','w') as f:
+      f.write('# radio (um)\tdistancia (um)\taltura (um)\tdensidad\n')
+with open(savepath+'tiempos.dat','w') as f:
+      f.write('# N_iter\tt_total (min)\tt_iteracion(min)\th\tr\td\n')
+
+
+
+#inicio el reloj
+t0 = time.time()
+nnn = 0
+for ind_h in range(len(alturas)):
+  h = int(alturas[ind_h])
+  for ind_r in range(len(radios)):
+    distancias = distancias_r[ind_r]
+    r = int(radios[ind_r])
+    for ind_d in range(len(distancias)):
+      d = int(distancias[ind_d])      
+      #inicio el reloj parcial
+      t0parcial = time.time()
+      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      msj = 'altura= {:d} um,  radio= {:d} um,  distancia = {:d} um'.format(h,r,d)
+      print(msj)
+      print(' ')
+      progreso = nnn/ntotal*100
+      print('         ... Progreso :  {:.2f}%  ({}/{})'.format(progreso, nnn, ntotal))
+      elapsed = (time.time() - t0)/60
+      print('tiempo: {:.2f} min'.format(elapsed))
+      if nnn>0:
+        t_est = elapsed*(ntotal/nnn-1)
+        msj = 'tiempo restante estimado: {:.2f} min  =  {:.2f} '.format(t_est, t_est/60)
+        print(msj)
+              
+      a = get_param_a(d)            
+      # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
+      # (sup max:  Nx/2*Ny/2)
+      N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+      N_celdas_y = (Ny/2)//(2*a)
+      
+      medidas = [h*vsz,N_celdas_y*(2*a)*vsy,N_celdas_x*d*vsx]
+      distancia = d*vsx
+      parametro_a = a*vsy
+      radio = r*vsx
+      muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)       
+      # calculo densidad usando celda unidad    
+      A_mic  = np.sum(muestra.muestra[1,:int(2*a),:int(d)]/Chi) # la muestra vale Chi en el objeto
+      A_tot  = 2*a*d      
+      densidad = A_mic/A_tot    
+      with open(savepath+'/Densidades.dat','a') as f:
+        f.write('{:d}\t{:d}\t{:d}\t{:.4f}\n'.format(r,d,h,densidad))             
+      #CREACION DEL OBJETO DELTA-------------------------------------------------
+      # delta es la perturbacion de campo magnetico
+      delta = Delta(muestra)
+      # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
+      superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
+      ## MEDICION ---------------------------------------------------------------
+      # debo sacar el borde superior de z
+      if h<20:
+        borde_z = 4
+      else:
+        borde_z = 12
+      medicion = Medicion(superposicion, volumen_medido='sin-borde', borde_a_quitar=[borde_z,a,d/2])
+      
+      ppmAxis , spec  = medicion.CrearEspectro(secuencia='sp' , k=0.5, Norm=False)
+      ppmAxis1, spec1 = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False)
+      datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+      #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
+  
+      # guardado
+      regiones = ['', '-microestructuras', '-bulk']  
+      # -------- centro--------------------------------------------------------------    
+      for region in regiones:
+        ### secuencia: ..... SP ......           
+        medicion = Medicion(superposicion, volumen_medido='sin-borde{}'.format(region), borde_a_quitar=[borde_z,a,d/2])
+        # - - - - SP
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5)
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        file = 'SP/h{:d}_r{:d}_d{:d}_SP{}.dat'.format(int(h), int(r), int(d), region)
+        np.savetxt(savepath+file, datos)
+        # - - - - SMC64
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False)
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        file = 'SMC64-k1/h{:d}_r{:d}_d{:d}_SMC64k1{}.dat'.format(int(h), int(r), int(d), region)
+        np.savetxt(savepath+file, datos)
+      # 
+      elapsed_parcial = (time.time() - t0parcial)/60
+      elapsed         = (time.time() - t0)/60
+      print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
+      with open(savepath+'tiempos.dat','a') as f:
+        f.write('{:d}\t{:.2f}\t{:.2f}\t{:d}\t{:d}\t{:d}\n'.format(int(nnn), elapsed, elapsed_parcial,h,r,d))
+
+      nnn+=1
+
 elapsed = (time.time() - t0)/60
 print('---  tiempo: {:.2f} min'.format(elapsed))

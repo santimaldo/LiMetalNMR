@@ -77,7 +77,7 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='centro', borde_a_quitar=[12,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
+  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='completo', borde_a_quitar=[12,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
 
     self.superposicion = superposicion
     self.secuencia = secuencia

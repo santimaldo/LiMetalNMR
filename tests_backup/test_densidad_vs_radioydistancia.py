@@ -17,20 +17,27 @@ def get_param_a(d):
   return a
 
 
-
+#------------
 distancias = np.arange(4,128,2)
 radios = np.arange(1,63)
+#------------
 
-densidades=np.zeros([radios.size, distancias.size])
+
+# radios = np.array([1,3,5,10,15,20,40,60])
+# distancias = np.zeros([10])
+
+  
+densidades=np.zeros([radios.size, distancias.size])-1
 
 for i in range(radios.size):
-  for j in range(distancias.size):    
-    # print('ij',i,i)
-    r = int(radios[i])
+  r = int(radios[i])
+  semidistancias = np.linspace(r+1, 512/8, 10)  # el maximo d posible es Nx/4
+  for j in range(distancias.size):             
     d = int(distancias[j])  
+    # d = int(semidistancias[j])*2      
     if r>(d/2-1):
       # print(r,d,'no sirve')
-      densidades[i,j] = 2      
+      densidades[i,j] = -1
       continue
     # print(r,d,'ok')
     a = get_param_a(d)
@@ -46,8 +53,8 @@ for i in range(radios.size):
       xc = xc_U[ii]
       yc = yc_U[ii]
       #-----------------------------------------------------------cilindro  
-      for ind_x in range(int(d)-1):   
-        for ind_y in range(int(2*a)-1):
+      for ind_x in range(int(d)):   
+        for ind_y in range(int(2*a)):
           if (ind_x-xc)**2+(ind_y-yc)**2<r2:
             obj[ind_y, ind_x] = 1
             
@@ -56,17 +63,41 @@ for i in range(radios.size):
     A_tot  = 2*a*d    
     densidad = A_mic/A_tot    
     densidades[i,j] = densidad
+    if i==0 and j==0:
+      print('deeens', densidad)
 
 
 #%%    
+
+
 plt.figure(2222)
-plt.pcolormesh(distancias, radios, densidades)
+plt.pcolormesh(densidades, cmap='jet', vmax=1, vmin=0)
+plt.colorbar(label='densidad')
+plt.xlabel('distancia [voxels]')
+plt.ylabel('radio [voxels]')
+plt.title('Densidad de microestructuras')
 
-
+np.savetxt('densidad_vs_r_y_d.dat', densidades)
 
 
 #%%
 
-# plt.plot(densidades[:], 'o-')
-# plt.yscale('log')
+# Rs = [1,3,5,10,15,20,40,60]
+
+
+# plt.figure(9873)
+# for r in Rs:
+#   plt.plot(distancias, dens[r-1,:], 'o', label='R={}'.format(int(r)), markersize=8)
+# plt.ylim([0,1])
+# plt.legend()
+# plt.grid('on')
+
+#%%
+
+
+plt.figure(333)
+plt.plot(densidades.T,'o-')
+  
+  
+  
 

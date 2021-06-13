@@ -57,10 +57,10 @@ vsz,vsy,vsx = voxelSize
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
 h = 64
-d = 4
+d = 120
 a = get_param_a(d)
 # rMAX = d/2 - 1
-r = 1
+r = 30
 if r>(d/2-1): raise Exception("El radio elegido es muy grande")
 
 # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
@@ -109,8 +109,8 @@ plt.colorbar()
 # medicion = Medicion(superposicion, volumen_medido='completo')
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
 # 'borde' son los voxels del borde que no aportaran a la senal. En el caso de z, es solo la parte superior
-medicion = Medicion(superposicion, volumen_medido='sin-borde', borde_a_quitar=[12,a,d/2])
-#%%
+medicion = Medicion(superposicion, volumen_medido='sin-borde-bulk', borde_a_quitar=[12,a,d/2])
+
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
 #datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
