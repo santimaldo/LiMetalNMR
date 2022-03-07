@@ -25,6 +25,8 @@ def funciones(geometria):
   funciones['cilindritos_aleatorios_2'] = cilindritos_aleatorios_2
   funciones['cilindritos_aleatorios_3'] = cilindritos_aleatorios_3
   funciones['cilindros_hexagonal'] = cilindros_hexagonal
+  funciones['clusters_hexagonal'] = clusters_hexagonal
+  funciones['cilindros_aleatorios_hexagonal'] = cilindros_aleatorios_hexagonal
   if geometria in funciones:
     return funciones[geometria]
   else:
@@ -867,6 +869,189 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
 #------------------------------------------------------------------------------
 
 
+
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def clusters_hexagonal(N, voxelSize, **geokwargs):
+  """ 2021-06-13
+  Creo  clusters de palitos que forman cilindritos a distancia constante entre sí.
+  Es decir, en un arreglo hexagonal. La distancia se define centro a centro. 
+  
+  Los parametros no son independientes, sino que tienen que cumplir ciertos
+  requisitos. A saber:
+    
+    Nmx = n * d    ,  con n entero
+    Nmy = m * 2a   ,  con m entero
+  
+  pero ademas, el parametro a debe ser tal que minimice el error de discretizar
+  d y a en la relacion:
+    
+    (d/2)**2 + a**2  = d**2
+    
+  En la carpeta DataBases, el archivo 'Hexagonal_parametro_a.dat', tiene los
+  valores de a optimos para cada d.
+  
+  d DEBE SER PAR
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  try:
+    p_huecos = geokwargs['p_huecos']
+  except:
+    p_huecos = 0.5
+  
+  
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+
+  centros_CU = [(0,0),(0,d),(a,d/2),(2*a,0),(2*a,d)]
+
+  Nceldas_x = int(Nmx/d)
+  Nceldas_y = int(Nmy/(2*a))
+  
+  indices = []  
+  R2 = R**2
+  for centro in centros_CU:
+    yc, xc = centro
+    xc = xc-0.5
+    yc = yc-0.5      
+    # recorro la celda unidad
+    for ind_x in range(d):      
+      for ind_y in range(2*a):
+        # solo guardo los xy del cilindro            
+        if (ind_x-xc)**2 +(ind_y-yc)**2 < R2:
+          # recorro en altura
+          if np.random.rand()>p_huecos:                
+            for ind_z in range(Nmz):
+              # agrego las demas celdas en x, y
+              for icx in range(Nceldas_x):
+                for icy in range(Nceldas_y):                
+                    indices.append((ind_z,ind_y+icy*2*a, ind_x+icx*d))
+  return indices
+  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def cilindros_aleatorios_hexagonal(N, voxelSize, **geokwargs):
+  """ 2021-06-13
+  Creo cilindritos a distancia constante entre sí. Es decir, en un arreglo
+  hexagonal. La distancia se define centro a centro.
+  Además, los cilindros toman direcciones aleatorias:
+  A los cilindritos inclinados les cambio la dirección de forma aleatoria 
+  siendo (y,x)--> con las posibilidades de crecimiento (0,0),(1,0),(0,1) y (1,1)
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección
+  
+  Los parametros no son independientes, sino que tienen que cumplir ciertos
+  requisitos. A saber:
+    
+    Nmx = n * d    ,  con n entero
+    Nmy = m * 2a   ,  con m entero
+  
+  pero ademas, el parametro a debe ser tal que minimice el error de discretizar
+  d y a en la relacion:
+    
+    (d/2)**2 + a**2  = d**2
+    
+  En la carpeta DataBases, el archivo 'Hexagonal_parametro_a.dat', tiene los
+  valores de a optimos para cada d.
+  
+  d DEBE SER PAR
+  
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+                
+  #Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar 
+  #la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
+  #hasta una altura Nz_random_1 que para cada cilindro toma valores random de 0
+  #a Nz/3, luego en el segundo bloque tienen la posibilidad de inclinarse y frenar
+  #a otra altura random Nz_random_2 y finalmente en el tercer bloque vuelven a tener
+  #la posibilidad de inclinarse sin recordar la inclinación anterior necesariamente.
+
+
+  # CREO LOS CENTROS DEL ARREGLO HEXAGONAL.  - - - - - - - - - - - - - - - - - 
+  Ncentros_x = int(Nmx/d + 1)
+  Ncentros_y = int(Nmy/a + 1)
+  centros = []
+  for iy in range(Ncentros_y):
+    if iy%2==0:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix))
+    else:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix+d/2))
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  
+  indices = [] 
+  R2 = R**2
+  for centro in centros:
+    ind_yc, ind_xc = centro
+    xc = ind_xc - 0.5
+    yc = ind_yc - 0.5
+    ind_xc = int(xc)
+    ind_yc = int(yc)
+    
+    # alturas de quiebre
+    Nz_rand1 = np.random.randint(0,Nmz+1)
+    Nz_rand2 = np.random.randint(Nz_rand1,Nmz+1)
+    Nz_rand3 = np.random.randint(Nz_rand2,Nmz+1)
+    
+    # direcciones de desviacion (j,i), con ij= -1,0,1.
+    dir1 = (0,0)
+    dir2 = (np.random.randint(-1,2),np.random.randint(-1,2))
+    dir3 = (np.random.randint(-1,2),np.random.randint(-1,2))
+    for ind_y in range(ind_yc-R,ind_yc+R+1):
+      for ind_x in range(ind_xc-R,ind_xc+R+1):      
+        if (ind_x-xc)**2 + (ind_y-yc)**2 < R2:          
+          ix = ind_x; iy = ind_y                   
+          #------------------------------------------primer tramo
+          for ind_z in range(Nz_rand1):    
+             indices.append((ind_z,int(iy%Nmy), int(ix%Nmx))) # guardo modulo Nm para imponer condiciones periodicas
+          #------------------------------------------segundo tramo                        
+          for ind_z in range(Nz_rand1, Nz_rand2):
+            iy += dir2[0]                          
+            ix += dir2[1]              
+            indices.append((ind_z,int(iy%Nmy), int(ix%Nmx))) # guardo modulo Nm para imponer condiciones periodicas
+          #------------------------------------------tercer tramo
+          for ind_z in range(Nz_rand2, Nmz):
+            iy += dir3[0]                          
+            ix += dir3[1]              
+            indices.append((ind_z,int(iy%Nmy), int(ix%Nmx))) # guardo modulo Nm para imponer condiciones periodicas
+                
+  return indices
+  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -895,23 +1080,25 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([128,112,128])
+  N = np.array([128,138,240])
+  # N = np.array([128,256,256])
   Nz,Ny,Nx = N   
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
 
-  geometria = 'cilindros_hexagonal'
+  # geometria = 'cilindritos_aleatorios_3'
+  geometria = 'cilindros_aleatorios_hexagonal'
   constructor = funciones(geometria)
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
   #tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
   #tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
-  #tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
-  tuplas = constructor(N, voxelSize, radio=9e-3, distancia=20e-3, parametro_a=17e-3) # para 'cilindros_hexagonal'
-
+  # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
+  tuplas = constructor(N, voxelSize, radio=20e-3, distancia=80e-3, parametro_a=69e-3) # para 'cilindros_hexagonal'
+  # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'
 
   # convierto a indices planos
   indices = np.array(tuplas).T  
@@ -927,6 +1114,7 @@ if __name__=='__main__':
   #%%
   
   x0 = int(Nx/2)
+  x0 = int(25)
   y0 = int(Ny/2)
   z0 = int(Nz/2)
   x1 = int(3/4*Nx)
@@ -945,18 +1133,18 @@ if __name__=='__main__':
   plt.subplot(2,2,4)
   plt.title('corte en 3/4 de x')
   plt.pcolormesh(muestra[:,:,x1])
+  plt.show()  
 
-#%%
-  
-  # tmpvol =np.zeros((Nz+5,Ny,Nx))
-  # tmpvol[1:-4,:,:] = muestra
-  # tmpvol[0,:,:] = 1
-  # filename = './tmp.stl'
-  # with Oct2Py() as oc:
-  #   print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  #   print("Creando figura 3D. Esto puede demorar varios minutos...")
-  #   fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
-  #   oc.stlwrite(filename,fv)        # Save to binary .stl
-  # print("       Listo!") 
-  # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  # plt.show()
+  #%%  
+  tmpvol =np.zeros((Nz+5,Ny,Nx))
+  tmpvol[1:-4,:,:] = muestra
+  tmpvol[0,:,:] = 1
+  filename = './tmp.stl'
+  with Oct2Py() as oc:
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("Creando figura 3D. Esto puede demorar varios minutos...")
+    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+    oc.stlwrite(filename,fv)        # Save to binary .stl
+  print("       Listo!") 
+  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+

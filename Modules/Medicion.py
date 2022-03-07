@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import scipy.ndimage as ndimage
 import os.path as path
-import Modules.Export3D as Export3D
+# import Modules.Export3D as Export3D
 
 
 class Medicion(object):
@@ -77,7 +77,7 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='completo', borde_a_quitar=[12,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
+  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='completo', borde_a_quitar=[0,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
 
     self.superposicion = superposicion
     self.secuencia = secuencia
@@ -122,10 +122,15 @@ class Medicion(object):
       'sin-borde'
       'sin-borde-microestructuras'
       'sin-borde-bulk'
-    """
-    borde_a_quitar = self.borde_a_quitar
+    """    
+    if 'muestra' in volumen_medido.lower():     
+      condicion = (np.ones_like(self.superposicion.muestra_sup)==1)           
+      mask = np.zeros_like(condicion)
+      slz, sly, slx = self.superposicion.muestra.slices      
+      mask[:,sly[0]:sly[1],slx[0]:slx[1]] = 1    
+      condicion=condicion*mask      
     #-----------------------------------------centro
-    if 'centro' in volumen_medido.lower():
+    elif 'centro' in volumen_medido.lower():
       # primero creo un sistema de coordenadas
       N = self.superposicion.muestra_sup.shape
       z = np.arange(N[0])-N[0]/2
@@ -135,41 +140,58 @@ class Medicion(object):
       # vamos a seleccionar un circulo cuyo diametro va a ser la mitad del tamaño
       # de la muestra (es decir, la region con microestructuras)
       condicion = (X/(N[2]/4))**2+(Y/(N[1]/4))**2 <1
-      if volumen_medido.lower() == 'centro-microestructuras'.lower(): # la comparacion es case insenstive
-        z0 = self.superposicion.z0
-        condicion[0:z0,:,:]=False
-      elif volumen_medido.lower() == 'centro-bulk'.lower():
-        z0 = self.superposicion.z0
-        condicion[z0:,:,:]=False
+      # if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
+      #   z0 = self.superposicion.z0
+      #   condicion[0:z0,:,:]=False
+      # elif 'bulk' in volumen_medido.lower():
+      #   z0 = self.superposicion.z0
+      #   condicion[z0:,:,:]=False
     #-----------------------------------------completo
     elif 'completo' in volumen_medido.lower():
       #return Ellipsis
       condicion = (np.ones_like(self.superposicion.muestra_sup)==1)
-      if volumen_medido.lower() == 'completo-microestructuras'.lower(): # la comparacion es case insenstive
-        z0 = self.superposicion.z0
-        condicion[0:z0,:,:]=False
-      elif volumen_medido.lower() == 'completo-bulk'.lower():
-        z0 = self.superposicion.z0
-        condicion[z0:,:,:]=False
+      # if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
+      #   z0 = self.superposicion.z0
+      #   condicion[0:z0,:,:]=False
+      # elif 'bulk' in volumen_medido.lower():
+      #   z0 = self.superposicion.z0
+      #   condicion[z0:,:,:]=False
     #-----------------------------------------quitando borde
     elif 'sin-borde' in volumen_medido.lower():
       condicion = (np.ones_like(self.superposicion.muestra_sup)==1)
       # quito el borde                
-      bordez = int(self.borde_a_quitar[0])
-      bordey = int(self.borde_a_quitar[1])
-      bordex = int(self.borde_a_quitar[2])
+      
+      
+      # if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
+      #   z0 = self.superposicion.z0
+      #   condicion[0:z0,:,:]=False
+      # elif 'bulk' in volumen_medido.lower():
+      #   z0 = self.superposicion.z0
+      #   condicion[z0:,:,:]=False
+    #-------------------------------------------------
+      
+    #-----------------------------------------------------------REGION
+    if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
+      z0 = self.superposicion.z0
+      condicion[0:z0,:,:]=False
+    elif 'bulk' in volumen_medido.lower():
+      z0 = self.superposicion.z0
+      condicion[z0:,:,:]=False    
+    #-----------------------------------------------------------------      
+    
+    # quito los bordes
+    bordez = int(self.borde_a_quitar[0])
+    bordey = int(self.borde_a_quitar[1])
+    bordex = int(self.borde_a_quitar[2])
+    if bordez>0:
       condicion[-bordez:,:,:] = False
+    if bordey>0:  
       condicion[:,0:bordey,:] = False
       condicion[:,-bordey:,:] = False
+    if bordex>0:        
       condicion[:,:,0:bordex] = False
       condicion[:,:,-bordex:] = False
-      if 'microestructuras' in volumen_medido.lower(): # la comparacion es case insenstive
-        z0 = self.superposicion.z0
-        condicion[0:z0,:,:]=False
-      elif 'bulk' in volumen_medido.lower():
-        z0 = self.superposicion.z0
-        condicion[z0:,:,:]=False
-    #-------------------------------------------------
+      
     return condicion
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -185,9 +207,9 @@ class Medicion(object):
       # inicializo variables
       z0 = int(self.superposicion.z0)
       vs = self.superposicion.muestra.voxelSize
-      skdp = self.skindepth
+      skdp = self.skindepth    
       obj = self.superposicion.muestra_sup
-      beta = np.zeros_like(obj)
+      beta = np.zeros_like(obj)      
       # chequeo que el voxelSize sea igual en todas las direcciones
       if np.all(vs==vs[0]):
         # como son todos iguales, llamo vs un lado del voxelSize
@@ -220,16 +242,15 @@ class Medicion(object):
         mask = (erode==1)
 
         ## GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN
-        # if n<9:
-        #   plt.figure(666)
-        #   plt.subplot(3,3,n+1)
-        #   plt.pcolormesh(tajada[64,:,:])
-        #   plt.figure(667)
-        #   plt.subplot(3,3,n+1)
-        #   plt.pcolormesh(tajada[:,:,128])
-      beta = beta*self.volumen_medido # solo selecciono la parte del volumen medido
-      # plt.figure(668)
-      # plt.pcolormesh(beta[64,:,:])
+      #   if n<9:
+      #     plt.figure(666)
+      #     plt.subplot(3,3,n+1)
+      #     plt.pcolormesh(tajada[64,:,:])
+      #     plt.figure(667)
+      #     plt.subplot(3,3,n+1)
+      #     plt.pcolormesh(tajada[:,:,128])
+      
+      beta = beta*self.volumen_medido # solo selecciono la parte del volumen medido    
       return beta
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -331,7 +352,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', KS=None, return_angle=False, Norm=True):
+  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', KS=None, return_angle=False, Norm=False):
     """
     Mediante el histograma 2D y teniendo como dato la amplitud de senal para
     cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes
@@ -352,12 +373,12 @@ class Medicion(object):
     # de acuerdo a la secuencia, elegimos el archivo de signal intensity
     sp = ['sp', 'singlepulse', 'single_pulse', 'single']
     if secuencia.lower() in sp:
-      file = '/SinglePulse/SinglePulse_k{:.2f}.dat'.format(k)
+      file = 'SinglePulse/SinglePulse_k{:.2f}.dat'.format(k)
     elif secuencia.lower() == 'smc':
       file = 'SMC/SMC_N{:d}_k{:.2f}.dat'.format(N,k)
 
     if not path.exists(loadpath+file):
-      loadpath = '../DataBases'
+      loadpath = '../DataBases/'
       if not path.exists(loadpath+file):
         msg = 'No existe el archivo con la senal en funcion de k.'
         raise Exception(msg)

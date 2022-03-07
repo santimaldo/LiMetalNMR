@@ -47,6 +47,7 @@ def evolucion(rho, t, T1, T2, rho0=None):
     return E_diag + E_nodiag
 
 #%%
+guardar = False
 savepath = "./SMC/"
 
 r3 = np.sqrt(3)
@@ -77,7 +78,9 @@ r_list = np.linspace(0, int(8/b-1), 1024)
 # evanesencia: B1 = B10*beta = B10 * exp(-r/12um)
 beta = np.exp(-b*r_list)
 k_list = np.arange(0.5, 3.1, 0.1)
-k_list = np.array([1])
+# k_list = np.array([1])
+# k_list = np.array([1.05,1.15])
+
 
 
 #"""
@@ -135,7 +138,8 @@ for kk in range(k_list.size):
 
   S = -np.real(Sy[:,kk])+ 1j* np.real(Sx[:,kk])
   datos = np.array([beta, np.real(S), np.imag(S)]).T
-  np.savetxt(savepath+"SMC_N{}_k{:.2f}.dat".format(N,k_list[kk]), datos)
+  if guardar:
+    np.savetxt(savepath+"SMC_N{}_k{:.2f}.dat".format(N,k_list[kk]), datos)
 #%%
 S = np.real(Sx)+ 1j* np.real(Sy)
 plt.figure(431)
@@ -150,22 +154,22 @@ plt.plot(beta, np.imag(S), '-')
 #np.savetxt("r.dat", r_list)
 #np.savetxt("k.dat", k_list)
 #%%
-#plt.figure(0)
-##plt.pcolormesh(k_list, r_list, np.ral(Sx+1j*Sy))
-##plt.pcolormesh(k_list, r_list, np.sqrt(np.abs(Sx-1j*Sy)))
-##plt.pcolormesh(k_list, r_list*b, np.abs(np.real(Sx+1j*Sy)), cmap='inferno')
-#plt.pcolormesh(k_list, r_list*b, np.abs(Sx+1j*Sy), cmap='inferno')
-#plt.plot(k_list, np.log(k_list)  ,  color='orange')
-#plt.plot(k_list, np.log(k_list/2), color='orange')
-#plt.plot(k_list, np.log(k_list/3), color='orange')
-#plt.plot(k_list, np.log(k_list/4), color='orange')
-#plt.plot(k_list, np.log(k_list/5), color='orange')
-#plt.xlabel('k')
-#plt.ylabel('r/$\delta$')
-#plt.ylim([0,5])
-##plt.xlim([0.5,3.5])
-#plt.colorbar()
-#
+plt.figure(0)
+#plt.pcolormesh(k_list, r_list, np.ral(Sx+1j*Sy))
+#plt.pcolormesh(k_list, r_list, np.sqrt(np.abs(Sx-1j*Sy)))
+#plt.pcolormesh(k_list, r_list*b, np.abs(np.real(Sx+1j*Sy)), cmap='inferno')
+plt.pcolormesh(k_list, r_list*b, np.abs(Sx+1j*Sy), cmap='inferno')
+plt.plot(k_list, np.log(k_list)  ,  color='orange')
+plt.plot(k_list, np.log(k_list/2), color='orange')
+plt.plot(k_list, np.log(k_list/3), color='orange')
+plt.plot(k_list, np.log(k_list/4), color='orange')
+plt.plot(k_list, np.log(k_list/5), color='orange')
+plt.xlabel('k')
+plt.ylabel('r/$\delta$')
+plt.ylim([0,5])
+#plt.xlim([0.5,3.5])
+plt.colorbar()
+
 #%%
 
 S = -np.real(Sy)+ 1j* np.real(Sx)

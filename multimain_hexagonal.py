@@ -38,13 +38,6 @@ skindepth = 0.012 # profundida de penetracion, mm
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
-
-N = [256,512,512] 
-
-# utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
-# FOV (field of view) o  voxelSize
-volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-Nz,Ny,Nx = N
 vsz,vsy,vsx = voxelSize
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
 #------------------------------------------------------------------------------
@@ -56,30 +49,38 @@ vsz,vsy,vsx = voxelSize
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
 
-radios = [1,3,5,10,20,40,60]
-
-distancias_r=[[4+2*jj for jj in range(8)]               ,\
-             [8,14,22,28,34,40,46,54]             ,\
-             [14,20,34,48,58,66,76,86]            ,\
-             [22,34,50,64,78,94,108,126]          ,\
+# corrida 1
+radios = [1,3,10,20,40,60]
+distancias_r=[[4,6,8,10,16,22]               ,\
+             [8,18,28,34,44,54]             ,\
+             # [14,20,34,48,58,66,76,86]            ,\
+             [22,34,50,70,94,108,126]          ,\
              #[42,46,50,56,62,68,78,94,110,126]          ,\
-             [62,70,78,86,94,102,110,126]         ,\
+             [62,72,86,98,110,126]         ,\
              #[82,88,94,100,104,108,112,116,122,126]     ,\
-             [102,110,118,122,126]              ,\
+             [108,118,122,126]              ,\
              [122,124,126]                              ]   
+  
+# corrida 2
+radios = [1,3,5,10,20,30,40,50]
+distancias_r=[[12]               ,\
+             [10,14]             ,\
+             [14,20,28,38,46,58,66,76,86]            ,\
+             [26,30,40]          ,\
+             [42, 48, 54]          ,\
+             [62,72,86,98,110,126]  ,\
+             [82,88,94,100]         ,\
+             [102,110,116,122,126]  ]   
 
 alturas = [64,16,128]
 
 
-radios = [5]
-distancias_r = [[20,50]]
-alturas = [50]
-
-nd = sum( [ len(dist) for dist in distancias_r])
-nr = len(radios)
-nh = len(alturas)
-
-ntotal = nd*nr*nh
+# radios = [5]
+# distancias_r = [[20,50]]
+# alturas = [50]
+ntotal = 0
+for ir in range(len(radios)):
+  ntotal+=len(distancias_r[ir])*len(alturas)
 
 
 savepath = './Outputs/Cilindros_hexagonal/'
@@ -115,7 +116,14 @@ for ind_h in range(len(alturas)):
         t_est = elapsed*(ntotal/nnn-1)
         msj = 'tiempo restante estimado: {:.2f} min  =  {:.2f} h'.format(t_est, t_est/60)
         print(msj)
-              
+        
+      if d<=64:
+        N = [256,256,256] 
+      else:
+        N = [256,512,512] 
+      Nz,Ny,Nx = N  
+      volumen = SimulationVolume(voxelSize=voxelSize, N=N)
+
       a = get_param_a(d)            
       # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
       # (sup max:  Nx/2*Ny/2)

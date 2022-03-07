@@ -17,6 +17,7 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 import time
 
+# stop
 
 def get_param_a(d):
   # distancias, parametros_a, errores relativos
@@ -40,7 +41,10 @@ skindepth = 0.012 # profundida de penetracion, mm
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
 
-N = [256,512,512] 
+# N = [256,256,256] 
+N = [256,128,128] 
+# N = [256,512,512] 
+# N = [256,64,64] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -56,11 +60,11 @@ vsz,vsy,vsx = voxelSize
 
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
-h = 64
-d = 120
+h = 12
+r = 5
+d = 20
 a = get_param_a(d)
 # rMAX = d/2 - 1
-r = 30
 if r>(d/2-1): raise Exception("El radio elegido es muy grande")
 
 # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
@@ -73,6 +77,12 @@ distancia = d*vsx
 parametro_a = a*vsy
 radio = r*vsx
 muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
+# muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=0.8) 
+# muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
+# muestra = Muestra(volumen, medidas=medidas, geometria='bulk') 
+
+
+
 
 # calculo densidad usando celda unidad
 
@@ -86,41 +96,60 @@ densidad = A_mic/A_tot
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)
 
-#%%
+
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 # superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 
-#%% grafico para chequear
+
+
+# grafico para chequear
 # fig1, ax1 = plt.subplots()
 # ax1.set_aspect('equal')
 # vmax = np.max(np.abs(superposicion.delta_sup[64,120:329,120:329]))
 # # ax1.pcolormesh(superposicion.delta_sup[64,120:392,120:392], cmap='seismic', vmin=-vmax, vmax=vmax)
 # ax1.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
 
-plt.figure(53879531798321)
-z0 = 1
-vmax = np.max(np.abs(superposicion.delta_sup[z0,:,:]))
-plt.pcolormesh(superposicion.delta_sup[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
-plt.colorbar()
+# plt.figure(53879531798321)
+# z0 = 1
+# vmax = np.max(np.abs(superposicion.delta_sup[z0,:,:]))
+# plt.pcolormesh(superposicion.delta_sup[60,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+# plt.colorbar()
 
 #%%
-# medicion = Medicion(superposicion, volumen_medido='completo')
+#medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
+# medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
+# medicion = Medicion(superposicion, volumen_medido='muestra')
+medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[0,0,0])
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
-# 'borde' son los voxels del borde que no aportaran a la senal. En el caso de z, es solo la parte superior
-medicion = Medicion(superposicion, volumen_medido='sin-borde-bulk', borde_a_quitar=[12,a,d/2])
 
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
-#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
+# norm = True
+# path = 'S:/Doctorado/pyprogs/calculateFieldShift/Outputs/Resultados/comparacion_sp-smc/bis/'
 #%%
-# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.1, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.2, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
+
+# medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[12,0,0])
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+# medicion = Medicion(superposicion, volumen_medido='muestra-microestructuras', borde_a_quitar=[12,0,0])
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+# medicion = Medicion(superposicion, volumen_medido='muestra-bulk', borde_a_quitar=[12,0,0])
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
+# datos = np.array([ppmAxis, np.real(spec)/np.max(np.real(spec)), np.imag(spec)]).T
+# np.savetxt(path+'h{:d}_r{:d}_d{:d}_SP.dat'.format(h,r,d), datos)
+#%%
+# for k in [1.0,1.05,1.1,1.15,1.2,1.3,1.4,1.5,1.75,2.0,2.25]: 
+#   ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=64, k=k, figure=12345)
+#   datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+#   np.savetxt(path+'h{:d}_r{:d}_d{:d}_SMC64-k{:.2f}.dat'.format(h,r,d,k), datos)
+
+
+# beta = medicion.Crear_beta()
+# #%%
+# plt.figure(88888)
+# plt.pcolormesh(beta[:,98,:])
+# plt.colorbar()
+
 
 #%%
 elapsed = (time.time() - t0)/60

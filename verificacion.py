@@ -60,7 +60,7 @@ Bnuc = eta*B0 + B0
 Bmac = Bnuc/(1-2/3*muestra*Chi)
 
 
-# graffff
+#%% graffff
 n=0
 n+=1
 plt.figure(n)
@@ -69,7 +69,16 @@ plt.pcolormesh(X[int(N/2),:,:], Y[int(N/2),:,:], muestra[int(N/2),:,:])
 n+=1
 plt.figure(n)
 plt.pcolormesh(X[int(N/2),:,:], Y[int(N/2),:,:], eta[int(N/2),:,:])
+plt.colorbar()
 
+n+=1
+vmax = np.max(np.abs(eta[:,int(N/2),:]))
+plt.figure(n)
+plt.pcolormesh(X[:,int(N/2),:], Z[:,int(N/2),:], eta[:,int(N/2),:], cmap='seismic', vmax=vmax, vmin=-vmax)
+plt.xlabel("x")
+plt.ylabel("z")
+plt.title(r"$\delta$ con $\chi=${}".format(Chi))
+plt.colorbar()
 
 #%%% B exacto
 """

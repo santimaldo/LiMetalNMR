@@ -41,7 +41,6 @@ class Delta(object):
     
     # el paso mas importante de todos:
     delta = cFS.calculateFieldShift(dChi, voxelSize) * 1e6
-    
     self.delta = delta
     return 0
   

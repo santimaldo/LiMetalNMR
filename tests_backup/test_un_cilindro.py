@@ -44,7 +44,7 @@ Nz, Ny, Nx = N
 # CREACION DEL CILINDRO-----------------------------------------------------
 # primero defino las dimensiones del objeto: obj_dim, expresada en mm.
 #%%
-semialtura =  50 # la altura sera entonces 2*semialtura+1 (voxels)
+semialtura =  10 # la altura sera entonces 2*semialtura+1 (voxels)
 
 for semialtura in [50,5]:
   for  radio in [2,6,12,24]:

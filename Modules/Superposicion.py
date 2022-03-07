@@ -86,6 +86,7 @@ class Superposicion(object):
     self.crear_delta_muestra()        
     if superposicion_lateral:
       self.superponer_laterales()
+      self.superponer_laterales_muestra()
     
     self.delta_sup =  self.delta_bulk + self.delta_muestra
   #--- Metodos -------------------------------------------------------------------
@@ -238,23 +239,66 @@ class Superposicion(object):
     delta2 = np.zeros_like(delta0)
     delta2[:,:,ini_x:fin_x]  = np.roll(delta0[:,:,ini_x:fin_x]+delta1[:,:,ini_x:fin_x] , Nmx, axis=2)
     
-    ### para chequear si va bien
+    ## para chequear si va bien
     # import matplotlib.pyplot as plt
     # vmax = 0.7*np.max(np.abs(delta0))
     # plt.figure(5000)
+    # zz = 120
     # plt.subplot(2,2,1)
-    # plt.pcolormesh(delta0[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.pcolormesh(delta0[zz,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
     # plt.subplot(2,2,2)
-    # plt.pcolormesh(delta1[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.pcolormesh(delta1[zz,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
     # plt.subplot(2,2,3)
-    # plt.pcolormesh(delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.pcolormesh(delta2[zz,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
     # plt.subplot(2,2,4)
-    # plt.pcolormesh(delta0[64,:,:]+delta1[64,:,:]+delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
+    # plt.pcolormesh(delta0[zz,:,:]+delta1[64,:,:]+delta2[64,:,:], cmap='seismic', vmin=-vmax, vmax=vmax)
     
     
-    self.delta_muestra = delta0 + delta1 + delta2
+    self.delta_muestra = delta0 + delta1 + delta2 
     return 0
+  #-------------------------------------------------------------------------------
+  def superponer_laterales_muestra(self):
+    # redimensiono para poder usar roll y se se "simetrice"  
+    z0 = self.z0
+    Nmy = self.muestra.N_muestra[1]
+    Nmx = self.muestra.N_muestra[2]
     
+    # y - - - - - - - - - - - - - - - - - - - - - 
+    sly = int( (self.muestra.N[1] - 2*Nmy) / 2)
+    ini_y=sly
+    if sly!=0:
+      fin_y = -sly
+    else:
+      fin_y = self.muestra.N[1]
+    # x - - - - - - - - - - - - - - - - - - - - - 
+    slx = int( (self.muestra.N[2] - 2*Nmx) / 2)
+    ini_x=slx
+    if slx!=0:
+      fin_x = -slx
+    else:
+      fin_x = self.muestra.N[2]
+    #   - - - - - - - - - - - - - - - - - - - - - 
+    muestra0 = self.muestra_sup
+    # debo quitar el bulk para hacer la superposicion lateral:
+    muestra0[:z0,:,:] = 0
+    # ahora voy sumando los corrimientos:
+    # corro en y (tengo que redimensionar)
+    muestra1 = np.zeros_like(muestra0)
+    muestra1[:,ini_y:fin_y,:] = np.roll(muestra0[:,ini_y:fin_y,:], Nmy, axis=1)
+    # corro en x
+    muestra2 = np.zeros_like(muestra0)
+    muestra2[:,:,ini_x:fin_x]  = np.roll(muestra0[:,:,ini_x:fin_x]+muestra1[:,:,ini_x:fin_x] , Nmx, axis=2)
+    
+
+    muestra_sup_lateral = muestra0 + muestra1 + muestra2    
+    # agrego bulk:
+    muestra_sup_lateral[:z0,:,:] = 1
+    
+    self.muestra_sup = muestra_sup_lateral
+    return muestra_sup_lateral
+
+
+  
   #-------------------------------------------------------------------------------
   def areas(self):
     """

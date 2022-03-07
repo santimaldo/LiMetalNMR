@@ -71,7 +71,7 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=
 #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
 #%%
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.1, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.2, figure=153)
 #ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
