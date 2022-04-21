@@ -10,7 +10,10 @@ Created on Mon May 11 14:04:31 2020
 import numpy as np
 import scipy.ndimage as ndimage
 from scipy.interpolate import interp1d
+from Modules.Funciones import timerClass
 
+
+@timerClass
 class Superposicion(object):
   """
   Esta clase representa la superposicion de los deltas bulk y microestructuras
@@ -99,7 +102,7 @@ class Superposicion(object):
     slz0 = slz[0] - self.z0
     if slz0 < 0:
       print('WARNING!!!!!  puede que haya poca profundidad de bulk ! ')
-      print('     paso de {}um a -----> {} um'.format(self.z0*vsz*1e3, slz[0]*vsz*1e3))
+      print('     z0 pasa de {}um a -----> {} um'.format(self.z0*vsz*1e3, slz[0]*vsz*1e3))
       self.z0 = slz[0]
       slz0 = 0
     slz1 = slz[1]

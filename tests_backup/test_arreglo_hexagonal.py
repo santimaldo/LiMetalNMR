@@ -49,8 +49,8 @@ plt.hist(dist, bins=500)
 #%%
 plt.rcParams.update({'font.size': 14})
 
-d = np.arange(2,256,2)
-a = np.arange(2,256)
+d = np.arange(2,512,2)
+a = np.arange(2,512)
 
 D,A = np.meshgrid(d,a)
 
@@ -92,5 +92,5 @@ plt.title("Error relativo de la mejor aproximación")
 #%%
 
 data = np.array([d.astype(int),a[aa].astype(int), minErr]).T
-np.savetxt('S:/Doctorado/LiMetal/simulaciones/2021-06-10_superposicion_lateral/Hexagonos_Param_a_vs_d.dat', data)
+np.savetxt('S:/temp/Hexagonos_Param_a_vs_d.dat', data)
 

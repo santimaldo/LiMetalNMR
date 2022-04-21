@@ -38,7 +38,7 @@ skindepth = 0.012 # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-vs = 1 # um
+vs = 0.1 # um
 voxelSize = [vs*1e-3]*3# mm
 vsz,vsy,vsx = voxelSize
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
@@ -77,12 +77,9 @@ distancias_r=[[12]               ,\
 alturas = [64,16,128]
 
 
-
-radios = [0.2]
-distancias_r = [[1]]
+radios = [2.5]
+distancias_r = [[10]]
 alturas = [10]
-
-
 ntotal = 0
 for ir in range(len(radios)):
   ntotal+=len(distancias_r[ir])*len(alturas)
@@ -100,12 +97,12 @@ savepath = './Outputs/Cilindros_hexagonal/'
 t0 = time.time()
 nnn = 0
 for ind_h in range(len(alturas)):
-  h = int(alturas[ind_h]/vs)
+  h = int(alturas[ind_h])
   for ind_r in range(len(radios)):
     distancias = distancias_r[ind_r]
-    r = int(radios[ind_r]/vs)
+    r = int(radios[ind_r])
     for ind_d in range(len(distancias)):
-      d = int(distancias[ind_d]/vs)      
+      d = int(distancias[ind_d])      
       #inicio el reloj parcial
       t0parcial = time.time()
       print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -126,6 +123,8 @@ for ind_h in range(len(alturas)):
         N = [512,512,512] 
       else:
         N = [256,512,512] 
+      
+      N = [256]*3 # agregado para hacer una prueba el dia 08/03/2022  
       Nz,Ny,Nx = N  
       volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 
@@ -154,14 +153,14 @@ for ind_h in range(len(alturas)):
       # delta es la perturbacion de campo magnetico    
       delta = Delta(muestra)
       # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
-      superposicion = Superposicion(muestra, delta, superposicion_lateral=True, )
+      superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
       ## MEDICION ---------------------------------------------------------------
       # debo sacar el borde superior de z
       if h<20:
         borde_z = 4
       else:
         borde_z = 12
-      medicion = Medicion(superposicion, borde_a_quitar=[borde_z,a,d/2])
+      medicion = Medicion(superposicion, volumen_medido='sin-borde', borde_a_quitar=[borde_z,a,d/2])
       print("Calculando espectro sp...")
       ppmAxis , spec  = medicion.CrearEspectro(secuencia='sp' , k=0.5, Norm=False)
       print("Calculando espectro smc...")
@@ -175,13 +174,14 @@ for ind_h in range(len(alturas)):
       for region in regiones:
         print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
         ### secuencia: ..... SP ......           
+        medicion = Medicion(superposicion, volumen_medido='sin-borde{}'.format(region), borde_a_quitar=[borde_z,a,d/2])
         # - - - - SP
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, volumen_medido='sin-borde{}'.format(region))
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:d}_d{:d}_SP{}.dat'.format(int(h), int(r), int(d), region)
         # np.savetxt(savepath+file, datos)
         # - - - - SMC64
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False, volumen_medido='sin-borde{}'.format(region))
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SMC64-k1/h{:d}_r{:d}_d{:d}_SMC64k1{}.dat'.format(int(h), int(r), int(d), region)
         # np.savetxt(savepath+file, datos)

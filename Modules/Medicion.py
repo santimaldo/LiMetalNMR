@@ -11,8 +11,12 @@ import matplotlib.colors as colors
 import scipy.ndimage as ndimage
 import os.path as path
 # import Modules.Export3D as Export3D
+from Modules.Funciones import timer
+from Modules.Funciones import timerClass
+import time
 
 
+@timerClass
 class Medicion(object):
   """
   Esta clase representa a la medicion. Contiene el delta y la superposicion de la muestra, de las
@@ -77,33 +81,40 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, volumen_medido='completo', borde_a_quitar=[0,0,0], skindepth=skdp , stl_file=False, **seqkwargs):
-
+  def __init__(self, superposicion, secuencia='SP', k=0.5, borde_a_quitar=[0,0,0], skindepth=skdp , stl_file=False, **seqkwargs):    
+    
     self.superposicion = superposicion
     self.secuencia = secuencia
     self.skindepth = skindepth
     self.skdp = int(skindepth/self.superposicion.muestra.voxelSize[0])
     self.borde_a_quitar = borde_a_quitar
 
-    self.volumen_medido = self.crear_volumen_medido(volumen_medido)
+    self.volumen_medido = self.crear_volumen_medido('completo')
+
+    # creo las matrices de utilidad:
+    self.eta  = self.Crear_eta()
+    self.beta = self.Crear_beta()
 
     # creacion de histograma 2D
     self.histograma = None
-    self.CrearHistograma2D()
+    # self.CrearHistograma2D() ## el histograma sera creado en el espectro
 
     self.ppmAxis = None
     self.spec = None
     # el espectro no se crea por defecto. Hay que hacerlo
     #self.CearEspectro(k)
     
+    
     if stl_file: # si stl_file es un string, se evalua como True
       matriz = self.get_volumen_medido()
       archivo = stl_file
       Export3D.exportar_3D(matriz, archivo)
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  @timer
   def crear_volumen_medido(self, volumen_medido):
     """
     Este metodo sirve para determinar que region de la superposicion utilizamos
@@ -191,11 +202,13 @@ class Medicion(object):
     if bordex>0:        
       condicion[:,:,0:bordex] = False
       condicion[:,:,-bordex:] = False
-      
+    
+    self.volumen_medido = condicion
     return condicion
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  @timer
   def Crear_beta(self):
       """
       Mediante erosiones de 1 voxel vamos creando una matriz de beta.
@@ -224,7 +237,7 @@ class Medicion(object):
       struct = ndimage.generate_binary_structure(3, 1)
       # hago suficientes slices como para llegar a una profundidad de 7xSkinDepth
       # es decir, 84um
-      n_slices = int(7*skdp/vs)
+      n_slices = int(5*skdp/vs)
       for n in range(n_slices):
         # erosiono:
         erode = ndimage.binary_erosion(mask, struct)
@@ -234,6 +247,9 @@ class Medicion(object):
         erode[0:z0-n-1,:,:] = 1
         # obtengo la tajada
         tajada = mask ^ erode
+        if np.sum(tajada)==0:
+          # si ya erosione todo, la tajada es nula, por lo tanto salgo del loop
+          break
         # voy llenando las capas con los valores de B1. la variable de profundidad
         # es (n+1)*vs/2, ya que en la primer tajada n=0 y la profundidad es de la
         # mitad del voxelsize (si tomo el centro del voxel)
@@ -241,20 +257,23 @@ class Medicion(object):
         # ahora el nuevo objeto a erosionar es el de la erosion anterior
         mask = (erode==1)
 
-        ## GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN
-      #   if n<9:
-      #     plt.figure(666)
-      #     plt.subplot(3,3,n+1)
-      #     plt.pcolormesh(tajada[64,:,:])
-      #     plt.figure(667)
-      #     plt.subplot(3,3,n+1)
-      #     plt.pcolormesh(tajada[:,:,128])
+        # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
+        # slz = int(obj.shape[0]-10)
+        # sly = int(obj.shape[1]/2)
+        # if n<9:
+        #   plt.figure(666)
+        #   plt.subplot(3,3,n+1)
+        #   plt.pcolormesh(tajada[slz,:,:])
+        #   plt.figure(667)
+        #   plt.subplot(3,3,n+1)
+        #   plt.pcolormesh(tajada[:,sly,:])
       
       beta = beta*self.volumen_medido # solo selecciono la parte del volumen medido    
       return beta
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  @timer
   def Crear_eta(self):
     """
     Esto crea la matriz "eta", que corresponde al corrimiento en campo
@@ -266,6 +285,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  @timer
   def CrearHistograma2D(self, graficos=False):
     """
     Creacion del histograma 2D con los valores de beta y eta.
@@ -276,12 +296,15 @@ class Medicion(object):
     vs = self.superposicion.muestra.voxelSize[0]
     skdp = self.skindepth
     # obtengo las matrices de eta y beta
-    eta = self.Crear_eta()
-    beta = self.Crear_beta()
+    # eta = self.Crear_eta()
+    # beta = self.Crear_beta()
+    eta = self.eta
+    beta = self.beta
     # los paso a array planos para armar el histograma. Para ello uso el slicing
     # del volumen medido, que los transforma a planos
     # eta_f  =  eta.flatten()
     # beta_f = beta.flatten()
+
     eta_f  =  eta[self.volumen_medido]
     beta_f = beta[self.volumen_medido]
     # quito las regiones en las que beta es cero, ya que no dan senal
@@ -352,7 +375,8 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', KS=None, return_angle=False, Norm=False):
+  @timer
+  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo',KS=None, return_angle=False, Norm=False):
     """
     Mediante el histograma 2D y teniendo como dato la amplitud de senal para
     cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes
@@ -383,14 +407,22 @@ class Medicion(object):
         msg = 'No existe el archivo con la senal en funcion de k.'
         raise Exception(msg)
 
+               
+    print("Calculando espectro...")
+    print(f"\t secuencia {secuencia}, pulso de {k}x180°")
+    # creo el volumen 
+    self.crear_volumen_medido(volumen_medido)        
+
     #SignalIntensity = np.loadtxt(loadpath+file, dtype=complex) ### NOTA: reemplazar archivos por dtype=float!!!!
     SignalIntensity = np.loadtxt(loadpath+file)
 
     Beta = SignalIntensity[:,0]
     SignalIntensity = SignalIntensity[:,1]
 
-    # cargo el histograma:
-    X, Y, H2D = self.histograma
+    # creo el histograma:
+    X, Y, H2D = self.CrearHistograma2D()
+    # X, Y, H2D = self.histograma
+    
     #FID-----------------------------------------------------------------------
     ppm = 116.641899 # Hz
     T2est = 0.14*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
@@ -489,7 +521,6 @@ def autophase(ppmAxis, spec):
     spec=-spec
   angle=angle[idx]
   return  spec, angle
-
 
 
 

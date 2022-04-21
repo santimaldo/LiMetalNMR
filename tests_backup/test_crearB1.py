@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.ndimage as ndimage
-import calculateFieldShift as cFS
+# import calculateFieldShift as cFS
 #%%
 
 
@@ -61,6 +61,7 @@ def Crear_B1(obj):
 Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
 voxelSize = [0.001, 0.001, 0.001]# mm
 N = [128,128,128]
+Nz,Ny,Nx = N
 
 obj = np.zeros(N)
 obj[20:108, 20:108,20:108] = 1
@@ -68,9 +69,9 @@ obj[20:108, 20:108,20:108] = 1
 #%%
 B1 = Crear_B1(obj)
 plt.figure(2)
-plt.pcolormesh(B1[64,:,:])
+plt.pcolormesh(B1[int(Nz/2),:,:])
 plt.figure(22222)
-plt.plot(B1[64,64,:], 'o')
+plt.plot(B1[int(Nz/2),int(Ny/2),:], 'o')
 
 #%%
 b1 = B1.flatten()

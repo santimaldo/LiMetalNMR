@@ -8,7 +8,10 @@ Created on Mon May 11 14:04:31 2020
 
 import numpy as np
 import Modules.calculateFieldShift as cFS
+from Modules.Funciones import timerClass
 
+
+@timerClass
 class Delta(object):
   """
   Esta clase representa al corrimiento en el campo magnetico.

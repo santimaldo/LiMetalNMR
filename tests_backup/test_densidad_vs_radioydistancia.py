@@ -77,7 +77,7 @@ plt.xlabel('distancia [voxels]')
 plt.ylabel('radio [voxels]')
 plt.title('Densidad de microestructuras')
 
-np.savetxt('densidad_vs_r_y_d.dat', densidades)
+# np.savetxt('densidad_vs_r_y_d.dat', densidades)
 
 
 #%%

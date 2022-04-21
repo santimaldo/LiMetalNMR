@@ -9,7 +9,10 @@ Created on Thu May  7 12:48:21 2020
 import numpy as np
 import warnings
 import Modules.Geometria as Geometria
+from Modules.Funciones import timerClass
 
+
+@timerClass
 class Muestra(object):
   """
   la clase Muestra contiene objetos que representan el litio metálico que
@@ -44,12 +47,18 @@ class Muestra(object):
                               cada uno de ellos es una lista con dos int
                               slj=[j_inicial, j_final+1] que indican como hacer
                               el slice en cada dimension.
+  + exceptions: bool      -   defaut: True.
+                              Habilita o no la detencion del codigo por las
+                              excepciones en la creacion de la muestra
+  + **geokwargs:          -   Argumentos que neceseita cada geometria en
+                              particular
   """
 
   # defino el chi por defecto
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
-
-  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li, **geokwargs):
+  
+  
+  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li, exceptions=True, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
     # y el volumen simulado:
     # 1)OBTENCION DE INPUTS E INICIALIZACION
@@ -94,6 +103,7 @@ class Muestra(object):
     self.muestra = None
     self.slices = None
     self.pCubierto = None
+    self.exceptions = exceptions
 
         # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
@@ -109,9 +119,10 @@ class Muestra(object):
     skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
     min_bulk = skdp*3
     min_FOV = medidas[0] + 2*min_bulk # como la muestra se ubica al centro, lo que sobra arriba y abajo es lo mismo. Por eso va 2 veces min_bulk    
-    if  FOV[0] < min_FOV :
-      msg = "No hay suficiente FOV en z. Aumentar N[0]"
-      raise Exception(msg)
+    if(self.exceptions):
+      if  FOV[0] < min_FOV :
+        msg = "No hay suficiente FOV en z. Aumentar N[0]"
+        raise Exception(msg)
 
 
 
@@ -202,6 +213,11 @@ class Muestra(object):
     slz = [int(Nz/2-Nmz/2), int(Nz/2+Nmz/2)]
     sly = [int(Ny/2-Nmy/2), int(Ny/2+Nmy/2)]
     slx = [int(Nx/2-Nmx/2), int(Nx/2+Nmx/2)]
+    
+    # para unas pruebas el dia 08/02/2022:
+    # shift = 10
+    # slz = [int(Nz/2-Nmz/2)+shift, int(Nz/2+Nmz/2)+shift]
+      
     self.slices = [slz,sly,slx]
     return 0
 

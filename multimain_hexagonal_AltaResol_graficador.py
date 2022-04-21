@@ -9,15 +9,8 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 20})
 # from VoigtFit import *
 
-# path0 ='./Outputs/Cilindros_hexagonal_aleatorios/clusters/p_huecos_80/'
-# path0 ='./Outputs/Cilindros_hexagonal_aleatorios/aleatorios/'
-# radios, distancias, alturas, densidades = np.loadtxt(path0+'Densidades.dat').T
-
-
-path0="T:/pyprogs/calculateFieldShift/Outputs/Cilindros_hexagonal_AltaResolucion/"
-radios, distancias, alturas, vs, densidades = np.loadtxt(path0+'Densidades.dat').T
-
-
+path0="T:/pyprogs/calculateFieldShift/Outputs/2022-03-11_Cilindros_hexagonal_AltaResolucion/"
+distancias, radios, alturas, vss, densidades = np.loadtxt(path0+'Densidades.dat').T
 
 p_cubierto = []
 delta_mic = []
@@ -31,40 +24,44 @@ radios_t=[]
 densidades_t=[]
 
 path=path0
-n_d=1
-for ii in range(radios.size):
-# for ii in range(6):
-  for jj in range(1,6):
-    
-    path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
-      
-    h = int(alturas[ii])
-    d = int(distancias[ii])
-    r = int(radios[ii])
+nn=0
+
+folders = ['','2022-03-11_','2022-03-13_']
+
+for folder in folders:
+  path0=f"T:/pyprogs/calculateFieldShift/Outputs/{folder}Cilindros_hexagonal_AltaResolucion/"
+  print(path0)
+  distancias, radios, alturas, vss, densidades = np.loadtxt(path0+'Densidades.dat').T
+  for ii in range(radios.size):
+    # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)    
+    h = alturas[ii]
+    d = distancias[ii]
+    r = radios[ii]
     p = densidades[ii]
-    
-    
-    alturas_t.append(h)
-    distancias_t.append(d)    
-    radios_t.append(r)
-    densidades_t.append(p)
-    
-    
-      
-    regiones = ['','-microestructuras', '-bulk']
+    vs = vss[ii]
+          
+    regiones = ['-microestructuras', '-bulk']
     col =  ['k','r','b']
     
-    
-    
-    n_r=0
+    n_r=-1
     for region in regiones:
-      
-      # path    = path0 + 'SMC64-k1/'      
-      archivo = 'h{:d}_r{:d}_d{:d}{}.dat'.format(h, r, d, region)
+      n_r+=1
+      path    = path0 + 'SP/'      
+      archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(int(h), r, d,vs, region)
         
-        
-      # extraigo  
-      datos = np.loadtxt(path+archivo)  
+      # extraigo
+
+      try:
+        datos = np.loadtxt(path+archivo)  
+        if n_r==0:
+          alturas_t.append(h)
+          distancias_t.append(d)    
+          radios_t.append(r)
+          densidades_t.append(p)
+          nn+=1
+      except:
+        print(f"error al intentar leer: {archivo}")
+        continue
       ppmAxis0 = datos[:,0]
       spec = datos[:,1]
       #spec_imag = datos[:,2]
@@ -78,24 +75,33 @@ for ii in range(radios.size):
       ppmAxis = ppmAxis0[np.abs(center-ppmAxis0)<ventana]
       spec = spec[np.abs(center-ppmAxis0)<ventana]
           
-      # plt.figure(1231)
-      # plt.subplot(2,3,n_d)
-      # plt.plot(ppmAxis,spec, col[n_r], linewidth=2)
-      # #plt.xlim([ppmAxis[-1], ppmAxis[0]])
-      # plt.xlim(150,-150)  
-      # plt.vlines(0, 0, np.max(spec))
-      # plt.yticks([])      
-     
-  
+      plt.figure(1231)
+      plt.subplot(1,3,n_r+1)
+      plt.plot(ppmAxis,spec, col[n_r], linewidth=2)
+      #plt.xlim([ppmAxis[-1], ppmAxis[0]]) 
+      plt.xlim(150,-150)  
+      plt.vlines(0, 0, np.max(spec))
+      plt.yticks([])         
+    
       if region=='-microestructuras':
         delta_mic.append(ppmAxis[spec==np.max(spec)][0])
         i_mic = np.trapz(spec, x=ppmAxis)
         amp_mic.append(i_mic)
+        
+        if vs == r:
+          plt.figure(11111)
+        else:
+          plt.figure(22222)
+          plt.annotate(f"r{r} vs{vs}", (p, ppmAxis[spec==np.max(spec)][0]))
+        plt.scatter(p, ppmAxis[spec==np.max(spec)][0])
+        
+          
       elif region=='-bulk':
         delta_bulk.append(ppmAxis[spec==np.max(spec)][0])
         i_bulk = np.trapz(spec, x=ppmAxis)                
         amp_bulk.append(i_bulk)
-        
+      
+      
     
 #---------------- guardado
 
@@ -109,10 +115,18 @@ amp_bulk  = np.array(amp_bulk)
 amp_rel = amp_mic/amp_bulk
 corrimientos = delta_mic-delta_bulk
 
+#%%
+plt.figure(8491689)
+try:
+  plt.scatter(densidades_t,delta_mic, c=alturas_t )
+except ValueError:
+  plt.scatter(densidades_t[:-1],delta_mic, c=radios_t[:-1] )
+  
+plt.colorbar()
 
-datos = np.array([alturas_t, radios_t, distancias_t, densidades_t, corrimientos, amp_rel, delta_mic, delta_bulk]).T
+# datos = np.array([alturas_t, radios_t, distancias_t, densidades_t, corrimientos, amp_rel, delta_mic, delta_bulk]).T
 # np.savetxt(path0+'resultados.dat', datos)
-np.savetxt(path0+'resultados.csv', datos, fmt='%.4f', delimiter=',')
+# np.savetxt(path0+'resultados.csv', datos, fmt='%.4f', delimiter=',')
 
 
   #%%
@@ -183,5 +197,5 @@ np.savetxt(path0+'resultados.csv', datos, fmt='%.4f', delimiter=',')
 #     n_a += 1
 #   n_h += 1
 
-# plt.show()
+plt.show()
     

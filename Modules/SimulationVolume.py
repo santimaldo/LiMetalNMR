@@ -58,7 +58,6 @@ def SimulationVolume(N=None, voxelSize=None, FOV=None):
   r = r.astype(int)
   r[check!=0] = (r[check!=0]+1)
   N_new = 2**r
-  print(check)
   if any(check):
     if none=='n'             :
       con = 'con una cantidad de voxels de N={}'.format(list(N_new))

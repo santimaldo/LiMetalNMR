@@ -826,8 +826,8 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
   d DEBE SER PAR
   """  
   
-  radio = geokwargs['radio']
-  distancia = geokwargs['distancia']
+  radio = geokwargs['radio'] # debe estar en unidad de milimetros
+  distancia = geokwargs['distancia'] 
   parametro_a = geokwargs['parametro_a']
   
  
