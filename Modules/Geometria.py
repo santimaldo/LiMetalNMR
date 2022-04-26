@@ -7,7 +7,7 @@ Created on Tue May 12 14:00:22 2020
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from oct2py import Oct2Py
+#from oct2py import Oct2Py
 
 def funciones(geometria):
   """
@@ -25,6 +25,7 @@ def funciones(geometria):
   funciones['cilindritos_inclinados'] = cilindritos_inclinados
   funciones['cilindritos_aleatorios_1'] = cilindritos_aleatorios_1
   funciones['cilindritos_aleatorios_2'] = cilindritos_aleatorios_2
+  funciones['cilindros_p_random'] = cilindros_p_random
   funciones['cilindritos_aleatorios_3'] = cilindritos_aleatorios_3
   funciones['cilindros_hexagonal'] = cilindros_hexagonal
   if geometria in funciones:
@@ -653,6 +654,142 @@ def cilindritos_aleatorios_2(N, voxelSize, **geokwargs):
   else:
     return indices
 
+###############################################################################
+
+def cilindros_p_random(N, voxelSize, **geokwargs):
+  """ 2022-04-06
+      Igual que los cilindros aleatorios 2. Intento crear posiciones aleatorias
+      en x-y, no a distancias fijas."""   
+  try:
+    extra_info=geokwargs['extra_info']
+  except KeyError:
+    extra_info=False    
+  ancho = geokwargs['ancho']
+  distancia = geokwargs['distancia']
+  area = ancho*ancho
+ 
+  Nmz,Nmy,Nmx = N
+  print(N)
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro 
+  R = int(ancho/(2*vsx))
+  print(R)
+  nsx = int(ancho/vsx)
+  print(nsx)
+  nsy = int(ancho/vsy)
+  print(nsy)
+  ndx = int(distancia/vsx)
+  print(ndx)
+  ndy = int(distancia/vsy)
+  print(ndy)
+  
+ 
+  #Armo los indices aleatorios desde donde va a crecer la dendrita
+  rand_x = []
+  rand_y = []
+
+  for i in range(0,36,1):
+      r_ind_x = 0
+      r_ind_y = 0
+      r_ind_x = np.random.randint(17,241)
+      r_ind_y = np.random.randint(17,241)
+      rand_x.append(r_ind_x)
+      rand_y.append(r_ind_y)
+ 
+    
+ 
+  indices = []
+  
+  Nz_random_1 = []
+   
+  n=0
+  ind_x = 0
+  ind_y = 0
+  
+  for i in range(0,36,1):
+      ind_x = rand_x[i]
+      ind_y = rand_y[i]
+      print('ind_x',ind_x)
+      print('ind_y',ind_y)
+      ind_z = 0
+      Nz_rand_1 = np.random.randint(0,int(N[0]/3)+1)
+      print('Nz_rand_1',Nz_rand_1)
+      Nz_random_1.append(Nz_rand_1)
+      while ind_z < Nz_rand_1:    
+          for iy in range(nsy):
+              for ix in range(nsx):
+                  if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                      indices.append((ind_z,ind_y+iy, ind_x+ix))
+                      ind_z+=1 
+  #Hasta acá hice que todas las dendritas crezcan derechas hasta zmax/3
+    
+  Nz_random_2 = []
+  ind_x_lista = []
+  ind_y_lista = []
+  ind_suma_x_lista = []
+  ind_suma_y_lista = []
+  
+  j = 0
+  for i in range(0,36,1):
+      ind_x = rand_x[i]
+      ind_y = rand_y[i]
+      ind_suma_y=0
+      ind_suma_x=0
+      ind_z = Nz_random_1[j]
+      ind_suma_rand_y= np.random.randint(0,3)-1
+      ind_suma_rand_x= np.random.randint(0,3)-1
+      Nz_rand_2 = np.random.randint(ind_z,int(2*N[0]/3)+1)
+      while ind_z < Nz_rand_2 and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy:
+          for iy in range(nsy):
+              for ix in range(nsx):
+                  if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                      indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+                      
+          ind_suma_x+= ind_suma_rand_x
+          ind_suma_y+= ind_suma_rand_y                  
+          
+          ind_z+=1
+          
+      ind_y_lista.append(ind_y)                
+      ind_suma_y_lista.append(ind_suma_y)
+      ind_suma_x_lista.append(ind_suma_x)
+      j=j+1
+      Nz_random_2.append(ind_z)
+      ind_x_lista.append(ind_x)
+          
+  #Hasta acá construi en z con orientaciones en cada uno de los cilindros
+  
+  k=0
+  for i in range(0,36,1):
+      ind_x = ind_x_lista[k]
+      ind_y = ind_y_lista[k]
+      ind_suma_y=ind_suma_y_lista[k]
+      ind_suma_x=ind_suma_x_lista[k]
+      ind_z = Nz_random_2[k]
+      ind_suma_rand_y= np.random.randint(0,3)-1
+      ind_suma_rand_x= np.random.randint(0,3)-1
+      #print('ind_suma_rand_y',ind_suma_rand_y)
+      #print('ind_z',ind_z)
+      while ind_z < N[0] and ind_x + ind_suma_x <= (Nmx-2*nsx) and ind_x + ind_suma_x >= 2*nsx-1 and ind_y + ind_suma_y <= (Nmy-2*nsy) and ind_y + ind_suma_y >= 2*nsy-1:
+          for iy in range(nsy):
+              for ix in range(nsx):
+                  if (ix-nsx/2)**2 + (iy-nsy/2)**2 < R**2:
+                      indices.append((ind_z,ind_y+iy+ind_suma_y, ind_x+ix+ind_suma_x))
+              n+=1
+                      #print('n_abajo',n)
+                      
+          ind_suma_x+= ind_suma_rand_x
+          ind_suma_y+= ind_suma_rand_y
+          #print('ind_suma_y',ind_suma_y)
+                  
+              
+          ind_z+=1
+      k=k+1
+  return indices
+  
+  
+
  ##############################################################################
 def cilindritos_aleatorios_3(N, voxelSize, **geokwargs):
   """ 2021-01-21
@@ -892,22 +1029,22 @@ if __name__=='__main__':
   script para testear las geometrias
   """
   # este N es el N de la muestra ejemplo
-  N = np.array([128,112,128])
+  N = np.array([128,256,256])
   Nz,Ny,Nx = N   
   voxelSize = np.array([1e-3,1e-3,1e-3])
   
   # 'geometria' es el nombre de la geometria que vamos a utilizar
   # 'constructor' es una FUNCION. Esa funcion es diferente de acuerdo a la geometria elegida
 
-  geometria = 'cilindros_hexagonal'
+  geometria = 'cilindros_p_random'
   constructor = funciones(geometria)
   # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
   # en los cuales hay litio.
   #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
   #tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
-  #tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
+  tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=False) # para 'distancia_constante'
   #tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
-  tuplas = constructor(N, voxelSize, radio=9e-3, distancia=20e-3, parametro_a=17e-3) # para 'cilindros_hexagonal'
+  #tuplas = constructor(N, voxelSize, radio=9e-3, distancia=20e-3, parametro_a=17e-3) # para 'cilindros_hexagonal'
 
 
   # convierto a indices planos
