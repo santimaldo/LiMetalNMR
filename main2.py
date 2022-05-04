@@ -49,7 +49,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #microestructuras
 medidas = [0.128,0.256,0.256]
 
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2', ancho=16e-3, distancia=20e-3)
+muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 #muestra = Muestra(volumen, medidas=medidas, geometria='porcentaje_palos',ancho=10e-3, porcentaje=50) # para 'porcentaje_palos'
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
@@ -64,30 +64,40 @@ delta = Delta(muestra)
 espectros_tita = []
 superposicion = Superposicion(muestra, delta, z0=84e-3, delta_in=-8.614860948911854166, delta_out=7.349113258713176222)
 medicion = Medicion(superposicion, volumen_medido='centro')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=254.4)
 
 
 espectros_tita.append([ppmAxis,spec])
 
+
+RADIO = '000'
+radios = ['000','300','450','580']
 espectros_R = []
 
-superposicion = Superposicion(muestra, delta, radio = '000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-medicion = Medicion(superposicion, volumen_medido='centro')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
+for RADIO in radios:
+    superposicion = Superposicion(muestra, delta, radio = RADIO, z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+    medicion = Medicion(superposicion, volumen_medido='centro')
+    ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=254.4)
 
-espectros_R.append([ppmAxis,spec])
+    espectros_R.append([ppmAxis,spec])
 
 
 espectro_tita = espectros_tita[0]
-espectro_R = espectros_R[0]
+espectro_R0 = espectros_R[0]
+espectro_R3 = espectros_R[1]
+espectro_R4 = espectros_R[2]
+espectro_R5 = espectros_R[3]
 
 plt.figure(40)
 ax = plt.subplot(111)
-ax.plot(espectro_tita[0],espectro_tita[1],'-', linewidth=7, label='Función escalón')
-ax.plot(espectro_R[0],espectro_R[1],'.',linewidth=1, label=' Perfil en R = 0mm')
+#ax.plot(espectro_tita[0],espectro_tita[1],'-', linewidth=5, color='#ff9896', label='Función escalón')
+ax.plot(espectro_R0[0],espectro_R0[1],linestyle='-', marker='.',linewidth=2,color='#1f77b4', label=' Perfil en R = 0mm')
+ax.plot(espectro_R3[0],espectro_R3[1],linestyle='-', marker='.',linewidth=2,color='#ff7f0e', label=' Perfil en R = 3mm')
+ax.plot(espectro_R4[0],espectro_R4[1],linestyle='-', marker='.',linewidth=2,color='#2ca02c', label=' Perfil en R = 4,5mm')
+ax.plot(espectro_R5[0],espectro_R5[1],linestyle='-', marker='.',linewidth=2,color='#d62728', label=' Perfil en R = 5,8mm')
 plt.xlim(left=350,right=150)
 plt.xlabel('[ppm]')
-plt.ylabel('Comparación de espectros')
+plt.ylabel(' ')
 ax.legend()
 
 #%%
@@ -128,62 +138,61 @@ plt.figure(50)
 ax = plt.subplot(111)
 ax.plot(espectro_R000[0],espectro_R000[1],'-',linewidth=2, label=' Perfil en R = 0 mm')
 ax.plot(espectro_R300[0],espectro_R300[1],'-',linewidth=2, label=' Perfil en R = 3 mm')
-ax.plot(espectro_R450[0],espectro_R450[1],'-',linewidth=2, label=' Perfil en R = 4.5 mm')
-ax.plot(espectro_R580[0],espectro_R580[1],'-',linewidth=2, label=' Perfil en R = 5.8 mm')
+ax.plot(espectro_R450[0],espectro_R450[1],'-',linewidth=2, label=' Perfil en R = 4,5 mm')
+ax.plot(espectro_R580[0],espectro_R580[1],'-',linewidth=2, label=' Perfil en R = 5,8 mm')
 plt.xlim(left=350, right=150)
 plt.xlabel('[ppm]')
 plt.ylabel(' ')
-plt.title('Espectro para los distintos perfiles')
+plt.title(' ')
 ax.legend()
 
 plt.figure(51)
 ax = plt.subplot(111)
 ax.plot([0,3,4.5,5.8],[0,250.332-249.910,251.168-249.910,253.260-249.910],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[0,0,0,0],'-',linewidth=2, label=' Tita de heavyside')
-plt.xlabel('Radio [mm]')
-plt.ylabel('Desplazamiento absoluto de máximos según el perfil utilizado [ppm]')
-plt.title('Posición de los máximos según el radio')
-plt.title('Posición de los máximos según el radio')
+ax.plot([0,3,4.5,5.8],[0,0,0,0],'-',linewidth=2, label=' Función escalón')
+plt.xlabel('Radio interno [mm]')
+plt.ylabel(' ')
+plt.title(' ')
 ax.legend()
 
-plt.figure(53)
-ax = plt.subplot(111)
-ax.plot([0,3,4.5,5.8],[1563355.7600388995,1564291.2031659614,1568411.8392508423,1632141.8100303358],marker='o', markersize=8, label=' Perfiles')
-ax.plot([0,3,4.5,5.8],[1563355.7600388995,1563355.7600388995,1563355.7600388995,1563355.7600388995],'-',linewidth=2, label=' Tita de heavyside')
-plt.xlabel('Radio [mm]')
-plt.ylabel('Valor del máximo según el perfil utilizado')
-plt.title('Valor de los máximos según el radio')
-ax.legend()
-#%%
-#Busco los máximos en cada espectro y donde se encuentran
+# plt.figure(53)
+# ax = plt.subplot(111)
+# ax.plot([0,3,4.5,5.8],[1563355.7600388995,1564291.2031659614,1568411.8392508423,1632141.8100303358],marker='o', markersize=8, label=' Perfiles')
+# ax.plot([0,3,4.5,5.8],[1563355.7600388995,1563355.7600388995,1563355.7600388995,1563355.7600388995],'-',linewidth=2, label=' Función escalón')
+# plt.xlabel('Radio [mm]')
+# plt.ylabel(' ')
+# plt.title(' ')
+# ax.legend()
+# # #%%
+# #Busco los máximos en cada espectro y donde se encuentran
 
-#La notación será max_000 para el máximo del espectro correspondiente a R=0mm
-# y así sucesivamente. La notación para el voxel en el que se encuentra cada
-#máximo será where_000 para el correspondiente a R=0mm
+# #La notación será max_000 para el máximo del espectro correspondiente a R=0mm
+# # y así sucesivamente. La notación para el voxel en el que se encuentra cada
+# #máximo será where_000 para el correspondiente a R=0mm
 
-max_000 = np.max(np.real(espectro_R000[1]))
-print('max_000=',max_000)
-where_000 = np.where(espectro_R000 == max_000)
-print('where_000=',where_000)
+# max_000 = np.max(np.real(espectro_R000[1]))
+# print('max_000=',max_000)
+# where_000 = np.where(espectro_R000 == max_000)
+# print('where_000=',where_000)
 
-max_300 = np.max(np.real(espectro_R300[1]))
-print('max_300=',max_300)
-where_300 = np.where(espectro_R300 == max_300)
-print('where_300=',where_300) 
+# max_300 = np.max(np.real(espectro_R300[1]))
+# print('max_300=',max_300)
+# where_300 = np.where(espectro_R300 == max_300)
+# print('where_300=',where_300) 
 
-max_450 = np.max(np.real(espectro_R450[1]))
-print('max_450=',max_450)
-where_450 = np.where(espectro_R450 == max_450)
-print('where_450=',where_450)
+# max_450 = np.max(np.real(espectro_R450[1]))
+# print('max_450=',max_450)
+# where_450 = np.where(espectro_R450 == max_450)
+# print('where_450=',where_450)
 
-max_580 = np.max(np.real(espectro_R580[1]))
-print('max_580=',max_580)
-where_580 = np.where(espectro_R580 == max_580)
-print('where_580=',where_580)
+# max_580 = np.max(np.real(espectro_R580[1]))
+# print('max_580=',max_580)
+# where_580 = np.where(espectro_R580 == max_580)
+# print('where_580=',where_580)
 
-where_tita = where_000
-#El maximo para el espectro de heavyside se encuentra (exactamente) en el mismo lugar 
-#que el del espectro para R=0mm
+# where_tita = where_000
+# #El maximo para el espectro de heavyside se encuentra (exactamente) en el mismo lugar 
+# #que el del espectro para R=0mm
 
 
 #%% GRAFICOS-------------------------------------------------------------------
