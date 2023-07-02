@@ -1178,17 +1178,17 @@ if __name__=='__main__':
 #%%
 #%%
   
-  tmpvol =np.zeros((Nz+5,Ny,Nx))
-  tmpvol[1:-4,:,:] = muestra
-  tmpvol[0,:,:] = 1
-  filename = './tmp.stl'
-  with Oct2Py() as oc:
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("Creando figura 3D. Esto puede demorar varios minutos...")
-    fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
-    oc.stlwrite(filename,fv)        # Save to binary .stl
-  print("       Listo!") 
-  print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+#   tmpvol =np.zeros((Nz+5,Ny,Nx))
+#   tmpvol[1:-4,:,:] = muestra
+#   tmpvol[0,:,:] = 1
+#   filename = './tmp.stl'
+#   with Oct2Py() as oc:
+#     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+#     print("Creando figura 3D. Esto puede demorar varios minutos...")
+#     fv = oc.isosurface(tmpvol, 0.5) # Make patch w. faces "out"
+#     oc.stlwrite(filename,fv)        # Save to binary .stl
+#   print("       Listo!") 
+#   print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 
-plt.show()
+# plt.show()
