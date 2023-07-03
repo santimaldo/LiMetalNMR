@@ -6,8 +6,8 @@ Created on Tue May 12 14:00:22 2020
 @author: santi
 """
 import numpy as np
-import matplotlib.pyplot as plt
-from oct2py import Oct2Py
+#import matplotlib.pyplot as plt
+#from oct2py import Oct2Py
 
 def funciones(geometria):
   """

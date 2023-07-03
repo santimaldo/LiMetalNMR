@@ -5,7 +5,7 @@ Created on Thu Feb 18 11:22:35 2021
 @author: santi
 """
 import numpy as np
-from oct2py import Oct2Py
+#from oct2py import Oct2Py
 
 # funcion para crear la figura 3D
 def exportar_3D(matriz, archivo):
