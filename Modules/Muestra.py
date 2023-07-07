@@ -105,7 +105,7 @@ class Muestra(object):
     self.pCubierto = None
     self.exceptions = exceptions
 
-        # 2)_______________________________________________________________________
+    # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
     if any(np.array(FOV) < 2*np.array(medidas)):

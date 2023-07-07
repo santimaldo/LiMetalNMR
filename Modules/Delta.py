@@ -25,13 +25,20 @@ class Delta(object):
   + delta_r : array -  es delta pero evaluado solo en la muestra
   """
   
-  def __init__(self, muestra):
+  def __init__(self, muestra, skip=False):
     
     self.muestra = muestra
     self.delta = None
     self.delta_r = None
     
-    self.calcular()
+    if not skip:
+      self.calcular()
+    elif skip:
+      self.delta = muestra.construir_volumen()
+      self.delta_r = self.delta
+      msg="WARNING! Delta no fue calculado. Para calcularlo elegir 'skip=False'"
+      print(msg)
+      
 #    self.recortar()
     
     

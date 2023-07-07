@@ -41,9 +41,9 @@ skindepth = 0.012 # profundida de penetracion, mm
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]# mm
 
-# N = [256,256,256] 
-N = [256,128,128] 
-# N = [256,512,512] 
+N = [128,1024,1024] 
+#N = [256,128,128] 
+#N = [256,512,512] 
 # N = [256,64,64] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
@@ -58,12 +58,20 @@ vsz,vsy,vsx = voxelSize
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom de microestructuras
 
+
+path = "./Outputs/2022-07-23_Clusters_SinCeldaUnidad_HuecoCentral/"
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
-h = 12
-r = 5
-d = 20
+h = 16
+r = 10
+d = 22
 a = get_param_a(d)
+# densidad local:
+p_loc = 0.5
+rh= 50
+
+filename = f'h{h:d}_r{r:d}_dist{d:d}_densLoc{p_loc:.2f}'
+
 # rMAX = d/2 - 1
 if r>(d/2-1): raise Exception("El radio elegido es muy grande")
 
@@ -76,8 +84,9 @@ medidas = [h*vsz,N_celdas_y*(2*a)*vsy,N_celdas_x*d*vsx]
 distancia = d*vsx
 parametro_a = a*vsy
 radio = r*vsx
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
-# muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=0.8) 
+#muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
+# muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc) 
+muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',  R_hueco_central=rh*1e-3,radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc) 
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a) 
 # muestra = Muestra(volumen, medidas=medidas, geometria='bulk') 
 
@@ -97,10 +106,24 @@ densidad = A_mic/A_tot
 delta = Delta(muestra)
 
 
+#%%
+
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 # superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
+
+#%%
+plt.figure(1110101001010)
+matriz = (superposicion.delta_sup*superposicion.muestra_sup)[-int(h*1e-3/vsz/2),:,:]
+matriz_mask = np.ma.masked_where(matriz == 0, matriz)
+plt.pcolormesh(matriz_mask, cmap='inferno_r')
+plt.colorbar()
+
+
+header = f'Corte a la mitad de la altura de las microestructuras'
+np.savetxt(f'{path}{filename}.matriz', matriz, header=header)
+
 
 
 
@@ -121,8 +144,8 @@ superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 #medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
 # medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
 # medicion = Medicion(superposicion, volumen_medido='muestra')
-medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[0,0,0])
-# medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
+medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0,0,0], stl_file=f"{filename}")
+# medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')0
 
 
 # norm = True
@@ -135,8 +158,8 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-bulk', borde_a_quitar=[12,0,0])
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
-# datos = np.array([ppmAxis, np.real(spec)/np.max(np.real(spec)), np.imag(spec)]).T
-# np.savetxt(path+'h{:d}_r{:d}_d{:d}_SP.dat'.format(h,r,d), datos)
+datos = np.array([ppmAxis, np.real(spec)/np.max(np.real(spec)), np.imag(spec)]).T
+np.savetxt(path+f'{filename}.dat'.format(h,r,d), datos)
 #%%
 # for k in [1.0,1.05,1.1,1.15,1.2,1.3,1.4,1.5,1.75,2.0,2.25]: 
 #   ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=64, k=k, figure=12345)
@@ -154,3 +177,5 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 #%%
 elapsed = (time.time() - t0)/60
 print('---  tiempo: {:.2f} min'.format(elapsed))
+
+plt.show()

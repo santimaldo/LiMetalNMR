@@ -19,10 +19,17 @@ import time
 
 
 def get_param_a(d):
-  # distancias, parametros_a, errores relativos
-  Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
-  a = As[Ds==d][0]
-  return a
+  if d>256:
+    msg = ("d debe ser mas chico")
+    raise Exception(msg)
+  if d%2==0:    
+    # distancias, parametros_a, errores relativos
+    Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
+    a = As[Ds==d][0]
+    return a
+  else:
+    msg = ("la distancia debe ser tal que distancia/vs sea PAR")
+    raise Exception(msg)
 
 
 #%%----------------------------------------------------------------------------
