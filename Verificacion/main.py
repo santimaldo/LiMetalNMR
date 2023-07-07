@@ -10,6 +10,7 @@ Created on Thu May  7 12:18:27 2020
 import numpy as np
 import matplotlib.pyplot as plt
 import Modules.calculateFieldShift as cFS
+from Modules.SimulationVolume  import  *
 import time
 
 """
@@ -34,8 +35,8 @@ FOV = [512,512,512]
 N = [256,256,256] 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
-volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-#volumen = SimulationVolume(FOV=FOV, N=N)
+# volumen = SimulationVolume(voxelSize=voxelSize, N=N)
+volumen = SimulationVolume(FOV=FOV, N=N)
 #%% CREACION DE LA MUESTRA-----------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------

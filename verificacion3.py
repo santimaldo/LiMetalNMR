@@ -67,8 +67,8 @@ def crearEspectro(muestra, eta, x, y, z):
     #FID-----------------------------------------------------------------------
     ppm = 116.641899 # Hz
     # T2est = 0.14*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
-    T2est = 1*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
-    dw = 20e-6 # sacado de los experimentos. Esto da un SW=857ppm aprox
+    T2est = 100*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
+    dw = 200e-6 # sacado de los experimentos. Esto da un SW=857ppm aprox
     NP = 1024 # experimentalmente usamos 2048, pero con 4096 sale mas lindo
     t = np.arange(NP)*dw
     fid = np.zeros_like(t).astype(complex)
@@ -99,6 +99,21 @@ def crearEspectro(muestra, eta, x, y, z):
     # corrijo la fase:
     spec, angle = autophase(ppmAxis,spec)
     return ppmAxis, np.real(spec)
+  
+  
+def exacta(x, centros=[-0.1,0.1], radio=0.1):
+  #solucion exacta para z=0, y=0:
+  muestra_z0_y0 = np.zeros_like(x)
+  muestra_z0_y0[np.abs(x-centros[0])<radio]==1
+  muestra_z0_y0[np.abs(x-centros[1])<radio]==1
+    
+  eta0 = radio**3/3*(-(x-centros[0])**2) / ((x-centros[0]))**(5)
+  eta1 = radio**3/3*(-(x-centros[1])**2) / ((x-centros[1]))**(5)
+  eta = (eta0+eta1)*(1-muestra_z0_y0)
+  return eta
+  
+  
+  
 """
 ##############################################################################
 """
@@ -120,6 +135,7 @@ B0 = 7 # T
 FOV = 0.512
 
 Ns   = [256,128,64,32,16,8]
+Ns   = [32,16,8]
 jj=-1
 for N in Ns:
   jj+=1
@@ -140,9 +156,9 @@ for N in Ns:
   muestra = np.zeros_like(X)
   
   # centro 4 esferas en distintos puntos en el plano x-z
-  centros = [-1,1]
+  centros = [-0.75, 0.75]
   for i in centros:
-    for j in centros:
+    for j in [0]:
       condicion = (X+i*diametro)**2+Y**2+(Z+j*diametro)**2 <= (diametro/2.0)**2
       muestra[condicion] = 1
 
@@ -165,7 +181,7 @@ for N in Ns:
   plt.ylabel("z")
   plt.title("Esfera discretizada")  
   for i in centros:
-    for j in centros:      
+    for j in [0]:      
       ax = plt.gca()
       circle = plt.Circle((i*diametro, j*diametro), diametro/2.0, color='k', fill=False)
       ax.add_patch(circle)
@@ -180,10 +196,21 @@ for N in Ns:
   plt.title(r"$\delta$ con $\chi=${}".format(Chi))
   plt.colorbar()
   for i in centros:
-    for j in centros:      
+    for j in [0]:      
       ax = plt.gca()
       circle = plt.Circle((i*diametro, j*diametro), diametro/2.0, color='k', fill=False)
       ax.add_patch(circle)
+  
+  # grafico un slice en z:
+  plt.figure(1112246871000)
+  plt.subplot(2,3,jj+1)
+  plt.plot(X[int(N/2), int(N/2), :], eta[int(N/2), int(N/2), :], 'o-')
+  muestra_z0_y0 = muestra[int(N/2), int(N/2), :]
+  sol_exacta = exacta(x, centros=centros, radio=diametro/2)
+  plt.plot(x, sol_exacta, 'k--')
+  plt.xlabel(r"$z$ [mm]")
+  plt.ylabel("$\delta$ [ppm]")
+  plt.title(rf"z={Z[int(N/2), int(N/2), 0]}$\pm${voxelSize/2} mms")
   
   
   ##### NMR -------------------------------------------------------------------
@@ -208,6 +235,7 @@ for N in Ns:
   plt.xlabel(r"$\delta$ [ppm]")
   plt.ylabel("Intensity [a.u]")
   plt.title("Espectros Normalizados")
+  
   
   
 
