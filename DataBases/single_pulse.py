@@ -69,14 +69,14 @@ T = 300
 w = 116e6 / 2*np.pi
 hbar = 1.054571818e-34
 Boltz = hbar*w / (kB*T)  # factor de boltzmann
-#rho0 = 1/2 + Boltz * Iz/2
+# rho0 = 1/2 + Boltz * Iz/2
 rho0 = Iz
-#rho0 =np.zeros((4,4))
-#rho0[0,0] = 1
+# rho0 =np.zeros((4,4))
+# rho0[0,0] = 1
 
 T2 = 600e-6
 T1 = 170e-3
-#w = 0
+# w = 0
 N = 16
 b = 1/14  # 1/um
 r_list = np.linspace(0, int(8/b-1), 1024)
@@ -94,8 +94,8 @@ k_list[0] = 0.08  # pulso de pi/12
 # """
 # elijo cietos valores de k, sólo los  correspondientes a slices
 # """
-#r_list = np.arange(0.25, 24, 0.5)
-#k_list = np.exp(b*r_list)
+# r_list = np.arange(0.25, 24, 0.5)
+# k_list = np.exp(b*r_list)
 
 Sx = np.zeros((r_list.size, k_list.size)).astype('complex')
 Sy = np.zeros((r_list.size, k_list.size)).astype('complex')
@@ -141,7 +141,7 @@ for kk in range(k_list.size):
         np.savetxt(
             savepath+"SinglePulse_k{:.2f}.dat".format(k_list[kk]), datos)
 # %%
-#S = np.real(Sx)- 1j* np.real(Sy)
+# S = np.real(Sx)- 1j* np.real(Sy)
 S = -np.real(Sy) + 1j * np.real(Sx)
 # plt.figure(431)
 # plt.plot(beta, np.real(S), '-')
@@ -155,22 +155,25 @@ if S.shape[1] == 1:  # grafico esto solo si corro para un valor de k
              label=rf"Senal para pulso de {k}$\pi$")
     plt.plot(b*r_list, np.exp(-b*r_list), '--',
              color='gray', label="exp(-z/skdp)")
-    if k_list[0] < 1:
-        # para que profundidad, la senal es 1%:
-        x1pc = b*r_list[absS[:, 0] < 0.01*absS[0, 0]][0]
-        plt.axvline(x1pc, ls='--', color='k')
-        plt.axvline(x1pc, ls='--', color='k')
-        plt.text(x1pc, 0.1, f"1% de la senal en z/skdp={x1pc:.2f}")
+
+    # para que profundidad, la senal es 1%:
+    absS = absS[r_list > 1/b]
+    rnew = r_list[r_list > 1/b]
+    x1pc = b*rnew[absS[:, 0] < 0.01][0]
+    plt.axvline(x1pc, ls='--', color='k')
+    plt.axvline(x1pc, ls='--', color='k')
+    plt.text(x1pc, 0.1, f"1% de la senal en z/skdp={x1pc:.2f}")
     plt.legend()
     plt.xlabel(r"z/skindepth")
     plt.ylabel(r"Signal")
 
+
 # %%
 if S.shape[1] > 1:  # grafico esto solo si corro para varios k
     plt.figure(0)
-    #plt.pcolormesh(k_list, r_list, np.ral(Sx+1j*Sy))
-    #plt.pcolormesh(k_list, r_list, np.sqrt(np.abs(Sx-1j*Sy)))
-    #plt.pcolormesh(k_list, r_list*b, np.abs(np.real(Sx+1j*Sy)), cmap='inferno')
+    # plt.pcolormesh(k_list, r_list, np.ral(Sx+1j*Sy))
+    # plt.pcolormesh(k_list, r_list, np.sqrt(np.abs(Sx-1j*Sy)))
+    # plt.pcolormesh(k_list, r_list*b, np.abs(np.real(Sx+1j*Sy)), cmap='inferno')
     plt.pcolormesh(k_list, r_list*b, np.abs(S), cmap='inferno')
     plt.xlabel(r'k/$\pi$')
     plt.ylabel('r/$\delta$')
@@ -182,7 +185,7 @@ if S.shape[1] > 1:  # grafico esto solo si corro para varios k
     # %%
 
     S = -np.real(Sy) + 1j * np.real(Sx)
-    #S = np.abs(My)
+    # S = np.abs(My)
     S = np.trapz(S, axis=0)
 
     plt.figure(1)
@@ -193,14 +196,14 @@ if S.shape[1] > 1:  # grafico esto solo si corro para varios k
     plt.xlim([0, 8])
     plt.yticks([])
     plt.grid()
-    #plt.ylabel('phase(S) [rad]')
+    # plt.ylabel('phase(S) [rad]')
 
     # %%
     plt.figure(2)
     plt.plot(k_list, np.abs(S), 'k')
-    #plt.plot(k_list, np.imag(S), 'r')
+    # plt.plot(k_list, np.imag(S), 'r')
     plt.xlabel('k')
-    #plt.ylabel('phase(S) [rad]')
+    # plt.ylabel('phase(S) [rad]')
 
     # %%
     # grafico la posicion en la cual la senal es del 1 %
@@ -208,16 +211,16 @@ if S.shape[1] > 1:  # grafico esto solo si corro para varios k
 
     x1pc_list = np.zeros_like(k_list)
     for ii in range(k_list.size):
-        absS = np.abs(S)[:, ii]/np.max(np.abs(S[0, ii]))
-        absS = absS[r_list > b]
-        rnew = r_list[r_list > b]
-        x1pc = b*rnew[absS_1pc < 0.01*max(absS_1pc)]
+        absS = np.abs(S)[:, ii]/np.max(np.abs(S[:, ii]))
+        absS = absS[r_list > 1/b]
+        rnew = r_list[r_list > 1/b]
+        x1pc = b*rnew[absS < 0.01]
         if x1pc.size > 0:
             x1pc_list[ii] = x1pc[0]
 
     plt.figure(3)
     plt.plot(k_list[x1pc_list != 0], x1pc_list[x1pc_list != 0], 'o')
-    plt.xlabel(r"k  (pulso de k$\pi$")
+    plt.xlabel(r"k  (pulso de k$\pi$)")
     plt.ylabel(r"z/skdp donde S=$0.01\times S_0$")
 
     # %%
