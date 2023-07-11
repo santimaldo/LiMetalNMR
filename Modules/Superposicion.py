@@ -64,7 +64,7 @@ class Superposicion(object):
                               una funcion escalon
   """
 
-  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None, superposicion_lateral=False):
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None, superposicion_lateral=False, superposicion=True):
 
 
     self.muestra = muestra
@@ -79,19 +79,28 @@ class Superposicion(object):
     self.definir_slice()
 
     self.muestra_sup = None
-    self.superponer_muestra()    
-
     self.delta_bulk = None
     self.delta_muestra = None
     
+    self.checkpoint = False  # esta variable se prende solo se produce una superposicion
     
-    self.crear_delta_bulk(radio)
-    self.crear_delta_muestra()        
-    if superposicion_lateral:
-      self.superponer_laterales()
-      self.superponer_laterales_muestra()
+    if superposicion: # esto esta por si quiero el espectro de la muestra ya armada
+      self.superponer_muestra()    
+      self.crear_delta_bulk(radio)
+      self.crear_delta_muestra()        
+      if superposicion_lateral:
+        self.superponer_laterales()
+        self.superponer_laterales_muestra()
+      
+      self.delta_sup =  self.delta_bulk + self.delta_muestra
     
-    self.delta_sup =  self.delta_bulk + self.delta_muestra
+    else:
+      self.muestra_sup = muestra.muestra/muestra.chi
+      self.delta_sup = delta.delta
+      
+    
+    
+    
   #--- Metodos -------------------------------------------------------------------
   def definir_slice(self):
     """
@@ -126,6 +135,7 @@ class Superposicion(object):
     # lleno al objeto de 1 en todos los lugaras HASTA z0 (exclusivo)
     obj[0:self.z0,:,:] = 1
     self.muestra_sup = obj
+    self.checkpoint = True
     return 0
 
   #-------------------------------------------------------------------------------

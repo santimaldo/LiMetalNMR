@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import scipy.ndimage as ndimage
 import os.path as path
-# import Modules.Export3D as Export3D
+import Modules.Export3D as Export3D
 from Modules.Funciones import timer
 from Modules.Funciones import timerClass
 import time
@@ -81,7 +81,7 @@ class Medicion(object):
 
   skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-  def __init__(self, superposicion, secuencia='SP', k=0.5, borde_a_quitar=[0,0,0], skindepth=skdp , stl_file=False, **seqkwargs):    
+  def __init__(self, superposicion, secuencia='SP', k=0.5, borde_a_quitar=[0,0,0], skindepth=skdp , stl_file=False, volumen_medido='completo', **seqkwargs):    
     
     self.superposicion = superposicion
     self.secuencia = secuencia
@@ -89,7 +89,7 @@ class Medicion(object):
     self.skdp = int(skindepth/self.superposicion.muestra.voxelSize[0])
     self.borde_a_quitar = borde_a_quitar
 
-    self.volumen_medido = self.crear_volumen_medido('completo')
+    self.volumen_medido = self.crear_volumen_medido(volumen_medido)
 
     # creo las matrices de utilidad:
     self.eta  = self.Crear_eta()
@@ -190,6 +190,21 @@ class Medicion(object):
       condicion[z0:,:,:]=False    
     #-----------------------------------------------------------------      
     
+    #-----------------------------------------------------------REGION
+    if 'esfera' in volumen_medido.lower(): # la comparacion es case insenstive
+
+      N = self.superposicion.muestra_sup.shape
+      z = np.arange(N[0])-N[0]/2
+      y = np.arange(N[1])-N[1]/2
+      x = np.arange(N[2])-N[2]/2
+      Z,Y,X = np.meshgrid(z,y,x,indexing='ij')
+      # vamos a seleccionar un circulo cuyo diametro va a ser la mitad del tamaño
+      # de la muestra (es decir, la region con microestructuras)
+      condicion = (X/(N[2]/2))**2+(Y/(N[1]/2))**2 + (Z/(N[2]/2))**2 <1
+    
+    #----------------------------------------------------------------- 
+    
+    
     # quito los bordes
     bordez = int(self.borde_a_quitar[0])
     bordey = int(self.borde_a_quitar[1])
@@ -238,13 +253,15 @@ class Medicion(object):
       # hago suficientes slices como para llegar a una profundidad de 7xSkinDepth
       # es decir, 84um
       n_slices = int(5*skdp/vs)
+      print(n_slices)
       for n in range(n_slices):
         # erosiono:
         erode = ndimage.binary_erosion(mask, struct)
         # la erosion tambien se come los laterales del bulk, por eso los vuelvo a
         # rellenar con 1. La tajada va estar exactamente en z0-n-1, los 1 se llenan
         # hasta z0-n-2
-        erode[0:z0-n-1,:,:] = 1
+        if self.superposicion.checkpoint: # solo añado el bulk si se hizo una superposicion con bulk.
+          erode[0:z0-n-1,:,:] = 1        
         # obtengo la tajada
         tajada = mask ^ erode
         if np.sum(tajada)==0:
@@ -257,16 +274,18 @@ class Medicion(object):
         # ahora el nuevo objeto a erosionar es el de la erosion anterior
         mask = (erode==1)
 
-        # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
-        # slz = int(obj.shape[0]-10)
-        # sly = int(obj.shape[1]/2)
-        # if n<9:
-        #   plt.figure(666)
-        #   plt.subplot(3,3,n+1)
-        #   plt.pcolormesh(tajada[slz,:,:])
-        #   plt.figure(667)
-        #   plt.subplot(3,3,n+1)
-        #   plt.pcolormesh(tajada[:,sly,:])
+        #####GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
+        slz = int(obj.shape[0]-10)
+        sly = int(obj.shape[1]/2)
+        if n<9:
+          matriz = tajada
+          matriz = beta*self.volumen_medido
+          plt.figure(666)          
+          plt.subplot(3,3,n+1)
+          plt.pcolormesh(matriz[slz,:,:])
+          plt.figure(667)
+          plt.subplot(3,3,n+1)
+          plt.pcolormesh(matriz[:,sly,:])
       
       beta = beta*self.volumen_medido # solo selecciono la parte del volumen medido    
       return beta
@@ -376,7 +395,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   @timer
-  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo',KS=None, return_angle=False, Norm=False):
+  def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo',KS=None, return_angle=False, Norm=False, T2est=0.14*1e-3):
     """
     Mediante el histograma 2D y teniendo como dato la amplitud de senal para
     cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes
@@ -425,7 +444,7 @@ class Medicion(object):
     
     #FID-----------------------------------------------------------------------
     ppm = 116.641899 # Hz
-    T2est = 0.14*1e-3 # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
+    T2est = T2est # T2est=0.14ms estimado con ancho de espectro. 2020-11-13
     dw = 5e-6 # sacado de los experimentos. Esto da un SW=857ppm aprox
     NP = 4096 # experimentalmente usamos 2048, pero con 4096 sale mas lindo
     t = np.arange(NP)*dw

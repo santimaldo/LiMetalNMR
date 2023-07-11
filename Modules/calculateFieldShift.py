@@ -63,9 +63,12 @@ import time
 #   dB = B0*calculateFieldShift(dChi_3D, voxelSize);
 #   dOhmega = dB*gyromagneticRatio;
 
-def calculateFieldShift(dChi_3D, voxelSize):
+def calculateFieldShift(dChi_3D, voxelSize, substract_aliasing=True):
     """
     voxelSize tiene que ser un array de tres elementos
+    
+    substract_aliasing=True  le quita el alisaing (default)
+    substract_aliasing=False Solo hace la transformada de Salomir
     """
     #     Checking the input parameters:
     #    if or(nargin < 1, nargin > 2)
@@ -109,20 +112,30 @@ def calculateFieldShift(dChi_3D, voxelSize):
     # (unpadded) susceptibility distribution. Together this is
     # referred to as the "DUAL" distribution:
 
-    ZcX = Zc(D(dChi_3D))
+    if substract_aliasing:  
+      ZcX = Zc(D(dChi_3D))
+    else:
+      ZcX = np.zeros_like(dChi_3D)      
     FT_dChi_3D_DUAL = fftpack.fftn(dChi_3D + 1j * ZcX)
     del dChi_3D  # en matlab, borraba la variable
 
-    # 2) multiplication with the dipole function:
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # 2) multiplication with the dipole function: - - - - - - - - - - - - - - -
     FT_dField_3D = FT_dChi_3D_DUAL*KF_kernel(FOV,np.shape(FT_dChi_3D_DUAL))
     del FT_dChi_3D_DUAL
-    # 3) inverse FT to spatial domain:
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # 3) inverse FT to spatial domain: - - - - - - - - - - - - - - - - - - - - 
     dField_3D_DUAL = fftpack.ifftn(FT_dField_3D)
     del FT_dField_3D
-    # 4) Subtracting the upscaled, cropped center of the aliasing:
-    dField_3D = np.real(dField_3D_DUAL) - UC(np.imag(dField_3D_DUAL))
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # 4) Subtracting the upscaled, cropped center of the aliasing: - - - - - - 
+    if substract_aliasing:      
+      dField_3D = np.real(dField_3D_DUAL) - UC(np.imag(dField_3D_DUAL))
+    else:
+      print("WARNING----- la sustraccion de aliasing esta desactivada")
+      dField_3D = np.real(dField_3D_DUAL)       
     del dField_3D_DUAL
-
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # returning the field shift in the same size:
     if NxInput%4 + NyInput%4 + NzInput%4 > 0:
         nx = np.arange(0,NxInput+1)

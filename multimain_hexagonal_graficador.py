@@ -14,8 +14,9 @@ plt.rcParams.update({'font.size': 20})
 # radios, distancias, alturas, densidades = np.loadtxt(path0+'Densidades.dat').T
 
 
-path0="T:/pyprogs/calculateFieldShift/Outputs/Cilindros_hexagonal_AltaResolucion/"
-radios, distancias, alturas, vs, densidades = np.loadtxt(path0+'Densidades.dat').T
+path0="./Outputs/Cilindros_hexagonal/SP/"
+radios, distancias, alturas, densidades = np.loadtxt(path0+'Densidades.dat').T
+
 
 
 
@@ -35,8 +36,7 @@ n_d=1
 for ii in range(radios.size):
 # for ii in range(6):
   for jj in range(1,6):
-    
-    path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
+  
       
     h = int(alturas[ii])
     d = int(distancias[ii])
@@ -60,7 +60,7 @@ for ii in range(radios.size):
     for region in regiones:
       
       # path    = path0 + 'SMC64-k1/'      
-      archivo = 'h{:d}_r{:d}_d{:d}{}.dat'.format(h, r, d, region)
+      archivo = 'h{:d}_r{:d}_d{:d}_SP{}.dat'.format(h, r, d, region)
         
         
       # extraigo  
@@ -78,13 +78,13 @@ for ii in range(radios.size):
       ppmAxis = ppmAxis0[np.abs(center-ppmAxis0)<ventana]
       spec = spec[np.abs(center-ppmAxis0)<ventana]
           
-      # plt.figure(1231)
-      # plt.subplot(2,3,n_d)
-      # plt.plot(ppmAxis,spec, col[n_r], linewidth=2)
-      # #plt.xlim([ppmAxis[-1], ppmAxis[0]])
-      # plt.xlim(150,-150)  
-      # plt.vlines(0, 0, np.max(spec))
-      # plt.yticks([])      
+      plt.figure(1231)
+      plt.subplot(2,3,n_d)
+      plt.plot(ppmAxis,spec, col[n_r], linewidth=2)
+      #plt.xlim([ppmAxis[-1], ppmAxis[0]])
+      plt.xlim(150,-150)  
+      plt.vlines(0, 0, np.max(spec))
+      plt.yticks([])      
      
   
       if region=='-microestructuras':

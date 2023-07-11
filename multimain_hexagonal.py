@@ -56,32 +56,46 @@ radios = [1,3,10,20,40,60]
 distancias_r=[[4,6,8,10,16,22]               ,\
              [8,18,28,34,44,54]             ,\
              # [14,20,34,48,58,66,76,86]            ,\
-             [22,34,50,70,94,108,126]          ,\
+             [22,34,50,70,94,108,126]         ,\
              #[42,46,50,56,62,68,78,94,110,126]          ,\
-             [62,72,86,98,110,126]         ,\
+             [62,72,86,98,110,126]        ,\
              #[82,88,94,100,104,108,112,116,122,126]     ,\
-             [108,118,122,126]              ,\
-             [122,124,126]                              ]   
+             [108,118,122,126]             ,\
+             [122,124,126]                              ]  
   
 # corrida 2
 radios = [1,3,5,10,20,30,40,50]
-distancias_r=[[12]               ,\
-             [10,14]             ,\
-             [14,20,28,38,46,58,66,76,86]            ,\
-             [26,30,40]          ,\
-             [42, 48, 54]          ,\
-             [62,72,86,98,110,126]  ,\
-             [82,88,94,100]         ,\
+distancias_r=[[12]              ,\
+             [10,14]            ,\
+             [14,20,28,38,46,58,66,76,86]           ,\
+             [26,30,40]         ,\
+             [42, 48, 54]         ,\
+             [62,72,86,98,110,126] ,\
+             [82,88,94,100]        ,\
              [102,110,116,122,126]  ]   
-
 alturas = [64,16,128]
 
+# corrida 3: solo para exportar 3d
+radios = [3,20]
+distancias_r=[[8]               ,\
+             [48,126]         ,\
+             ]  
+alturas = [64]
 
 
-radios = [0.2]
-distancias_r = [[1]]
-alturas = [10]
+# corrida 4
+radios = [1,3,10,20]
+distancias_r=[[4,6,8,10,16,22]              ,\
+             [8,18,28,34,44,54]            ,\
+             [22,26,30,34,40,50,70,94,108,126]          ,\
+             [42,48,54, 62,72,86,98,110,126]         ] 
+alturas = [4]
 
+# corrida 4.1
+# radios = [10,20]
+# distancias_r=[[30,34,40,50,70,94,108,126]          ,\
+#              [42,48,54, 62,72,86,98,110,126]         ] 
+# alturas = [4]
 
 ntotal = 0
 for ir in range(len(radios)):
@@ -89,8 +103,9 @@ for ir in range(len(radios)):
 
 
 savepath = './Outputs/Cilindros_hexagonal/'
-# with open(savepath+'Densidades.dat','w') as f:
-#       f.write('# radio (um)\tdistancia (um)\taltura (um)\tdensidad\n')
+
+with open(savepath+'Densidades.dat','w') as f:
+       f.write('# radio (um)\tdistancia (um)\taltura (um)\tdensidad\n')
 # with open(savepath+'tiempos.dat','w') as f:
 #       f.write('# N_iter\tt_total (min)\tt_iteracion(min)\th\tr\td\n')
 
@@ -147,25 +162,35 @@ for ind_h in range(len(alturas)):
       A_mic  = np.sum(muestra.muestra[1,:int(2*a),:int(d)]/Chi) # la muestra vale Chi en el objeto
       A_tot  = 2*a*d
       densidad = A_mic/A_tot
+      print(f"densidad: {densidad:.3f}")
       with open(savepath+'/Densidades.dat','a') as f:
-        pass
-        # f.write('{:d}\t{:d}\t{:d}\t{:.4f}\n'.format(r,d,h,densidad))             
+        # pass
+        f.write('{:d}\t{:d}\t{:d}\t{:.4f}\n'.format(r,d,h,densidad))             
+      continue
       #CREACION DEL OBJETO DELTA-------------------------------------------------
       # delta es la perturbacion de campo magnetico    
       delta = Delta(muestra)
       # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
-      superposicion = Superposicion(muestra, delta, superposicion_lateral=True, )
+      superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
       ## MEDICION ---------------------------------------------------------------
       # debo sacar el borde superior de z
-      if h<20:
+      if h<10:
+        borde_z = 0
+      elif h<20:
         borde_z = 4
       else:
         borde_z = 12
       medicion = Medicion(superposicion, borde_a_quitar=[borde_z,a,d/2])
+    
+      # ####################### solo para exportar 3d
+      # medicion = Medicion(superposicion, volumen_medido='centro', stl_file=f'h{int(h):d}_r{int(r):d}_dens{densidad:.1f}')
+      # continue
+      # ####################### solo para exportar 3d
+    
       print("Calculando espectro sp...")
       ppmAxis , spec  = medicion.CrearEspectro(secuencia='sp' , k=0.5, Norm=False)
-      print("Calculando espectro smc...")
-      ppmAxis1, spec1 = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False)
+      # print("Calculando espectro smc...")
+      # ppmAxis1, spec1 = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False)
       datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
       #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
   
@@ -179,11 +204,11 @@ for ind_h in range(len(alturas)):
         ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, volumen_medido='sin-borde{}'.format(region))
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:d}_d{:d}_SP{}.dat'.format(int(h), int(r), int(d), region)
-        # np.savetxt(savepath+file, datos)
-        # - - - - SMC64
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False, volumen_medido='sin-borde{}'.format(region))
-        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SMC64-k1/h{:d}_r{:d}_d{:d}_SMC64k1{}.dat'.format(int(h), int(r), int(d), region)
+        np.savetxt(savepath+file, datos)
+        # # - - - - SMC64
+        # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1, Norm=False, volumen_medido='sin-borde{}'.format(region))
+        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        # file = 'SMC64-k1/h{:d}_r{:d}_d{:d}_SMC64k1{}.dat'.format(int(h), int(r), int(d), region)
         # np.savetxt(savepath+file, datos)
       # 
       elapsed_parcial = (time.time() - t0parcial)/60.0
