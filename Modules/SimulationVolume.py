@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 
 
-def SimulationVolume(N=None, voxelSize=None, FOV=None):
+def SimulationVolume(N=None, voxelSize=None, FOV=None, anisotropico=False):
   """
   Esta funcion determina el volumen de la simulacion.
   es decir determina N, voxelSize o FOV, alguno de ellos dados los otros
@@ -43,11 +43,15 @@ def SimulationVolume(N=None, voxelSize=None, FOV=None):
     N = FOV/voxelSize
 
   # chequeo si el voxelSize es igual en todas las direcciones------------------
-  iguales =  np.all(voxelSize==voxelSize[0])
-  if not iguales:
-    msg = "los elementos de voxelSize deberian ser todos iguales!!!"
-    #warnings.warn(msg)
-    raise Exception(msg)
+  if anisotropico:    
+      msg = "LOS VOXELS NO SON CUBOS!!!"
+      warnings.warn(msg)
+  else:
+      iguales =  np.all(voxelSize==voxelSize[0])  
+      if not iguales:
+        msg = "los elementos de voxelSize deberian ser todos iguales!!!"
+        #warnings.warn(msg)
+        raise Exception(msg)
   #----------------------------------------------------------------------------
 
 
