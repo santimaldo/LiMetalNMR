@@ -43,9 +43,9 @@ skindepth = 0.012  # profundida de penetracion, mm
 # volumen simulado.
 voxelSize = [0.001, 0.001, 0.001]  # mm
 
-N = [128, 1024, 1024]
+# N = [128, 1024, 1024]
 #N = [256,128,128]
-#N = [256,512,512]
+N = [512,1024,1024]
 # N = [256,64,64]
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
@@ -60,8 +60,8 @@ vsz, vsy, vsx = voxelSize
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom de microestructuras
 
-
-path = "./Outputs/2022-07-23_Clusters_SinCeldaUnidad_HuecoCentral/"
+# path = "./Outputs/2022-07-23_Clusters_SinCeldaUnidad_HuecoCentral/"
+path = "./Outputs/"
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
 #   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
 h = 16
@@ -87,10 +87,10 @@ medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
 distancia = d*vsx
 parametro_a = a*vsy
 radio = r*vsx
-#muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
-muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
-                  R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
+# muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
+                  # R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
 # muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 
@@ -146,8 +146,9 @@ if save:
 #medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
 # medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
 # medicion = Medicion(superposicion, volumen_medido='muestra')
-medicion = Medicion(superposicion, volumen_medido='centro',
-                    borde_a_quitar=[0, 0, 0], stl_file=f"{filename}")
+medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0])
+
+####, stl_file=f"{filename}")
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')0
 
 
@@ -156,7 +157,7 @@ medicion = Medicion(superposicion, volumen_medido='centro',
 # %%
 
 # medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[12,0,0])
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5, figure=153)
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5, T2est=0.6*1e-3 ,figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-microestructuras', borde_a_quitar=[12,0,0])
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-bulk', borde_a_quitar=[12,0,0])

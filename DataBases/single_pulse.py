@@ -55,7 +55,6 @@ def evolucion(rho, t, T1, T2, rho0=None):
 
 # %%
 savepath = "./SinglePulse/"
-savepath = "S:/tmp/"
 
 
 r3 = np.sqrt(3)

@@ -79,7 +79,7 @@ plt.plot(d, d, 'k--')
 plt.plot(d, a[aa], 'o')
 plt.ylabel("Paámetro $a$ [voxels]")
 plt.xlabel("Distancia [voxels]")
-plt.title("Valores de $a$ de mejor aproximan $d$")
+plt.title("Valores de $a$ que mejor aproximan $d$")
 
 
 plt.figure(11)

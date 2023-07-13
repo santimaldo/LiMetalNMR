@@ -9,6 +9,7 @@ from oct2py import Oct2Py
 
 # funcion para crear la figura 3D
 def exportar_3D(matriz, archivo):
+    
   print(" -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  ")
   print("Creando figura 3D. Esto puede demorar varios minutos...")
   Nz, Nx, Ny = matriz.shape
