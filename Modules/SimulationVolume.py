@@ -43,14 +43,13 @@ def SimulationVolume(N=None, voxelSize=None, FOV=None, anisotropico=False):
     N = FOV/voxelSize
 
   # chequeo si el voxelSize es igual en todas las direcciones------------------
-  if anisotropico:    
-      msg = "LOS VOXELS NO SON CUBOS!!!"
-      warnings.warn(msg)
-  else:
-      iguales =  np.all(voxelSize==voxelSize[0])  
-      if not iguales:
-        msg = "los elementos de voxelSize deberian ser todos iguales!!!"
-        #warnings.warn(msg)
+  iguales =  np.all(voxelSize==voxelSize[0])    
+  if not iguales:
+    if anisotropico: # esto es por si permito que los voxels no sean cubos
+        msg = "LOS VOXELS NO SON CUBOS!!!" # aviso
+        warnings.warn(msg)
+    else:            
+        msg = "los elementos de voxelSize deberian ser todos iguales!!!" #error
         raise Exception(msg)
   #----------------------------------------------------------------------------
 
