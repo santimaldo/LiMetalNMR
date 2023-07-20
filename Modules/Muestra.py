@@ -116,14 +116,15 @@ class Muestra(object):
       warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
 
     # chequeo que haya como minimo 3 veces skindepth por debajo de las
-    # microestructuras
-    skdp = 12e-3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
-    min_bulk = skdp*3
-    min_FOV = medidas[0] + 2*min_bulk # como la muestra se ubica al centro, lo que sobra arriba y abajo es lo mismo. Por eso va 2 veces min_bulk    
-    if(self.exceptions):
-      if  FOV[0] < min_FOV :
-        msg = "No hay suficiente FOV en z. Aumentar N[0]"
-        raise Exception(msg)
+    # microestructuras    
+    # min_bulk = skdp*3 # skin depth en milimetros del Li a una frecuencia de 116.6MHz
+    # min_FOV = medidas[0] + 2*min_bulk # como la muestra se ubica al centro, lo que sobra arriba y abajo es lo mismo. Por eso va 2 veces min_bulk    
+    # if(self.exceptions):
+    #   if  FOV[0] < min_FOV :
+    #     msg = "No hay suficiente FOVz para el bulk. La muestra se correra "\
+    #           "hacia arriba y no estara centrada"
+    #     # raise Exception(msg)
+    #     warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
 
 
 

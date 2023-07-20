@@ -45,11 +45,11 @@ skindepth = 0.012  # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxelSize = [0.25e-3]*3  # mm
+voxelSize = [1e-3]*3  # mm
 
 # N = [128, 1024, 1024]
-#N = [256,128,128]
-N = [512,1024,1024]
+N = [256,256,256]
+# N = [512,1024,1024]
 # N = [256,64,64]
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,

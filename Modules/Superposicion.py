@@ -11,7 +11,7 @@ import numpy as np
 import scipy.ndimage as ndimage
 from scipy.interpolate import interp1d
 from Modules.Funciones import timerClass
-
+import warnings
 
 @timerClass
 class Superposicion(object):
@@ -64,9 +64,10 @@ class Superposicion(object):
                               una funcion escalon
   """
 
-  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27, z0=60e-3, radio=None, superposicion_lateral=False, superposicion=True):
-
-
+  def __init__(self, muestra, delta, delta_in=-12.79, delta_out=3.27,
+               z0=None, skdp=14e-3, radio=None, superposicion_lateral=False,
+               superposicion=True):
+    
     self.muestra = muestra
     self.delta = delta
     self.delta_in = delta_in
@@ -74,7 +75,21 @@ class Superposicion(object):
     # el nuevo valor de indice en z en el cual empiezan las dendritas:
     # [0:z0,:,:] --> bulk
     # [z0: ,:,:] --> dendritas
-    self.z0 = int(z0/self.muestra.voxelSize[0]) # z0 en unidades de voexel
+    
+    if z0==None:
+        # z0 = Nz - Nmz - Nvx_seguridad
+        # las dendritas arrancan cerca de la mitad del FOV.
+        z0 = int(self.muestra.N[0] - self.muestra.N_muestra[0] - 6)
+    
+    if z0*self.muestra.voxelSize[0]/skdp < 3:
+        
+        msg = f"No hay suficiente FOVz para el bulk:\n"\
+              f"\t bulk = {z0*self.muestra.voxelSize[0]*1000} um "\
+              f"< 3 * skdp = {3*skdp*1000} um"
+        # raise Exception(msg)
+        warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
+        
+    self.z0 = z0 # z0 en unidades de voexel
     self.slice = None
     self.definir_slice()
 
