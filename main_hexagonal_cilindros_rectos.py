@@ -18,7 +18,7 @@ from Modules.Medicion import *
 import time
 
 def get_param_a(d):
-  if d>256:
+  if d>512:
     msg = ("d debe ser mas chico")
     raise Exception(msg)
   if d%2==0:    
@@ -40,7 +40,7 @@ save = False
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
-skindepth = 0.012  # profundida de penetracion, mm
+skindepth = 0.014  # profundida de penetracion, mm
 
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
@@ -95,7 +95,7 @@ medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
 distancia = d*vsx
 parametro_a = a*vsy
 radio = r*vsx
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, ubicacion='superior')
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
                   # R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
@@ -122,12 +122,14 @@ delta = Delta(muestra)
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 # superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-superposicion = Superposicion(muestra, delta, superposicion_lateral=True, radio=400)
+superposicion = Superposicion(muestra, delta, superposicion_lateral=True, radio=0)
 
 # %%
 plt.figure(1110101001010)
-matriz = (superposicion.delta_sup *
-          superposicion.muestra_sup)[-int(h*1e-3/vsz/2), :, :]
+matriz = (
+          superposicion.delta_sup *
+          superposicion.muestra_sup)[superposicion.z0+int(h*1e-3/vsz/2), :, :]
+          # superposicion.muestra_sup)[:, int(N[1]/2), :]
 matriz_mask = np.ma.masked_where(matriz == 0, matriz)
 plt.pcolormesh(matriz_mask, cmap='inferno_r')
 plt.colorbar()
@@ -153,8 +155,8 @@ if save:
 # %%
 #medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
 # medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
-# medicion = Medicion(superposicion, volumen_medido='muestra')
-medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0])
+medicion = Medicion(superposicion, volumen_medido='muestra')
+# medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0])
 
 ####, stl_file=f"{filename}")
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')0

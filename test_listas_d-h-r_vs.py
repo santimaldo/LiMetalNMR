@@ -8,11 +8,6 @@ Created on Thu Mar 10 15:06:45 2022
 import numpy as np
 import matplotlib.pyplot as plt
 from Modules.SimulationVolume import *
-from Modules.Muestra import *
-from Modules.Delta import *
-from Modules.Superposicion import *
-from Modules.Graficador import *
-from Modules.Medicion import *
 
 
 def get_param_a(d):
@@ -24,6 +19,7 @@ def get_param_a(d):
     a = As[Ds==d][0]
     return a
     
+skdp = 14 # um
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
@@ -134,19 +130,28 @@ for vs in VSs:
           Nceldasy.append(Ncy)
           
           # print(f"&%$&#%$&#&# ---> {rho}, {densidad}")
-          # una vez que llegamos aca, estamos en condiciones
-    
-          msj = f'distancia efectiva: {d*vs} um, radio ef.: {r*vs}, densidad ef.: {densidad:.2f}'
-          parametros_que_SI.append([distancia, radio, vs, d*vs, r*vs, densidad, Ncx, Ncy, msj])
+          # una vez que llegamos aca, estamos en condiciones de evaluar altura:
+          for altura in alturas:              
+              h = int(altura/vs)
+              Nz = 512
+              if (Nz/2 < h) or (Nz/2*vs < 3*skdp):
+                  Nz = Nz*2                
+              msj = f'distancia efectiva: {d*vs} um, radio ef.: {r*vs}, densidad ef.: {densidad:.2f}'
+              parametros_que_SI.append([vs, Nz, Nx,
+                                        altura, radio, distancia,
+                                        h*vs, r*vs, d*vs,
+                                        densidad, msj])
 
-pNO = len(parametros_que_NO)
-pSI = len(parametros_que_SI)
+# pNO = len(parametros_que_NO)
+# pSI = len(parametros_que_SI)
 
-print(f'fueron rechazados {pNO} conjuntos de parametros, se aceptaron {pSI} conjuntos de parametros')
+# print(f'fueron rechazados {pNO} conjuntos de parametros, se aceptaron {pSI} conjuntos de parametros')
 
 #%%
-#chequeo si hay distancias (par[3]) y radios (par[4]) duplicados --------------
-mylist = [[par[3], par[4], par[5], par[2]] for par in parametros_que_SI]
+# duplicados ------------------------------------------------------------------
+# chequeo distancias (par[6]),radios (par[7]) y alturas (par[8]) duplicados
+mylist = [[par[0], par[1], par[6], par[7], par[8], par[9]]
+          for par in parametros_que_SI]
 newlist = []
 duplist = []
 for i in mylist:
@@ -159,17 +164,17 @@ parametros = newlist
 
 filename = "./DataBases/ParametrosASimular.par"
 with open(filename, 'w') as f:
-    header = f"# voxelSize\t radio(um)\t distancia (um)\t densidad\n"
+    header = f"# voxelSize\t Nz\t altura(um)\t radio(um)\t distancia (um)\t densidad\n"
     f.write(header)
     for par in parametros:        
-        distancia, radio, densidad, vs = par
-        line = f"{vs:.4f}\t{radio:.4f}\t{distancia:.4f}\t{densidad:.4f}\n"
+        vs, Nz, altura, radio, distancia, densidad = par
+        line = f"{vs:.4f}\t{Nz}\t{altura:.4f}\t{radio:.4f}\t{distancia:.4f}\t{densidad:.4f}\n"
         f.write(line)
         
         
 #%%      
 
-vs, r, d, rho = np.loadtxt(filename).T
+vs, Nz, h, r, d, rho = np.loadtxt(filename).T
 
 fig, ax = plt.subplots(num=11111212111)
 cb = ax.scatter(rho, d, c=r, s=vs*100, cmap="jet")

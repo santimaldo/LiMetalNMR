@@ -79,7 +79,7 @@ class Superposicion(object):
     if z0==None:
         # z0 = Nz - Nmz - Nvx_seguridad
         # las dendritas arrancan cerca de la mitad del FOV.
-        z0 = int(self.muestra.N[0] - self.muestra.N_muestra[0] - 6)
+        z0 = int(7*skdp/self.muestra.voxelSize[0])
     
     if z0*self.muestra.voxelSize[0]/skdp < 3:
         

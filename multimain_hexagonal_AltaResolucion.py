@@ -21,7 +21,7 @@ import pandas as pd
 
 
 def get_param_a(d):
-  if d>256:
+  if d>512:
     msg = ("d debe ser mas chico")
     raise Exception(msg)
   if d%2==0:    
@@ -34,8 +34,6 @@ def get_param_a(d):
     raise Exception(msg)
 
 
-
-
 #%%----------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -43,34 +41,31 @@ def get_param_a(d):
 # Parametros fisicos
 Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
 B0 = 7 # T
-skindepth = 0.012 # profundida de penetracion, mm
+skindepth = 0.014 # profundida de penetracion, mm
 
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-Nz = 1024
-Ny = Nx = 256
+Nz = 512
+Ny = Nx = 1024
 N = [Nz,Ny,Nx]
 
 
-altura = 25 # u
+
 # radio, distancia y vs estan en el archivo:
-parametros = np.loadtxt('./DataBases/CilindrosAltaResolucion_parametros_d_r.dat')
-df = pd.DataFrame(parametros)
-df = df.sort_values(3,ascending=False)
+parametros = np.loadtxt('./DataBases/ParametrosASimular.par')
+df0 = pd.DataFrame(parametros)
+df = df0.sort_values(by=[1,2,0,3,4],ascending=True)
 parametros = np.array(df)
 
 
 
 #%%
-savepath = './Outputs/2022-03-11_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2022-03-13_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-07-20_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat','w') as f:
       f.write('# radio (um)\tdistancia (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat','w') as f:
       f.write('# N_iter\tt_total (min)\tt_iteracion(min)\tradio (um)\tdistancia (um)\taltura (um)\tvs (um)\n')
-
 
 
 # inicializo una lista de cuales tienen error.

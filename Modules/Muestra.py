@@ -50,6 +50,13 @@ class Muestra(object):
   + exceptions: bool      -   defaut: True.
                               Habilita o no la detencion del codigo por las
                               excepciones en la creacion de la muestra
+  + ubicacion: str        -   Metodo de cenrado de la muestra. 
+                              Opciones: 
+                                'centro': La muestra esta en el centro del
+                                            volumen.
+                                'superior': La muestra se ubica en la parte
+                                            superior dejando 10 voxels de
+                                            changui.
   + **geokwargs:          -   Argumentos que neceseita cada geometria en
                               particular
   """
@@ -59,7 +66,7 @@ class Muestra(object):
   
   
   def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li,
-               skdp=14e-3, exceptions=True, **geokwargs):
+               skdp=14e-3, exceptions=True, ubicacion='centro', **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
     # y el volumen simulado:
     # 1)OBTENCION DE INPUTS E INICIALIZACION
@@ -105,7 +112,7 @@ class Muestra(object):
     self.slices = None
     self.pCubierto = None
     self.exceptions = exceptions
-
+    self.ubicacion = ubicacion
     # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
@@ -211,10 +218,17 @@ class Muestra(object):
     Nz, Ny, Nx = self.N
     Nmz, Nmy, Nmx = self.N_muestra
     # hago un slice sobre la matriz en el cual coloco la muestra. Defino indices
-    # slj: slice en j, [j_inicial, j_final+1]
-    slz = [int(Nz/2-Nmz/2), int(Nz/2+Nmz/2)]
-    sly = [int(Ny/2-Nmy/2), int(Ny/2+Nmy/2)]
+    # slj: slice en j, [j_inicial, j_final+1]    
     slx = [int(Nx/2-Nmx/2), int(Nx/2+Nmx/2)]
+    sly = [int(Ny/2-Nmy/2), int(Ny/2+Nmy/2)]
+    if 'sup' in self.ubicacion.lower(): # "superior"
+        # z0 = Nz - Nmz - Nvx_seguridad        
+        z0 = int(Nz - Nmz - 10)
+        slz = [z0, Nz-10]
+    else: # (centro:)
+        slz = [int(Nz/2-Nmz/2), int(Nz/2+Nmz/2)]
+    
+        
     
     # para unas pruebas el dia 08/02/2022:
     # shift = 10
