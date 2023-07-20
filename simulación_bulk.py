@@ -6,7 +6,8 @@ Created on Fri Oct 30 07:22:30 2020
 @author: muri
 """
 import numpy as np 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+from matplotlib import patches
 from mpl_toolkits.mplot3d import Axes3D 
 import time
 
@@ -22,7 +23,7 @@ t0 = time.time()
 #%%
 
 N = [1024,1024,1024]
-voxelSize = [0.005, 0.02, 0.02]# mm
+voxelSize = [0.02, 0.02, 0.02]# mm
 
 # N = np.array([1024,1024,1024])/4
 # voxelSize = np.array([0.02, 0.02, 0.02])*4# mm
@@ -32,16 +33,16 @@ N, voxelSize, FOV = SV.SimulationVolume(voxelSize=voxelSize, N=N, anisotropico=T
 
 
 coordenadas = []
-for ii in range(3):
+for ii in range(2):
     ##### con un voxel centrado en cero:
     # xx = np.linspace(-FOV[ii]/2.0, (FOV[ii]/2.0-voxelSize[ii]) ,N[ii]) 
     ##### FOV simetrico sin voxel en cero
     xx = np.linspace(-(FOV[ii]-voxelSize[ii])/2.0, (FOV[ii]-voxelSize[ii])/2.0,N[ii]) 
     coordenadas.append(xx)
-    
-z, y, x = coordenadas
 
-Z,Y,X= np.meshgrid(z,y,x, indexing='ij')
+z, x = coordenadas 
+    
+Z,Y,X= np.meshgrid(z, x, x, indexing='ij')
 
 #%%
 
@@ -61,9 +62,17 @@ condicion = (Z*Z <= altura/2.0)
 mask[condicion]=1
 
 muestra = muestra*mask
+# antes de borrar  Z, Y, X, voy a guardarme los slices:
+slice_z = Z>0
+
+
+
+del Z, Y, X # para guardar memoria
+
 
 elapsed = (time.time() - t0)/60
 print('---  armado de muestra: {:.2f} min\n'.format(elapsed))
+
 
 #%%
 print("Calculando delta...")
@@ -87,7 +96,7 @@ z_slice = int(N[0]/2)
 
 
 plt.figure(10)
-plt.pcolormesh(x, y,muestra[z_slice,:,:])
+plt.pcolormesh(x, x,muestra[z_slice,:,:])
 plt.xlabel('x [mm]')
 plt.ylabel('y [mm]')
 
@@ -95,7 +104,7 @@ plt.ylabel('y [mm]')
 v = 5
 plt.figure(11)
 
-plt.pcolormesh(x,y,delta[int(z_slice),:,:], cmap='seismic', vmax=v, vmin=-v)
+plt.pcolormesh(x,x,delta[int(z_slice),:,:], cmap='seismic', vmax=v, vmin=-v)
 plt.xlabel('x [mm]')
 plt.ylabel('y [mm]')
 plt.colorbar()
@@ -105,23 +114,58 @@ plt.colorbar()
 x_slice = int(N[2]/2)
 
 plt.figure(20)
-plt.pcolormesh(y,z,muestra[:,:,x_slice])
+plt.pcolormesh(x,z,muestra[:,:,x_slice])
 plt.xlabel('y [mm]')
 plt.ylabel('z [mm]')
 
+#%%
 
 v = 4
 plt.figure(21)
-plt.pcolormesh(y,z,delta[:,:,x_slice], cmap='seismic', vmax=v, vmin=-v)
-plt.xlabel('y [mm]')
+plt.pcolormesh(x,z,delta[:,:,x_slice], cmap='seismic', vmax=v, vmin=-v)
+plt.xlabel('x [mm]')
 plt.ylabel('z [mm]')
-plt.colorbar()
+plt.colorbar(label=r"$\delta$ [ppm]")
+plt.gca().set_aspect('equal')
 
+#%%
+plot_macro = False
 
-plt.show()
+if plot_macro:
+    B0 = 7
+    Bnuc = delta*1e-6*B0 + B0
+    Bmac = Bnuc/(1-2/3*muestra*Chi)
+    
+    bmac_rel = (Bmac-B0)/B0
+    #%%
+    plt.rcParams.update({'font.size': 16})
+    v = 13
+    fig, ax = plt.subplots(num=22)
+    # cb = ax.pcolormesh(x,z,bmac_rel[:,:,x_slice]*1e6, cmap='seismic', vmax=v, vmin=-v)
+    cb = ax.pcolormesh(x,z,bmac_rel[z_slice,:,:]*1e6, cmap='seismic', vmax=v, vmin=-v)
+    ax.set_xlabel('x [mm]')
+    ax.set_ylabel('z [mm]')
+    ax.set_aspect('equal')
+    fig.colorbar(cb, label=r"$(B_{z,mac}-B_0) / B_0$  [ppm]")
+    ax.add_patch(patches.Rectangle((-radio,-altura/2), 2*radio, altura,
+                      edgecolor='k', lw=1.5, ls='--', fill=False))
+    
+    #%%    
+    v = 13
+    fig, ax = plt.subplots(num=23)
+    cb = ax.pcolormesh(x,z,bmac_rel[z_slice,:,:]*1e6, cmap='seismic', vmax=v, vmin=-v)    
+    ax.set_xlabel('x [mm]')
+    ax.set_ylabel('y [mm]')
+    ax.set_aspect('equal')
+    fig.colorbar(cb, label=r"$(B_{z,mac}-B_0) / B_0$  [ppm]")
+    ax.add_patch(patches.Circle((0,0), radio,
+                      edgecolor='k', lw=1.5, ls='--', fill=False))
+
 
 #%%
 print("Creando Perfiles...")
+
+Z,Y,X= np.meshgrid(z, x, x, indexing='ij')
 
 t0perfiles = time.time()
 
@@ -137,7 +181,7 @@ header = f"Electrodo circular de radio {radio} mm"\
          f" | FOV:  {FOV[0]}mm x {FOV[1]}mm x {FOV[2]}mm\n\n"\
          f"z [mm]\t\t delta[ppm]"
          
-perfiles_out = []
+# perfiles_out = []
 radios = np.zeros(Nslices)
 for ii in range(Nslices):
     Rext = (ii+1/2)*ancho
@@ -149,28 +193,27 @@ for ii in range(Nslices):
         Rslice =  (Rint+Rext)/2 # para ii=0 defino radio 0    
     radios[ii] = Rslice
             
-    condicion1 = (X*X + Y*Y >= Rint**2)
-    condicion2 = (X*X + Y*Y <= Rext**2)
-    
     # in - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    condicion_in = (muestra * (Z>0)) * (condicion1*condicion2)
+    condicion_in = (muestra * (Z>0)) * \
+                   (X*X + Y*Y >= Rint**2) * (X*X + Y*Y <= Rext**2)
     
     delta_in = np.ma.masked_array(delta, 
                                   mask=np.logical_not(condicion_in))    
     perfil = np.mean(delta_in, axis=(1,2))
     perfil = perfil.data[perfil.mask==False]
-    z_in = np.arange(perfil.size)*voxelSize[0]
+    z_in = -np.arange(perfil.size)*voxelSize[0]
     datos = np.array([z_in, perfil]).T
     np.savetxt(f"./DataBases/Bulk_perfiles/perfil_radio{int(Rslice*1000):04d}.in",
                datos, header=header)
     # in - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    condicion_out = ((1-muestra) * (Z>0)) * (condicion1*condicion2)
+    condicion_out = ((1-muestra) * (Z>0)) * \
+                    (X*X + Y*Y >= Rint**2) * (X*X + Y*Y <= Rext**2)
     
     delta_out = np.ma.masked_array(delta, 
                                   mask=np.logical_not(condicion_out))    
     perfil = np.mean(delta_out, axis=(1,2))
     perfil = perfil.data[perfil.mask==False]
-    perfiles_out.append(perfil)
+    # perfiles_out.append(perfil)
     z_out = np.arange(perfil.size)*voxelSize[0]
     datos = np.array([z_out, perfil]).T
     np.savetxt(f"./DataBases/Bulk_perfiles/perfil_radio{int(Rslice*1000):04d}.out",
@@ -182,20 +225,23 @@ elapsed = (time.time() - t0perfiles)/60
 print("Tiempo en calcular y guardar perfiles:")
 print('---  tiempo: {:.2f} min\n'.format(elapsed))
 
-perfiles_out = np.array(perfiles_out).T
+
 #%%
 
-
-plt.figure(5468)
-v = 4
-plt.pcolormesh(radios, z_out, perfiles_out, shading='nearest',
-               cmap='seismic', vmax=v, vmin=-v)
-plt.xlabel("radio [mm]")
-plt.ylabel(" z [mm]")
-plt.title("Out")
-plt.colorbar(label = r"$\delta$ [ppm]")
+# perfiles_out = np.array(perfiles_out).T
+# plt.figure(5468)
+# v = 4
+# plt.pcolormesh(radios, z_out, perfiles_out, shading='nearest',
+#                cmap='seismic', vmax=v, vmin=-v)
+# plt.xlabel("radio [mm]")
+# plt.ylabel(" z [mm]")
+# plt.title("Out")
+# plt.colorbar(label = r"$\delta$ [ppm]")
 
 
 elapsed = (time.time() - t0)/60
 print("Tiempo total:")
 print('---  tiempo: {:.2f} min'.format(elapsed))
+
+
+plt.show()

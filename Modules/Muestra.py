@@ -58,7 +58,8 @@ class Muestra(object):
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
   
   
-  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li, exceptions=True, **geokwargs):
+  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li,
+               skdp=14e-3, exceptions=True, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
     # y el volumen simulado:
     # 1)OBTENCION DE INPUTS E INICIALIZACION

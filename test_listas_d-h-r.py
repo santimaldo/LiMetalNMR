@@ -29,7 +29,7 @@ def get_param_a(d):
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-vs = 0.1 # um
+vs = 0.25 # um
 voxelSize = [vs*1e-3]*3# mm
 vsz,vsy,vsx = voxelSize
 

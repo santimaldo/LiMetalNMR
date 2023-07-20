@@ -54,7 +54,7 @@ class Superposicion(object):
   + self.delta_sup : array  - Matriz con el delta superpuesto
                                   delta_sup = delta_bulk + delta_muestra
 
-  + radion  :  float        - Para superponer con un perfil y no una funcion
+  + radio   :  float        - Para superponer con un perfil y no una funcion
                               escalon, debo decirle que perfil usar. Para ello,
                               le digo a que radio (o distancia al centro) se 
                               encuentra. Esto es porque los perfiles se
@@ -161,7 +161,7 @@ class Superposicion(object):
     
     else:
       path = './DataBases/Bulk_perfiles/'
-      archivo = path + 'perfil_radio{}.{}'
+      archivo = path + 'perfil_radio{:04d}.{}'
       # leo el perfil:
       z_in, delta_in = np.loadtxt(archivo.format(radio,'in')).T
       z_out, delta_out = np.loadtxt(archivo.format(radio,'out')).T

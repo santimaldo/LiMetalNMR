@@ -253,7 +253,6 @@ class Medicion(object):
       # hago suficientes slices como para llegar a una profundidad de 7xSkinDepth
       # es decir, 84um
       n_slices = int(5*skdp/vs)
-      print(n_slices)
       for n in range(n_slices):
         # erosiono:
         erode = ndimage.binary_erosion(mask, struct)

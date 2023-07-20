@@ -41,7 +41,7 @@ skindepth = 0.012  # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxelSize = [0.001, 0.001, 0.001]  # mm
+voxelSize = [0.25e-3]*3  # mm
 
 # N = [128, 1024, 1024]
 #N = [256,128,128]
@@ -60,13 +60,19 @@ vsz, vsy, vsx = voxelSize
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom de microestructuras
 
-# path = "./Outputs/2022-07-23_Clusters_SinCeldaUnidad_HuecoCentral/"
-path = "./Outputs/"
-# Debo "preparar" los parametros para que cumplan ciertos criterios:
-#   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
-h = 16
+path = "./Outputs/2023-07-19_CilindosRectos_HR"
+
+# altura (h), radio(r) y distancia (d) en micrometros
+h = 50
 r = 10
 d = 22
+
+
+# Debo "preparar" los parametros para que cumplan ciertos criterios:
+#   d: par,   Nmx=n*d,  Nmy=m*2*a,  'a' se lee de archivo.
+h_vx = int(h*1e-3/voxelSize[0])
+r_vx = int(r*1e-3/voxelSize[1])
+d_vx = int(d*1e-3/voxelSize[1])
 a = get_param_a(d)
 # densidad local:
 p_loc = 0.5
@@ -114,7 +120,7 @@ delta = Delta(muestra)
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 # superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
+superposicion = Superposicion(muestra, delta, superposicion_lateral=True, radio=400)
 
 # %%
 plt.figure(1110101001010)

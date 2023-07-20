@@ -11,6 +11,8 @@ Created on Thu Jun 10 20:48:44 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
+3save = True
+
 N = 100
 d = 10
 a = 9
@@ -90,6 +92,6 @@ plt.ylabel("$(d - d_{app})/d $")
 plt.title("Error relativo de la mejor aproximación")
 
 # %%
-
-data = np.array([d.astype(int), a[aa].astype(int), minErr]).T
-np.savetxt('../DataBases/Hexagonal_Parametro_a.dat', data)
+if save:
+    data = np.array([d.astype(int), a[aa].astype(int), minErr]).T
+    np.savetxt('../DataBases/Hexagonal_Parametro_a.dat', data)
