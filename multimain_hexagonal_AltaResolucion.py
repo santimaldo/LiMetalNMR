@@ -126,7 +126,7 @@ for par in parametros:
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
-    delta = Delta(muestra, skip=True)
+    delta = Delta(muestra)#, skip=True)
     # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
     superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
                                   radio=0)
