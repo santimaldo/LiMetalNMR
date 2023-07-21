@@ -81,8 +81,8 @@ class Medicion(object):
 
     skdp = 14e-3  # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-    def __init__(self, superposicion, secuencia='SP', k=0.5, 
-                 borde_a_quitar=[0, 0, 0], skindepth=skdp, stl_file=False, 
+    def __init__(self, superposicion, secuencia='SP', k=0.5,
+                 borde_a_quitar=[0, 0, 0], skindepth=skdp, stl_file=False,
                  volumen_medido='completo', **seqkwargs):
 
         self.superposicion = superposicion
@@ -115,6 +115,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
     @timer
     def crear_volumen_medido(self, volumen_medido):
@@ -251,8 +252,8 @@ class Medicion(object):
         # esto es para las erosiones:
         mask = (obj == 1)
         struct = ndimage.generate_binary_structure(3, 1)
-        # hago suficientes slices como para llegar a una profundidad de 7xSkinDepth
-        # es decir, 84um
+        # hago suficientes slices como para llegar a una profundidad de 5xSkinDepth
+        # es decir, 98um
         n_slices = int(5*skdp/vs)
         for n in range(n_slices):
             # erosiono:
