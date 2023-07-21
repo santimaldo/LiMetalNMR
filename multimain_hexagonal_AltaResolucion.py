@@ -42,6 +42,7 @@ def get_param_a(d):
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 0.014  # profundida de penetracion, mm
+skindepth = 14e-13  # profundida de penetracion, mm
 
 
 # radio, distancia y vs estan en el archivo:
