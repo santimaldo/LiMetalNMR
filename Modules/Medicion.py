@@ -81,7 +81,9 @@ class Medicion(object):
 
     skdp = 14e-3  # skin depth en milimetros del Li a una frecuencia de 116.6MHz
 
-    def __init__(self, superposicion, secuencia='SP', k=0.5, borde_a_quitar=[0, 0, 0], skindepth=skdp, stl_file=False, volumen_medido='completo', **seqkwargs):
+    def __init__(self, superposicion, secuencia='SP', k=0.5, 
+                 borde_a_quitar=[0, 0, 0], skindepth=skdp, stl_file=False, 
+                 volumen_medido='completo', **seqkwargs):
 
         self.superposicion = superposicion
         self.secuencia = secuencia
@@ -273,18 +275,18 @@ class Medicion(object):
             # ahora el nuevo objeto a erosionar es el de la erosion anterior
             mask = (erode == 1)
 
-            # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
-            slz = int(obj.shape[0]-10)
-            sly = int(obj.shape[1]/2)
-            if n < 9:
-                matriz = tajada
-                matriz = beta*self.volumen_medido
-                plt.figure(666)
-                plt.subplot(3, 3, n+1)
-                plt.pcolormesh(matriz[slz, :, :])
-                plt.figure(667)
-                plt.subplot(3, 3, n+1)
-                plt.pcolormesh(matriz[:, sly, :])
+            # # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
+            # slz = int(obj.shape[0]-10)
+            # sly = int(obj.shape[1]/2)
+            # if n < 9:
+            #     matriz = tajada
+            #     matriz = beta*self.volumen_medido
+            #     plt.figure(666)
+            #     plt.subplot(3, 3, n+1)
+            #     plt.pcolormesh(matriz[slz, :, :])
+            #     plt.figure(667)
+            #     plt.subplot(3, 3, n+1)
+            #     plt.pcolormesh(matriz[:, sly, :])
 
         beta = beta*self.volumen_medido  # solo selecciono la parte del volumen medido
         return beta
@@ -399,7 +401,7 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @timer
-    def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo', KS=None, return_angle=False, Norm=False, T2est=0.14*1e-3):
+    def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo', KS=None, return_angle=False, Norm=False, T2est=0.18*1e-3):
         """
         Mediante el histograma 2D y teniendo como dato la amplitud de senal para
         cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes

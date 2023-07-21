@@ -46,8 +46,8 @@ skindepth = 0.014  # profundida de penetracion, mm
 
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular.dat')
-df0 = pd.DataFrame(parametros)
-df = df0.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
+df = pd.DataFrame(parametros)
+df = df.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
 parametros = np.array(df)
 
 
@@ -166,7 +166,7 @@ for par in parametros:
     with open(savepath+'tiempos.dat', 'a') as f:
         f.write(
             f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')
-
+    del muestra, delta, superposicion, medicion
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100} %"
