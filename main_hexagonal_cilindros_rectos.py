@@ -17,18 +17,19 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 import time
 
+
 def get_param_a(d):
-  if d>512:
-    msg = ("d debe ser mas chico")
-    raise Exception(msg)
-  if d%2==0:    
-    # distancias, parametros_a, errores relativos
-    Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
-    a = As[Ds==d][0]
-    return a
-  else:
-    msg = ("la distancia debe ser tal que distancia/vs sea PAR")
-    raise Exception(msg)
+    if d > 512:
+        msg = ("d debe ser mas chico")
+        raise Exception(msg)
+    if d % 2 == 0:
+        # distancias, parametros_a, errores relativos
+        Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
+        a = As[Ds == d][0]
+        return a
+    else:
+        msg = ("la distancia debe ser tal que distancia/vs sea PAR")
+        raise Exception(msg)
 
 
 # inicio el reloj
@@ -48,7 +49,7 @@ skindepth = 0.014  # profundida de penetracion, mm
 voxelSize = [1e-3]*3  # mm
 
 # N = [128, 1024, 1024]
-N = [256,256,256]
+N = [256, 256, 256]
 # N = [512,1024,1024]
 # N = [256,64,64]
 
@@ -95,10 +96,11 @@ medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
 distancia = d*vsx
 parametro_a = a*vsy
 radio = r*vsx
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, ubicacion='superior')
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',
+                  radio=radio, distancia=distancia, parametro_a=parametro_a, ubicacion='superior')
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
-                  # R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
+# R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
 # muestra = Muestra(volumen, medidas=medidas, geometria='bulk')
 
@@ -122,14 +124,15 @@ delta = Delta(muestra)
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
 # superposicion = Superposicion(muestra, delta)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
-superposicion = Superposicion(muestra, delta, superposicion_lateral=True, radio=0)
+superposicion = Superposicion(
+    muestra, delta, superposicion_lateral=True, radio=0)
 
 # %%
 plt.figure(1110101001010)
 matriz = (
-          superposicion.delta_sup *
-          superposicion.muestra_sup)[superposicion.z0+int(h*1e-3/vsz/2), :, :]
-          # superposicion.muestra_sup)[:, int(N[1]/2), :]
+    superposicion.delta_sup *
+    superposicion.muestra_sup)[superposicion.z0+int(h*1e-3/vsz/2), :, :]
+# superposicion.muestra_sup)[:, int(N[1]/2), :]
 matriz_mask = np.ma.masked_where(matriz == 0, matriz)
 plt.pcolormesh(matriz_mask, cmap='inferno_r')
 plt.colorbar()
@@ -153,12 +156,14 @@ if save:
 # plt.colorbar()
 
 # %%
+nnn += 1
 #medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
 # medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
-medicion = Medicion(superposicion, volumen_medido='muestra')
+medicion = Medicion(superposicion, volumen_medido='completo',
+                    stl_file=f'test{nnn}')
 # medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0])
 
-####, stl_file=f"{filename}")
+# , stl_file=f"{filename}")
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')0
 
 
@@ -167,7 +172,8 @@ medicion = Medicion(superposicion, volumen_medido='muestra')
 # %%
 
 # medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[12,0,0])
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5, T2est=0.6*1e-3 ,figure=153)
+ppmAxis, spec = medicion.CrearEspectro(
+    secuencia='sp', k=0.5, T2est=0.6*1e-3, figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-microestructuras', borde_a_quitar=[12,0,0])
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-bulk', borde_a_quitar=[12,0,0])

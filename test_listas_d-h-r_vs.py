@@ -162,7 +162,7 @@ for i in mylist:
 parametros = newlist
 #------------------------------------------------------------------------------
 
-filename = "./DataBases/ParametrosASimular.par"
+filename = "./DataBases/ParametrosASimular.dat"
 with open(filename, 'w') as f:
     header = f"# voxelSize\t Nz\t altura(um)\t radio(um)\t distancia (um)\t densidad\n"
     f.write(header)
