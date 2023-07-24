@@ -20,6 +20,7 @@ alturas_t = []
 distancias_t = []
 radios_t = []
 densidades_t = []
+vss_t = []
 
 nn = 0
 # folders = ['','2022-03-11_','2022-03-13_']
@@ -57,6 +58,7 @@ for folder in folders:
                     distancias_t.append(d)
                     radios_t.append(r)
                     densidades_t.append(p)
+                    vss_t.append(vs)
                     nn += 1
             except:
                 print(f"error al intentar leer: {archivo}")
@@ -109,19 +111,38 @@ delta_bulk = np.array(delta_bulk)
 amp_mic = np.array(amp_mic)
 amp_bulk = np.array(amp_bulk)
 
+alturas_t = np.array(alturas_t)
+distancias_t = np.array(distancias_t)
+radios_t = np.array(radios_t)
+densidades_t = np.array(densidades_t)
+vss_t = np.array(vss_t)
+
 
 amp_rel = amp_mic/amp_bulk
 corrimientos = delta_mic-delta_bulk
 
 # %%
 plt.figure(8491689)
-try:
-    plt.scatter(densidades_t, delta_mic, c=alturas_t)
-    # plt.scatter(np.array(distancias_t)-2*np.array(radios_t), delta_mic, c=radios_t)
-except ValueError:
-    plt.scatter(densidades_t[:-1], delta_mic, c=radios_t[:-1])
+# try:
+# plt.scatter(densidades_t, delta_mic, c=alturas_t)
+marks = ['o', 's', 'v', '*', 'p']
+nn = 0
+eje_x = densidades_t
+# eje_x = distancias_t - 2*radios_t
+for vs in [0.125, 0.25, 0.5, 1]:
+    condicion = (vss_t == vs)
+    cb = plt.scatter(eje_x[condicion], delta_mic[condicion],
+                     c=radios_t[condicion], marker=marks[nn], s=50,
+                     label=f"vs = {vs} um", vmin=1, vmax=20)  # , cmap='rainbow')
+    print(radios_t[condicion])
+    nn += 1
+plt.legend()
+plt.xlim([0, 1])
+plt.ylim([0, 25])
+# except ValueError:
+#     plt.scatter(densidades_t[:-1], delta_mic, c=radios_t[:-1])
 
-plt.colorbar()
+plt.colorbar(cb)
 
 # datos = np.array([alturas_t, radios_t, distancias_t, densidades_t, corrimientos, amp_rel, delta_mic, delta_bulk]).T
 # np.savetxt(path0+'resultados.dat', datos)
