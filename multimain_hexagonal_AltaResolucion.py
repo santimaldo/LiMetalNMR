@@ -46,9 +46,9 @@ skindepth = 14e-13  # profundida de penetracion, mm
 
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular.dat')
-df = pd.DataFrame(parametros)
-df = df.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
-parametros = np.array(df)
+parametros = pd.DataFrame(parametros)
+parametros = parametros.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
+parametros = np.array(parametros)
 
 
 # %%
@@ -67,11 +67,13 @@ ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:
     nnn += 1
+    if nnn<178:
+        continue # para correr solo lo que falta    
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad = par
 
     h = int(altura/vs)
-    r = int(radio/vs)
+    r = int(radio/vs)-  zc
     d = int(distancia/vs)
 
     radio = vs*r
@@ -101,7 +103,7 @@ for par in parametros:
 
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(
-            f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\t{densidad:.4f}\n')
+            f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t{densidad:.4f}\n')
     # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
     voxelSize = [vs*1e-3]*3  # mm
     vsz, vsy, vsx = voxelSize
@@ -122,7 +124,7 @@ for par in parametros:
     muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
-                      exceptions=False)
+                      exceptions=False)    
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
@@ -137,7 +139,7 @@ for par in parametros:
     medicion = Medicion(superposicion)
     # guardado
     regiones = ['', '-microestructuras', '-bulk']
-    # -------- centro--------------------------------------------------------------
+    #%% -------- centro--------------------------------------------------------------
     for region in regiones:
         print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
         # secuencia: ..... SP ......
@@ -165,8 +167,9 @@ for par in parametros:
     print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
     with open(savepath+'tiempos.dat', 'a') as f:
         f.write(
-            f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')
-    del muestra, delta, superposicion, medicion
+            f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')    
+    del muestra, delta, superposicion, medicion, volumen
+    del ppmAxis, spec, datos
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100} %"
