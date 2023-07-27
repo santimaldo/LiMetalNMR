@@ -32,7 +32,7 @@ def get_param_a(d):
     else:
         msg = ("la distancia debe ser tal que distancia/vs sea PAR")
         raise Exception(msg)
-
+stop
 
 # %%----------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -48,7 +48,17 @@ skindepth = 14e-13  # profundida de penetracion, mm
 parametros = np.loadtxt('./DataBases/ParametrosASimular.dat')
 parametros = pd.DataFrame(parametros)
 parametros = parametros.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
-parametros = np.array(parametros)
+parametros0 = np.array(parametros)
+
+# meto un calculo al medio:
+# radio, distancia y vs estan en el archivo:
+parametros2 = np.loadtxt('./DataBases/ParametrosASimular_2.dat')
+df2 = pd.DataFrame(parametros2)
+df2 = df2.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
+parametros2 = np.array(df2)
+
+parametros = np.concatenate([parametros2, parametros0])
+
 
 
 # %%
@@ -66,9 +76,7 @@ nnn = -1
 ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:
-    nnn += 1
-    if nnn<178:
-        continue # para correr solo lo que falta    
+    nnn += 1    
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad = par
 
