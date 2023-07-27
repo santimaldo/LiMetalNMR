@@ -56,7 +56,7 @@ parametros2 = pd.DataFrame(parametros2)
 parametros2 = parametros2 .sort_values(by=[1, 2, 0, 3, 4], ascending=True)
 parametros2 = np.array(parametros2 )
 
-parametros = np.concatenate([parametros2, parametros])
+parametros = np.concatenate([parametros2, parametros[201:,:]])
 del parametros2
 
 
@@ -81,7 +81,7 @@ for par in parametros:
     vs, Nz, altura, radio, distancia, densidad = par
 
     h = int(altura/vs)
-    r = int(radio/vs)-  zc
+    r = int(radio/vs)
     d = int(distancia/vs)
 
     radio = vs*r
