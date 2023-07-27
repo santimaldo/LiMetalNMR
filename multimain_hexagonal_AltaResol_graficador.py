@@ -148,7 +148,7 @@ marks = ['^','o', 's', 'v', '*', 'p']
 
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
+plot_Deltadelta = False
 
 alturas = df['altura'].unique()
 radios = df['radio'].unique()
@@ -160,7 +160,7 @@ sin_repetir_data = True
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df.query(f'altura == {h} and radio==50')
+    data_h = df.query(f'altura == {h}')
     nn = 0
     for vs in vss:                    
         if sin_repetir_data:
@@ -317,57 +317,58 @@ if filename:
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
-
-from scipy.interpolate import griddata
-
-x = df['densidad']
-y = df['radio']/df['altura']
-z = df['delta_mic']-df['delta_bulk']
-
-points = np.array([x,y]).T
-values = df['delta_mic']-df['delta_bulk']
-
-grid_y, grid_x = np.meshgrid(np.linspace(min(y), max(y), 100),
-                             np.linspace(min(x), max(x), 100), indexing='ij')
-
-grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
-grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
-grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
-
-
-
-fig, axs = plt.subplots(1,2, num=78621)
-plt.subplot(121)
-vmin = min(z)
-vmax = max(z)
-ax = axs[0]
-ax.pcolormesh(grid_x, grid_y, grid_z0, vmin=vmin, vmax=vmax)
-ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
-            vmin=vmin, vmax=vmax)   # data
-ax.set_title('interpolacion 2D: Nearest')
-ax.set_ylabel("r/h")
-ax.set_xlabel(r"$\rho$")
-ax = axs[1]
-ax.pcolormesh(grid_x, grid_y, grid_z1, vmin=vmin, vmax=vmax)
-ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
-            vmin=vmin, vmax=vmax)   # data
-ax.set_title('interpolacion 2D: Linear')
-ax.set_ylabel("r/h")
-ax.set_xlabel(r"$\rho$")
-
-if plot_3d:
-    from mpl_toolkits import mplot3d
-     
-    # Creating dataset
-    x = grid_x
-    y = grid_y
-    z = grid_z1
-     
-    # Creating figure
-    fig = plt.figure(num=4566876, figsize =(14, 9))
-    ax = plt.axes(projection ='3d')
-     
-    # Creating plot
-    ax.plot_surface(x, y, z, cmap = 'viridis')
+interpolar2D = False
+if interpolar2D:
+    from scipy.interpolate import griddata
+    
+    x = df['densidad']
+    y = df['radio']/df['altura']
+    z = df['delta_mic']-df['delta_bulk']
+    
+    points = np.array([x,y]).T
+    values = df['delta_mic']-df['delta_bulk']
+    
+    grid_y, grid_x = np.meshgrid(np.linspace(min(y), max(y), 100),
+                                 np.linspace(min(x), max(x), 100), indexing='ij')
+    
+    grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
+    grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
+    grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
+    
+    
+    
+    fig, axs = plt.subplots(1,2, num=78621)
+    plt.subplot(121)
+    vmin = min(z)
+    vmax = max(z)
+    ax = axs[0]
+    ax.pcolormesh(grid_x, grid_y, grid_z0, vmin=vmin, vmax=vmax)
+    ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
+                vmin=vmin, vmax=vmax)   # data
+    ax.set_title('interpolacion 2D: Nearest')
     ax.set_ylabel("r/h")
     ax.set_xlabel(r"$\rho$")
+    ax = axs[1]
+    ax.pcolormesh(grid_x, grid_y, grid_z1, vmin=vmin, vmax=vmax)
+    ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
+                vmin=vmin, vmax=vmax)   # data
+    ax.set_title('interpolacion 2D: Linear')
+    ax.set_ylabel("r/h")
+    ax.set_xlabel(r"$\rho$")
+    
+    if plot_3d:
+        from mpl_toolkits import mplot3d
+         
+        # Creating dataset
+        x = grid_x
+        y = grid_y
+        z = grid_z1
+         
+        # Creating figure
+        fig = plt.figure(num=4566876, figsize =(14, 9))
+        ax = plt.axes(projection ='3d')
+         
+        # Creating plot
+        ax.plot_surface(x, y, z, cmap = 'viridis')
+        ax.set_ylabel("r/h")
+        ax.set_xlabel(r"$\rho$")
