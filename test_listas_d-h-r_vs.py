@@ -25,10 +25,12 @@ skdp = 14 # um
 # volumen simulado.
 VSs = [0.125, 0.25, 0.5, 1] # um
 
+
 # todo en micrometros
 radios = [0.05,1,2,5,10,20,50]
 rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
 alturas = [10, 50]
+
 
 Nx = 1024
 Ny = 1024

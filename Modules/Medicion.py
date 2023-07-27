@@ -79,10 +79,8 @@ class Medicion(object):
     + spec           : np.array()       - Espectro. Es un array COMPLEJO
     """
 
-    skdp = 14e-3  # skin depth en milimetros del Li a una frecuencia de 116.6MHz
-
     def __init__(self, superposicion, secuencia='SP', k=0.5,
-                 borde_a_quitar=[0, 0, 0], skindepth=skdp, stl_file=False,
+                 borde_a_quitar=[0, 0, 0], skindepth=14e-3, stl_file=False,
                  volumen_medido='completo', **seqkwargs):
 
         self.superposicion = superposicion
@@ -115,7 +113,6 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 
     @timer
     def crear_volumen_medido(self, volumen_medido):
@@ -237,7 +234,7 @@ class Medicion(object):
         # inicializo variables
         z0 = int(self.superposicion.z0)
         vs = self.superposicion.muestra.voxelSize
-        skdp = self.skindepth
+        skdp = self.skdp
         obj = self.superposicion.muestra_sup
         beta = np.zeros_like(obj)
         # chequeo que el voxelSize sea igual en todas las direcciones
@@ -254,7 +251,8 @@ class Medicion(object):
         struct = ndimage.generate_binary_structure(3, 1)
         # hago suficientes slices como para llegar a una profundidad de 5xSkinDepth
         # es decir, 98um
-        n_slices = int(5*skdp/vs)
+        n_slices = int(5*skdp)
+        print(n_slices)
         for n in range(n_slices):
             # erosiono:
             erode = ndimage.binary_erosion(mask, struct)
@@ -341,7 +339,7 @@ class Medicion(object):
         # --------beta----------
         # vamos a elegir los bins en beta de acuerdo al tamaño de voxel, para
         # asegurarnos de contar bien. para ello, definimos una variable n
-        n = np.arange(int(7*skdp/vs)+1)  # numero de voxel hacia el interior
+        n = np.arange(int(5*skdp/vs)+1)  # numero de voxel hacia el interior
         beta_bin_edges = np.exp(-n*vs/skdp)
         # distancia a la superficie, representada por el centro del voxel
         r = (n[:-1]+0.5)*vs
