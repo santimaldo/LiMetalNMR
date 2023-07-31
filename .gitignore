@@ -5,10 +5,13 @@
 *.dat
 # ignore all .stl files
 *.stl
-# ignore all .svg files
+# ignore all figures
 *.svg
-# ignore all .png files
 *.png
+*.jpg
+*.eps
+# ignore all .pdf files
+*.pdf
 # ignore all .txt files
 *.txt
 # ignore all .opj files

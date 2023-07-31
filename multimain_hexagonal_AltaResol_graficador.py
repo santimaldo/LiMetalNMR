@@ -147,8 +147,8 @@ axs1 = gs1.subplots()
 marks = ['^','o', 's', 'v', '*', 'p']
 
 filename = False
-# filename = "Deltadelta_vs_density"
-plot_Deltadelta = False
+filename = "Deltadelta_vs_density"
+plot_Deltadelta = True
 
 alturas = df['altura'].unique()
 radios = df['radio'].unique()
@@ -165,12 +165,10 @@ for h in alturas:
     for vs in vss:                    
         if sin_repetir_data:
             min_vs = data_h.groupby(['radio','densidad_nominal'])['vs'].idxmin()
-            data_h = data_h.loc[min_vs.values]
+            data = data_h.loc[min_vs.values]
         else:
-            data = data_h.query(f'vs == {vs}')       
-
+            data = data_h[data_h['vs']==vs]       
         
-        data = data_h
         # eje_x = data['distancia'] - 2*data['radio']        
         eje_x = data['densidad']         
     
