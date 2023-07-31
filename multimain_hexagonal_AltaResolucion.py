@@ -17,6 +17,7 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 # from Modules.Funciones import *
 import time
+from datetime import datetime
 import pandas as pd
 
 
@@ -96,7 +97,10 @@ for par in parametros:
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     msj = f"altura= {h:d}x{vs}um = {altura} um,\nradio= {r:d}x{vs}um = {radio} um,\ndistancia = {d:d}x{vs}um = {distancia} um,\ndensidad = {densidad:.2f}"
     print(msj)
-    print(' ')
+    print(' ')    
+    msj = f"      hora: {datetime.now().strftime('%H:%M:%S')}"
+    print(msj)
+    print(' ')                                                              
     msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100:.2f} %"
     print(msj)
     elapsed = (time.time() - t0)
