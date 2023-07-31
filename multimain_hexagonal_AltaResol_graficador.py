@@ -147,10 +147,13 @@ alturas = df['altura'].unique()
 radios = df['radio'].unique()
 vss = df['vs'].sort_values().unique()
 
-# quito un punto que esta feo.
+# quito un puntos que esta feos.
 try:
-    index = df.index[(df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)]
-    df.drop(index[0], inplace=True)
+    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)    
+    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)    
+    # condicion2 = False
+    index = df.index[condicion1 | condicion2]
+    df.drop(index, inplace=True)
 except:
     pass
 
@@ -160,11 +163,11 @@ filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = True
+sin_repetir_data = False
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df.query(f'altura == {h}')
+    data_h = df[(df['altura']== h) & (df['radio']== 50)]
     nn = 0
     for vs in vss:                    
         if sin_repetir_data:

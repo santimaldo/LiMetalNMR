@@ -25,11 +25,18 @@ skdp = 14 # um
 # volumen simulado.
 VSs = [0.125, 0.25, 0.5, 1] # um
 
+# # todo en micrometros
+# radios = [0.05,1,2,5,10,20,50]
+# rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
+# alturas = [10, 50]
 
-# todo en micrometros
-radios = [0.05,1,2,5,10,20,50]
+
+# para cilindros aleatorios:
+# todo en micrometros 
+VSs = [0.25] # um
+radios = [2]
 rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
-alturas = [10, 50]
+alturas = [10]
 
 
 Nx = 1024
@@ -164,7 +171,7 @@ for i in mylist:
 parametros = newlist
 #------------------------------------------------------------------------------
 
-filename = "./DataBases/ParametrosASimular.dat"
+filename = "./DataBases/ParametrosASimular_aleatorios.dat"
 with open(filename, 'w') as f:
     header = f"# voxelSize\t Nz\t altura(um)\t radio(um)\t distancia (um)\t densidad\n"
     f.write(header)
