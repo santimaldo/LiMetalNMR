@@ -142,19 +142,23 @@ axs = gs.subplots()
 fig1 = plt.figure(num=2, figsize=(10,5))
 gs1 = fig1.add_gridspec(1,2,wspace=0.05)
 axs1 = gs1.subplots()
-# try:
-# plt.scatter(densidades_t, delta_mic, c=alturas_t)
-marks = ['^','o', 's', 'v', '*', 'p']
-
-filename = False
-filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
 
 alturas = df['altura'].unique()
 radios = df['radio'].unique()
 vss = df['vs'].sort_values().unique()
 
+# quito un punto que esta feo.
+try:
+    index = df.index[(df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)]
+    df.drop(index[0], inplace=True)
+except:
+    pass
 
+marks = ['^','o', 's', 'v', '*', 'p']
+
+filename = False
+# filename = "Deltadelta_vs_density"
+plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 sin_repetir_data = True
 letra = ['a', 'b']
@@ -315,7 +319,10 @@ if filename:
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
-interpolar2D = False
+interpolar2D = True
+plot_3d = True
+
+
 if interpolar2D:
     from scipy.interpolate import griddata
     
