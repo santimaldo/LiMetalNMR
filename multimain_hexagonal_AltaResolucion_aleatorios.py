@@ -51,11 +51,9 @@ skindepth = 14e-13  # profundida de penetracion, mm
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular_aleatorios.par')
 
-# 
-# parametros = np.array([0.2500,	512,	10.0000,	2.0000,	5.5000	0.4976])
 
 # %%
-savepath = './Outputs/2023-07-31_Cilindros_aleatorios_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -133,6 +131,11 @@ for n_iter in range(Niteraciones):
                           radio=radio_mm, distancia=distancia_mm, 
                           parametro_a=parametro_a, ubicacion='superior')       
                           #exceptions=False)
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        densidad_volumetrica = muestra.densidad_volumetrica
+        with open(savepath+'/Densidades.dat', 'a') as f:
+            f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
+                    f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # CREACION DEL OBJETO DELTA-------------------------------------------------
         # delta es la perturbacion de campo magnetico

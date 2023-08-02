@@ -144,7 +144,7 @@ corrimientos = delta_mic-delta_bulk
 # %%
 fontsize = 16
 plt.rcParams.update({'font.size': fontsize})
-fig = plt.figure(num=1, figsize=(8,5))
+fig = plt.figure(num=1, figsize=(7,5))
 gs = fig.add_gridspec(1,1,wspace=0.05)
 axs = gs.subplots()
 
@@ -156,7 +156,7 @@ vss = df['vs'].sort_values().unique()
 ms = 10
 
 filename = False
-# filename = "Deltadelta_vs_density"
+filename = "RandomOrientations"
 plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 # eje_x = data['distancia'] - 2*data['radio']        
@@ -287,11 +287,6 @@ else:
 if filename:
     fig.savefig(f"{path0}/{filename}.png", format='png', bbox_inches='tight')
     fig.savefig(f"{path0}/{filename}.eps", format='eps',bbox_inches='tight')
-    
-    fig1.savefig(f"{path0}/Amplitud_vs_density.png", format='png', bbox_inches='tight')
-    fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')
-
-
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
