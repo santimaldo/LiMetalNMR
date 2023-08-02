@@ -43,6 +43,7 @@ Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
+Nxy = 512
 
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular.dat')
@@ -50,16 +51,8 @@ parametros = pd.DataFrame(parametros)
 parametros = parametros.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
 parametros = np.array(parametros)
 
-# meto un calculo al medio:
-# radio, distancia y vs estan en el archivo:
-parametros2 = np.loadtxt('./DataBases/ParametrosASimular_2.dat')
-parametros2 = pd.DataFrame(parametros2)
-parametros2 = parametros2 .sort_values(by=[1, 2, 0, 3, 4], ascending=True)
-parametros2 = np.array(parametros2 )
-
-parametros = np.concatenate([parametros2, parametros[201:,:]])
-del parametros2
-
+# hago una corrida con parametros elegidos:
+parametros = np.array([np.array([0.2500, 512, 50.0000, 2.0000, 5.5000, 0.4976])])
 
 
 # %%
@@ -119,7 +112,7 @@ for par in parametros:
     # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
     voxelSize = [vs*1e-3]*3  # mm
     vsz, vsy, vsx = voxelSize
-    Nx = Ny = 1024
+    Nx = Ny = Nxy
     N = [Nz, Ny, Nx]
     volumen = SimulationVolume(voxelSize=voxelSize, N=N)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -157,7 +150,8 @@ for par in parametros:
         # secuencia: ..... SP ......
         # - - - - SP
         ppmAxis, spec = medicion.CrearEspectro(
-            secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region))
+            secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region),
+            figure=1)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
             int(altura), radio, distancia, vs, region)
@@ -173,15 +167,19 @@ for par in parametros:
         # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         # file = 'SMC16-k1/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SMC64k1{}.dat'.format(int(altura), radio, distancia, vs, region)
         # np.savetxt(savepath+file, datos)
-
+        ppmAxis, spec = medicion.CrearEspectro(
+            secuencia='smc', k=1, volumen_medido='completo{}'.format(region),
+            figure=2)
+        
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0
     print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
     with open(savepath+'tiempos.dat', 'a') as f:
         f.write(
             f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')    
-    del muestra, delta, superposicion, medicion, volumen
-    del ppmAxis, spec, datos
+    
+     # del muestra, delta, superposicion, medicion, volumen
+    # del ppmAxis, spec, datos
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100} %"

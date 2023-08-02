@@ -10,7 +10,7 @@ Created on Fri Jun 30 18:33:19 2023
 #En este main integro el espectro promedio del electrodo
 
 
-import numpy as np
+-
 import matplotlib.pyplot as plt
 from Modules.SimulationVolume import *
 from Modules.Muestra import *
