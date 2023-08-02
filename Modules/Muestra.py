@@ -57,6 +57,10 @@ class Muestra(object):
                                 'superior': La muestra se ubica en la parte
                                             superior dejando 10 voxels de
                                             changui.
+  + densidad: float       -   Densidad de area ocupada por microest. Amic/Atot
+  + densidad_volumetrica: float
+                          -   Densidad de volumen ocupado por microest.
+                              VolMicroest/VolumenCaja                              
   + **geokwargs:          -   Argumentos que neceseita cada geometria en
                               particular
   """
@@ -66,7 +70,8 @@ class Muestra(object):
   
   
   def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li,
-               skdp=14e-3, exceptions=True, ubicacion='centro', **geokwargs):
+               skdp=14e-3, exceptions=True, ubicacion='centro', 
+               calcular_densidad = True, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
     # y el volumen simulado:
     # 1)OBTENCION DE INPUTS E INICIALIZACION
@@ -113,6 +118,8 @@ class Muestra(object):
     self.pCubierto = None
     self.exceptions = exceptions
     self.ubicacion = ubicacion
+    self.densidad = None
+    self.densidad_volumetrica = None
     # 2)_______________________________________________________________________
     # 2.1) MEDIDAS: dimensiones de la muestra en mm ---------------------------
     #chequeo que el FOV tenga un tamaño adecuado
@@ -149,6 +156,9 @@ class Muestra(object):
     self.definir_slices()
     # 3)_______________________________________________________________________
     self.construir_volumen()
+    # 4)_______________________________________________________________________
+    if calcular_densidad:
+        self.Calcular_densidad()
 
 
   #============================================================================
@@ -253,7 +263,14 @@ class Muestra(object):
     # guardo la variable matriz en el atributo matriz
     #self.matriz = matriz
     return matriz
-  #____________________________________________________________________________
+  #____________________________________________________________________________  
+  def Calcular_densidad(self):
+    """
+    El nombre lo dice
+    """
+    Nmz, Nmy, Nmx = self.N_muestra
+    self.densidad  = np.sum(self.muestra[0,:,:]) / (Nmx*Nmy)
+    self.densidad_volumetrica = np.sum(self.muestra) / (Nmx*Nmy*Nmz)     
   #____________________________________________________________________________
   #____________________________________________________________________________
 
