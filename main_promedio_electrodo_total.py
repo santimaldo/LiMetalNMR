@@ -68,10 +68,11 @@ lista_radios = ['000','030','050','080','100','130','160','180','200','230','260
 espectros_R = []
 
 RADIO = '000'
-for RADIO in lista_radios:
 
-    muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_aleatorios_2', ancho=16e-3, distancia= 20e-3)
-    delta = Delta(muestra)
+
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_dist_cte', ancho=16e-3, distancia= 20e-3)
+delta = Delta(muestra)
+for RADIO in lista_radios:
     superposicion = Superposicion(muestra, delta, radio = RADIO, z0=84e-3)
     medicion = Medicion(superposicion, volumen_medido='centro')
     ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
@@ -79,7 +80,6 @@ for RADIO in lista_radios:
     espectros_R.append([ppmAxis,spec])
     
     
-
 
 #%%
 #Contruyo el promedio del espectro total
@@ -91,7 +91,7 @@ R_e = 6000 #um
 
 
 
-A_elec = np.pi*R*R #um*um
+A_elec = np.pi*R_e*R_e #um*um
 print(A_elec)
 veces = A_elec/A_mic
 print(veces)
@@ -150,6 +150,8 @@ Spec_prom = (w_it_list[0]*espectro_1[1] + w_it_list[1]*espectro_2[1]+ w_it_list[
              + w_it_list[20]*espectro_21[1]+ w_it_list[21]*espectro_22[1]+ w_it_list[22]*espectro_23[1]+ w_it_list[23]*espectro_24[1])/1721
 
 
+datos_espectro_prom_R = np.array([np.real(espectro_1[0]),np.real(Spec_prom)]).T
+np.savetxt('./datos_espectro_prom_R_CVDC.dat', datos_espectro_prom_R)
     
 
 
