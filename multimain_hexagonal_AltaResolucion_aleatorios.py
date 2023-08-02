@@ -39,7 +39,7 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 10
+Niteraciones = 1
 
 
 # Parametros fisicos
@@ -50,6 +50,9 @@ skindepth = 14e-13  # profundida de penetracion, mm
 
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular_aleatorios.par')
+
+# 
+# parametros = np.array([0.2500,	512,	10.0000,	2.0000,	5.5000	0.4976])
 
 # %%
 savepath = './Outputs/2023-07-31_Cilindros_aleatorios_hexagonal_AltaResolucion/'

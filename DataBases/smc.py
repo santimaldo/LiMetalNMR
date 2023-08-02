@@ -47,7 +47,7 @@ def evolucion(rho, t, T1, T2, rho0=None):
     return E_diag + E_nodiag
 
 #%%
-guardar = False
+guardar = True
 savepath = "./SMC/"
 
 r3 = np.sqrt(3)
@@ -72,8 +72,8 @@ T1 = 170e-3
 
 #w = 0
 
-N = 64
-b = 1/12
+N = 16
+b = 1/14
 r_list = np.linspace(0, int(8/b-1), 1024)
 # evanesencia: B1 = B10*beta = B10 * exp(-r/12um)
 beta = np.exp(-b*r_list)
@@ -84,7 +84,7 @@ k_list = np.arange(0.5, 3.1, 0.1)
 
 
 #"""
-#elijo cietos valores de k, sólo los  correspondientes a slices
+#elijo ciertos valores de k, sólo los  correspondientes a slices
 #"""
 #r_list = np.arange(0.25, 24, 0.5)
 #k_list = np.exp(b*r_list)
