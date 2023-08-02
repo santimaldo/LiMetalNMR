@@ -39,8 +39,8 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 1
-
+Niteraciones = 20
+Nxy = 512
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
@@ -112,7 +112,7 @@ for n_iter in range(Niteraciones):
         # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
         voxelSize = [vs*1e-3]*3  # mm
         vsz, vsy, vsx = voxelSize
-        Nx = Ny = 512        
+        Nx = Ny = Nxy      
         N = [Nz, Ny, Nx]
         volumen = SimulationVolume(voxelSize=voxelSize, N=N)
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -133,6 +133,7 @@ for n_iter in range(Niteraciones):
                           #exceptions=False)
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         densidad_volumetrica = muestra.densidad_volumetrica
+        print(f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
         with open(savepath+'/Densidades.dat', 'a') as f:
             f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
                     f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')

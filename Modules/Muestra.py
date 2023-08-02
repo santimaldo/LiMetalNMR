@@ -269,8 +269,8 @@ class Muestra(object):
     El nombre lo dice
     """
     Nmz, Nmy, Nmx = self.N_muestra
-    self.densidad  = np.sum(self.muestra[0,:,:]) / (Nmx*Nmy)
-    self.densidad_volumetrica = np.sum(self.muestra) / (Nmx*Nmy*Nmz)     
+    self.densidad  = np.sum(self.muestra[0,:,:])/self.chi / (Nmx*Nmy)
+    self.densidad_volumetrica = np.sum(self.muestra)/self.chi / (Nmx*Nmy*Nmz)     
   #____________________________________________________________________________
   #____________________________________________________________________________
 
