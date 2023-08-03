@@ -23,34 +23,39 @@ alturas_t = []
 distancias_t = []
 radios_t = []
 densidades_t = []
+densidades_vol_t = []
 vss_t = []
 Niter_t = []
 
-Niteraciones=10
+Niteraciones=20
 
 nn = 0
 data_dir0 = "2023-07-20_Cilindros_hexagonal_AltaResolucion"
-data_dir = "2023-07-31_Cilindros_aleatorios_hexagonal_AltaResolucion"
+data_dir = "2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion"
 
 path0 = f"./Outputs/{data_dir0}/"
 path = f"./Outputs/{data_dir}/"
-distancias, radios, alturas, vss, densidades = np.loadtxt(
-    path+'Densidades.dat').T
-for ii in range(7):    
+distancias, radios, alturas, vss, densidades, densidades_volumetricas = np.loadtxt(path+'Densidades.dat').T
+
+Ndens = 7 # cuantos valores de densidad apunte
+for ii in range(Ndens):    
     # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
     h = alturas[ii]
     d = distancias[ii]
     r = radios[ii]
-    p = densidades[ii]
+    p = densidades[ii]    
     vs = vss[ii]
 
     regiones = ['-microestructuras', '-bulk']
     col = ['k', 'r', 'b']
 
     for nn_iter in range(Niteraciones+1):
-        Niter = f'niter{nn_iter}_'
-        directorio = path
-        if nn_iter == Niteraciones:
+        
+        if nn_iter < Niteraciones:
+            pv = densidades_volumetricas[nn_iter*Ndens+ii]        
+            Niter = f'niter{nn_iter}_'
+            directorio = path            
+        else:
             Niter = ''
             directorio = path0
         n_r = -1
@@ -67,8 +72,9 @@ for ii in range(7):
                     distancias_t.append(d)
                     radios_t.append(r)
                     densidades_t.append(p)
+                    densidades_vol_t.append(pv)
                     vss_t.append(vs)
-                    Niter_t.append(nn_iter)
+                    Niter_t.append(nn_iter)                    
                     nn += 1
             except:
                 print(f"error al intentar leer: {archivo}")
@@ -111,8 +117,7 @@ for ii in range(7):
                 delta_bulk.append(ppmAxis[spec == np.max(spec)][0])
                 i_bulk = np.trapz(spec, x=ppmAxis)
                 amp_bulk.append(i_bulk)
-
-
+        
 #---------------- guardado
 
 
@@ -125,14 +130,16 @@ alturas_t = np.array(alturas_t)
 distancias_t = np.array(distancias_t)
 radios_t = np.array(radios_t)
 densidades_t = np.array(densidades_t)
+densidades_vol_t = np.array(densidades_vol_t)
 vss_t = np.array(vss_t)
 
 #%%
 df = pd.DataFrame(list(zip(alturas_t, radios_t, 
-                           densidades_t, distancias_t, vss_t,
+                           densidades_t, densidades_vol_t, distancias_t, vss_t,
                            delta_mic, delta_bulk, amp_mic, amp_bulk,
                            np.around(densidades_t, decimals=1), Niter_t)),
-                  columns= ['altura', 'radio', 'densidad', 'distancia', 'vs',
+                  columns= ['altura', 'radio', 'densidad', 
+                            'densidad_volumetrica', 'distancia', 'vs',
                             'delta_mic', 'delta_bulk', 'amp_mic', 'amp_bulk',
                             'densidad_nominal', 'Niter'])
 
@@ -162,6 +169,7 @@ plot_Deltadelta = True
 # eje_x = data['distancia'] - 2*data['radio']        
 
 
+
 # cilindros rectos:
 data = df[df['Niter']==Niteraciones]
 data = data.sort_values(by='densidad', ascending=True)
@@ -184,7 +192,8 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color='k', lw=1)# marker=marker,
 
 # cilindros aleatorios
 data = df[df['Niter']<Niteraciones]          
-eje_x = data['densidad']         
+eje_x = data['densidad_volumetrica']         
+# eje_x = data['densidad']         
 ax = axs
 if plot_Deltadelta:
     eje_y = data['delta_mic']-data['delta_bulk']
@@ -192,12 +201,12 @@ else:
     eje_y = data['delta_mic']
 
 label = "Random orientation cylinders"    
-ax.scatter(eje_x, eje_y, s = 10*ms, facecolor='None', edgecolor='purple',
-           marker='^', label=label)
+ax.scatter(eje_x, eje_y, s = 10*ms, facecolor='purple', #edgecolor='purple',
+           marker='o', label=label, alpha=0.3)
                  
 ax.legend(fontsize=fontsize-2)
 
-ax.set_xlim([0, 0.8])
+ax.set_xlim([0.05, 0.75])
 if plot_Deltadelta:
     ax.set_ylim([4, 22])            
 else:
@@ -208,6 +217,7 @@ else:
     
 # agrego ejes y leyendas:------------------------------------------------------
 ax.set_xlabel('Density')
+# ax.set_xlabel('Density')
 if plot_Deltadelta:
 # ax.set_ylabel(r'$\delta_{mic}-\delta_{bulk}$ [ppm]')
     ax.set_ylabel(r'$\Delta\delta$ [ppm]')        
@@ -285,8 +295,9 @@ else:
 
 
 if filename:
-    fig.savefig(f"{path0}/{filename}.png", format='png', bbox_inches='tight')
-    fig.savefig(f"{path0}/{filename}.eps", format='eps',bbox_inches='tight')
+    fig.savefig(f"{path}/{filename}.png", format='png', bbox_inches='tight')    
+    fig.savefig(f"{path}/{filename}.eps", format='eps',bbox_inches='tight')
+    fig.savefig(f"{path}/{filename}.pdf", format='pdf',bbox_inches='tight')
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
