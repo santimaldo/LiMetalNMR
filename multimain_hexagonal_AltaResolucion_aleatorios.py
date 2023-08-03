@@ -105,10 +105,7 @@ for n_iter in range(Niteraciones):
                 t_est/60, t_est/60/60)
             print(msj)
             print(' ')
-    
-        with open(savepath+'/Densidades.dat', 'a') as f:
-            f.write(
-                f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t{densidad:.4f}\n')
+        
         # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
         voxelSize = [vs*1e-3]*3  # mm
         vsz, vsy, vsx = voxelSize
