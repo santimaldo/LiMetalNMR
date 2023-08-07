@@ -1,0 +1,1 @@
+Son los cilindros en distribucion hexagonal, pero crecen con angulo de 45 grados

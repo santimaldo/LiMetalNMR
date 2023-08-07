@@ -40,7 +40,7 @@ def get_param_a(d):
 
 # Niteraciones de cada conjunto de parametros:
 Niteraciones = 1
-Nxy = 256
+Nxy = 512
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
