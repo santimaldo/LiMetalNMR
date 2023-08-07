@@ -400,7 +400,10 @@ class Medicion(object):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @timer
-    def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, loadpath='./DataBases/', volumen_medido='completo', KS=None, return_angle=False, Norm=False, T2est=0.18*1e-3):
+    def CrearEspectro(self, secuencia=None, k=0.5, N=16, figure=False, 
+                      loadpath='./DataBases/', volumen_medido='completo', 
+                      KS=None, return_angle=False, Norm=False, 
+                      T2est=0.18*1e-3):
         """
         Mediante el histograma 2D y teniendo como dato la amplitud de senal para
         cierta secuencia (SP, SMC) de acuerdo a los parametros correspondientes

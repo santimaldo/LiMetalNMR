@@ -36,7 +36,7 @@ save = False
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
-skindepth = 0.012  # profundida de penetracion, mm
+skindepth = 0.014  # profundida de penetracion, mm
 
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
@@ -45,7 +45,7 @@ voxelSize = [0.25e-3]*3  # mm
 
 # N = [128, 1024, 1024]
 #N = [256,128,128]
-N = [512,1024,1024]
+N = [256,512,512]
 # N = [256,64,64]
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
@@ -63,9 +63,9 @@ vsz, vsy, vsx = voxelSize
 path = "./Outputs/2023-07-19_CilindosRectos_HR"
 
 # altura (h), radio(r) y distancia (d) en micrometros
-h = 50
-r = 10
-d = 22
+h = 10
+r = 2
+d = 7
 
 
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
@@ -73,7 +73,7 @@ d = 22
 h_vx = int(h*1e-3/voxelSize[0])
 r_vx = int(r*1e-3/voxelSize[1])
 d_vx = int(d*1e-3/voxelSize[1])
-a = get_param_a(d)
+a = get_param_a(d_vx)
 # densidad local:
 p_loc = 0.5
 rh = 50
@@ -81,19 +81,20 @@ rh = 50
 filename = f'h{h:d}_r{r:d}_dist{d:d}_densLoc{p_loc:.2f}'
 
 # rMAX = d/2 - 1
-if r > (d/2-1):
+if r > (d_vx/2-1):
     raise Exception("El radio elegido es muy grande")
 
 # calculo cuantas celdas unitarias entran en la maxima superf que puedo simular
 # (sup max:  Nx/2*Ny/2)
-N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+N_celdas_x = (Nx/2)//d_vx   # // es division entera en python3  (floor)
 N_celdas_y = (Ny/2)//(2*a)
 
-medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
-distancia = d*vsx
+medidas = [h_vx*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d_vx*vsx]
+distancia = d_vx*vsx
 parametro_a = a*vsy
-radio = r*vsx
+radio = r_vx*vsx
 muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_45grados_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
                   # R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
@@ -104,8 +105,8 @@ muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radi
 # calculo densidad usando celda unidad
 
 # la muestra vale Chi en el objeto
-A_mic = np.sum(muestra.muestra[1, :int(2*a), :int(d)]/Chi)
-A_tot = 2*a*d
+A_mic = np.sum(muestra.muestra[1, :int(2*a), :int(d_vx)]/Chi)
+A_tot = 2*a*distancia
 A_bulk = A_tot-A_mic
 
 densidad = A_mic/A_tot
@@ -123,7 +124,7 @@ delta = Delta(muestra)
 superposicion = Superposicion(muestra, delta, superposicion_lateral=True, radio=400)
 
 # %%
-plt.figure(1110101001010)
+plt.figure(1110101001011)
 matriz = (superposicion.delta_sup *
           superposicion.muestra_sup)[-int(h*1e-3/vsz/2), :, :]
 matriz_mask = np.ma.masked_where(matriz == 0, matriz)
@@ -163,7 +164,7 @@ medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0
 # %%
 
 # medicion = Medicion(superposicion, volumen_medido='muestra', borde_a_quitar=[12,0,0])
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5, T2est=0.6*1e-3 ,figure=153)
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5,figure=153, T2est=0.6e-3)
 # medicion = Medicion(superposicion, volumen_medido='muestra-microestructuras', borde_a_quitar=[12,0,0])
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153)
 # medicion = Medicion(superposicion, volumen_medido='muestra-bulk', borde_a_quitar=[12,0,0])

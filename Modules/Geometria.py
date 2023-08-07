@@ -28,6 +28,7 @@ def funciones(geometria):
   funciones['clusters_hexagonal'] = clusters_hexagonal
   funciones['clusters_hexagonal_SinCeldaUnidad'] = clusters_hexagonal_SinCeldaUnidad
   funciones['cilindros_aleatorios_hexagonal'] = cilindros_aleatorios_hexagonal
+  funciones['cilindros_45grados_hexagonal'] = cilindros_45grados_hexagonal
   funciones['cilindros_p_random2'] = cilindros_p_random2
   if geometria in funciones:
     return funciones[geometria]
@@ -1142,7 +1143,89 @@ def cilindros_aleatorios_hexagonal(N, voxelSize, **geokwargs):
                 
   return indices
 
+#------------------------------------------------------------------------------  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def cilindros_45grados_hexagonal(N, voxelSize, **geokwargs):
+  """ 2023-08-07
+  Creo cilindritos a distancia constante entre sí. Es decir, en un arreglo
+  hexagonal. La distancia se define centro a centro.
+  Además, los cilindros toman direcciones aleatorias:
+  A los cilindritos inclinados a 45 grados en la direccion x
+  también en valores negativos. Ademas secciono la altura z en 3 pedazos donde 
+  el crecimiento cambia segun la sección
   
+  Los parametros no son independientes, sino que tienen que cumplir ciertos
+  requisitos. A saber:
+    
+    Nmx = n * d    ,  con n entero
+    Nmy = m * 2a   ,  con m entero
+  
+  pero ademas, el parametro a debe ser tal que minimice el error de discretizar
+  d y a en la relacion:
+    
+    (d/2)**2 + a**2  = d**2
+    
+  En la carpeta DataBases, el archivo 'Hexagonal_parametro_a.dat', tiene los
+  valores de a optimos para cada d.
+  
+  d DEBE SER PAR
+  
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+                  
+  # CREO LOS CENTROS DEL ARREGLO HEXAGONAL.  - - - - - - - - - - - - - - - - - 
+  Ncentros_x = int(Nmx/d + 1)
+  Ncentros_y = int(Nmy/a + 1)
+  centros = []
+  for iy in range(Ncentros_y):
+    if iy%2==0:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix))
+    else:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix+d/2))
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  
+  indices = [] 
+  R2 = R**2
+  for centro in centros:
+    ind_yc, ind_xc = centro
+    xc = ind_xc - 0.5
+    yc = ind_yc - 0.5
+    ind_xc = int(xc)
+    ind_yc = int(yc)
+        
+    # direccion de desviacion (j,i), con ij= -1,0,1. Convencion (y,x)
+    dir1 = (0,1)    
+    for ind_y in range(ind_yc-R,ind_yc+R+1):
+      for ind_x in range(ind_xc-R,ind_xc+R+1):      
+        if (ind_x-xc)**2 + (ind_y-yc)**2 < R2:          
+          ix = ind_x; iy = ind_y                             
+          for ind_z in range(Nmz):
+            iy += dir1[0]                          
+            ix += dir1[1]              
+            indices.append((ind_z,int(iy%Nmy), int(ix%Nmx))) # guardo modulo Nm para imponer condiciones periodicas          
+                
+  return indices  
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -1567,7 +1650,8 @@ if __name__=='__main__':
     
     # geometria = 'cilindritos_aleatorios_3'
     # geometria = 'clusters_hexagonal_SinCeldaUnidad'
-    geometria = 'cilindros_aleatorios_hexagonal'
+    # geometria = 'cilindros_aleatorios_hexagonal'
+    geometria = 'cilindros_45grados_hexagonal'
     constructor = funciones(geometria)
     # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
     # en los cuales hay litio.
