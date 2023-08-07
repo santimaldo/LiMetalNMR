@@ -39,8 +39,8 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 20
-Nxy = 512
+Niteraciones = 1
+Nxy = 256
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
@@ -51,9 +51,13 @@ skindepth = 14e-13  # profundida de penetracion, mm
 # radio, distancia y vs estan en el archivo:
 parametros = np.loadtxt('./DataBases/ParametrosASimular_aleatorios.par')
 
+parametros = np.array([[0.2500,	512,	10.0000,	2.0000,	7.0000,	0.3095]])
+
 
 # %%
-savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
+# savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
+savepath = './Outputs/tmp/'
+
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat', 'w') as f:
