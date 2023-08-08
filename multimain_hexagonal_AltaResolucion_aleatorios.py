@@ -39,8 +39,8 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 1
-Nxy = 512
+Niteraciones = 20   
+Nxy = 1024
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
@@ -48,41 +48,42 @@ B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
 
-# radio, distancia y vs estan en el archivo:
-parametros = np.loadtxt('./DataBases/ParametrosASimular_aleatorios.par')
+# parametros : vs, Nz, altura, radio 
+parametros = [0.25, 512, 10, 2]
 
-parametros = np.array([[0.2500,	512,	10.0000,	2.0000,	7.0000,	0.3095]])
+# densidades nominales: (terminan siendo equivalentes a arange(0.1, 0.9, 0.1)
+densidades = [0.1, 0.2, 0.35, 0.5, 0.67, 0.85, 1.2, 1.5]
+densidades_target = np.arange(0.1,0.9,0.1)
 
 
 # %%
 # savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
-savepath = './Outputs/tmp/'
+savepath = './Outputs/2023-08-07_Cilindros_aleatorios_AltaResolucion/'
 
 with open(savepath+'Densidades.dat', 'w') as f:
-    f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\n')
+    f.write('# N_iter\tradio (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat', 'w') as f:
-    f.write('# N_iter\tt_total (min)\tt_iteracion(min)\tradio (um)\tdistancia (um)\taltura (um)\tvs (um)\n')
+    f.write('# N_iter\tt_total (min)\tt_iteracion(min)\tdensidad target\tradio (um)\tdistancia (um)\taltura (um)\tvs (um)\n')
 
 
 # inicializo una lista de cuales tienen error.
 # inicio el reloj
 t0 = time.time()
 nnn = -1
-ntotal = parametros.shape[0]
-# ntotal = 1
+ntotal = Niteraciones * len(densidades)
 for n_iter in range(Niteraciones):
-    for par in parametros:
+    for ii in range(len(densidades)):        
         nnn += 1
+        densidad_nominal = densidades[ii]
+        densidad_target = densidades_target[ii]
     
         # todos los datos estan en um
-        vs, Nz, altura, radio, distancia, densidad = par
+        vs, Nz, altura, radio = parametros
     
         h = int(altura/vs)
-        r = int(radio/vs)
-        d = int(distancia/vs)
+        r = int(radio/vs)        
     
-        radio = vs*r
-        distancia = vs*d
+        radio = vs*r        
         altura = vs*h
     
         # inicio el reloj parcial
@@ -92,7 +93,7 @@ for n_iter in range(Niteraciones):
         print(f"++++++++++++++++++   ITERACION:  {n_iter}  ++++++++++++++++++++++++++++")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        msj = f"altura= {h:d}x{vs}um = {altura} um,\nradio= {r:d}x{vs}um = {radio} um,\ndistancia = {d:d}x{vs}um = {distancia} um,\ndensidad = {densidad:.2f}"
+        msj = f"altura= {h:d}x{vs}um = {altura} um,\nradio= {r:d}x{vs}um = {radio} um,\ndensidad = {densidad_target:.2f}"
         print(msj)
         print(' ')    
         msj = f"      hora: {datetime.now().strftime('%H:%M:%S')}"
@@ -117,27 +118,26 @@ for n_iter in range(Niteraciones):
         N = [Nz, Ny, Nx]
         volumen = SimulationVolume(voxelSize=voxelSize, N=N)
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        # parametros de la muestra
-        a = get_param_a(d)
-        N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-        N_celdas_y = (Ny/2)//(2*a)
-        medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
-        distancia_mm = d*vsx
-        parametro_a = a*vsy
+        # parametros de la muestra        
+        Nmx = (Nx/2)
+        Nmy = (Ny/2)
+        medidas = [h*vsz, Nmy*vsy, Nmx*vsx]        
         radio_mm = r*vsx
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Creacion de la muestra    
         muestra = Muestra(volumen, medidas=medidas, 
-                          geometria='cilindros_aleatorios_hexagonal',
-                          radio=radio_mm, distancia=distancia_mm, 
-                          parametro_a=parametro_a, ubicacion='superior')       
+                          geometria='cilindros_aleatorios',
+                          radio = radio_mm,
+                          densidad_nominal = densidad_nominal,
+                          ubicacion='superior')       
                           #exceptions=False)
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         densidad_volumetrica = muestra.densidad_volumetrica
-        print(f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
+        densidad_area= muestra.densidad
+        print(f" densidad: {densidad_area:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
         with open(savepath+'/Densidades.dat', 'a') as f:
-            f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
-                    f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')
+            f.write(f'{n_iter}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
+                    f'{densidad_area:.4f}\t{densidad_volumetrica:.4f}\n')
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # CREACION DEL OBJETO DELTA-------------------------------------------------
         # delta es la perturbacion de campo magnetico
@@ -160,8 +160,8 @@ for n_iter in range(Niteraciones):
             ppmAxis, spec = medicion.CrearEspectro(
                 secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region))
             datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            file = 'SP/h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
-                int(altura), radio, distancia, vs, n_iter, region)
+            file = 'SP/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
+                int(altura), radio, densidad_target, vs, n_iter, region)
             np.savetxt(savepath+file, datos)
             # pulso de pi/12
             # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, volumen_medido='completo{}'.format(region))
@@ -177,10 +177,12 @@ for n_iter in range(Niteraciones):
     
         elapsed_parcial = (time.time() - t0parcial)/60.0
         elapsed = (time.time() - t0)/60.0
+        
         print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
         with open(savepath+'tiempos.dat', 'a') as f:
             f.write(
-                f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')    
+                f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{densidad_target:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')    
+                
         del muestra, delta, superposicion, medicion, volumen
         del ppmAxis, spec, datos
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

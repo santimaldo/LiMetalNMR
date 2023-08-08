@@ -135,7 +135,7 @@ for par in parametros:
     print(f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
-                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')
+                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')      
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
@@ -173,9 +173,9 @@ for par in parametros:
         # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         # file = 'SMC16-k1/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SMC64k1{}.dat'.format(int(altura), radio, distancia, vs, region)
         # np.savetxt(savepath+file, datos)
-        ppmAxis, spec = medicion.CrearEspectro(
-            secuencia='smc', k=1, volumen_medido='completo{}'.format(region),
-            figure=2)
+        # ppmAxis, spec = medicion.CrearEspectro(
+        #     secuencia='smc', k=1, volumen_medido='completo{}'.format(region),
+        #     figure=2)
         
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0

@@ -1390,8 +1390,7 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
       return nvxy, nvz
   # - - - - - - - - - - - - - - - - - -- - - - - - - - -- - - - - - - - -
   indices = []
-  R2 = R**2
-  jjj = 0
+  R2 = R**2  
   for centro in centros:
     ind_yc, ind_xc = centro
     xc = ind_xc - 0.5
@@ -1426,8 +1425,7 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                 ix += nvxy1*dir1[1]
                 # guardo modulo-Nm para imponer condiciones periodicas:
                 indices.append((ind_z,int(iy%Nmy), int(ix%Nmx)))
-                ind_z+= 1
-                if jjj==0: print(ind_z)
+                ind_z+= 1                
           #------------------------------------------segundo tramo                                  
           zmin = Nz_rand1
           zmax = Nz_rand2
@@ -1439,8 +1437,7 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                 ix += nvxy2*dir2[1]
                 # guardo modulo-Nm para imponer condiciones periodicas:
                 indices.append((ind_z,int(iy%Nmy), int(ix%Nmx)))
-                ind_z+= 1
-                if jjj==0: print(ind_z)
+                ind_z+= 1                
           #------------------------------------------tercer tramo
           nvxy, nvz = parametros_angulo() # sorteo
           zmin = Nz_rand2
@@ -1453,9 +1450,7 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                 ix += nvxy3*dir3[1]
                 # guardo modulo-Nm para imponer condiciones periodicas:
                 indices.append((ind_z,int(iy%Nmy), int(ix%Nmx)))
-                ind_z+= 1
-                if jjj==0: print(ind_z)
-          jjj += 1      
+                ind_z+= 1                          
   return indices
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------  
@@ -1484,9 +1479,9 @@ if __name__=='__main__':
     
     # geometria = 'cilindritos_aleatorios_3'
     # geometria = 'clusters_hexagonal_SinCeldaUnidad'
-    geometria = 'cilindros_aleatorios_hexagonal'
+    # geometria = 'cilindros_aleatorios_hexagonal'
     # geometria = 'cilindros_45grados_hexagonal'
-    # geometria = 'cilindros_aleatorios'
+    geometria = 'cilindros_aleatorios'
     constructor = funciones(geometria)
     # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
     # en los cuales hay litio.
@@ -1494,9 +1489,9 @@ if __name__=='__main__':
     #tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
     #tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
     # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
-    tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
+    # tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
     # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'  
-    # tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=0.1)#, R_hueco_central=40e-3) # para 'cilindros_aleatorios'
+    tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=1.5) # para 'cilindros_aleatorios'
     
     # convierto a indices planos
     indices = np.array(tuplas).T  
