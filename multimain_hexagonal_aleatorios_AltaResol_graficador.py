@@ -31,9 +31,11 @@ Niteraciones=20
 
 nn = 0
 data_dir0 = "2023-07-20_Cilindros_hexagonal_AltaResolucion"
+data_dir45 = "2023-08-07_Cilindros_45grados_hexagonal_AltaResolucion"
 data_dir = "2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion"
 
 path0 = f"./Outputs/{data_dir0}/"
+path45 = f"./Outputs/{data_dir45}/"
 path = f"./Outputs/{data_dir}/"
 distancias, radios, alturas, vss, densidades, densidades_volumetricas = np.loadtxt(path+'Densidades.dat').T
 
@@ -49,15 +51,20 @@ for ii in range(Ndens):
     regiones = ['-microestructuras', '-bulk']
     col = ['k', 'r', 'b']
 
-    for nn_iter in range(Niteraciones+1):
+    for nn_iter in range(Niteraciones+2):
         
         if nn_iter < Niteraciones:
             pv = densidades_volumetricas[nn_iter*Ndens+ii]        
             Niter = f'niter{nn_iter}_'
             directorio = path            
-        else:
+        elif nn_iter == Niteraciones:
+            # CILINDROS RECTOS
             Niter = ''
             directorio = path0
+        elif nn_iter == Niteraciones+1:
+            # CILINDROS A 45 GRADOS
+            Niter = ''
+            directorio = path45
         n_r = -1
         for region in regiones:
             n_r += 1        
@@ -162,8 +169,10 @@ vss = df['vs'].sort_values().unique()
 # markersize:
 ms = 10
 
-filename = False
-filename = "RandomOrientations"
+savedata = True # para guardar los dataframes
+# paa guardar figuras:
+filename = False # si esto es falos, no se guarda la figura
+# filename = "RandomOrientations"
 plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 # eje_x = data['distancia'] - 2*data['radio']        
@@ -186,10 +195,26 @@ ax.plot(eje_x, eje_y, 'o', color='k', lw=2, ms=ms, label=label)
 coef = np.polyfit(eje_x,eje_y,1)
 linear_fit= np.poly1d(coef) 
 ax.plot(eje_x, linear_fit(eje_x), '--', color='k', lw=1)# marker=marker,
+#-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 
+# cilindros A 45 GRADOS:
+data = df[df['Niter']==Niteraciones+1]
+data = data.sort_values(by='densidad', ascending=True)
+eje_x = data['densidad']             
+ax = axs
+if plot_Deltadelta:
+    eje_y = data['delta_mic']-data['delta_bulk']
+else:
+    eje_y = data['delta_mic']
+    
+label = r"$45^{\circ}$ cylinders"
+ax.plot(eje_x, eje_y, 'o', color='gray', lw=2, ms=ms, label=label)
 
+coef = np.polyfit(eje_x,eje_y,1)
+linear_fit= np.poly1d(coef) 
+ax.plot(eje_x, linear_fit(eje_x), '--', color='gray', lw=1)# marker=marker,
 
-
+#-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 # cilindros aleatorios
 data = df[df['Niter']<Niteraciones]          
 eje_x = data['densidad_volumetrica']         
@@ -202,7 +227,7 @@ else:
 
 label = "Random orientation cylinders"    
 ax.scatter(eje_x, eje_y, s = 10*ms, facecolor='purple', #edgecolor='purple',
-           marker='o', label=label, alpha=0.3)
+            marker='o', label=label, alpha=0.3)
                  
 ax.legend(fontsize=fontsize-2)
 
@@ -298,6 +323,17 @@ if filename:
     fig.savefig(f"{path}/{filename}.png", format='png', bbox_inches='tight')    
     fig.savefig(f"{path}/{filename}.eps", format='eps',bbox_inches='tight')
     fig.savefig(f"{path}/{filename}.pdf", format='pdf',bbox_inches='tight')
+    
+if savedata:
+
+  rectos = df[df['Niter']==Niteraciones].drop(columns="densidad_volumetrica")
+  rectos.to_csv(f'{path0}/datos.csv', index=False)    
+  
+  inclinados = df[df['Niter']==Niteraciones+1].drop(columns="densidad_volumetrica")
+  inclinados.to_csv(f'{path45}/datos.csv', index=False)
+
+  random = df[df['Niter']<Niteraciones]
+  random.to_csv(f'{path}/datos.csv', index=False)        
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
