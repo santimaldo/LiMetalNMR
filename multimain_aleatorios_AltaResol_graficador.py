@@ -41,7 +41,6 @@ path = f"./Outputs/{data_dir}/"
 parametros = np.loadtxt(path+'Densidades.dat')
 
 
-Ndens = 7 # cuantos valores de densidad apunte
 for par in parametros:    
     # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
     
@@ -213,7 +212,7 @@ ax.legend(fontsize=fontsize-2)
 
 ax.set_xlim([0.05, 0.75])
 if plot_Deltadelta:
-    ax.set_ylim([4, 22])            
+    ax.set_ylim([0, 24])            
 else:
     ax.set_ylim([-5, 25])            
     ax.axhline(y=0, color='gray', ls='--', lw=1)
