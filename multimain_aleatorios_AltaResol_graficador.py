@@ -163,6 +163,8 @@ vss = df['vs'].sort_values().unique()
 # markersize:
 ms = 10
 
+
+savedata = True # guada el dataframe
 filename = False
 # filename = "RandomOrientations"
 plot_Deltadelta = True
@@ -303,3 +305,5 @@ if filename:
     fig.savefig(f"{path}/{filename}.eps", format='eps',bbox_inches='tight')
     fig.savefig(f"{path}/{filename}.pdf", format='pdf',bbox_inches='tight')
 
+if savedata:
+  df.to_csv(f'{path}/datos.csv', index=False)  
