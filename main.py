@@ -59,7 +59,7 @@ delta = Delta(muestra)#, skip=True)
 superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
-medicion = Medicion(superposicion, volumen_medido='centro')
+medicion = Medicion(superposicion, volumen_medido='centro', stl_file='test')
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
 
 #%%
