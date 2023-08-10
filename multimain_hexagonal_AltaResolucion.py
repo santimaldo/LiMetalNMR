@@ -43,13 +43,19 @@ Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
-Nxy = 512
+Nxy = 1204
 
 # radio, distancia y vs estan en el archivo:
-parametros = np.loadtxt('./DataBases/ParametrosASimular_aleatorios.par')
-parametros = pd.DataFrame(parametros)
-parametros = parametros.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
-parametros = np.array(parametros)
+# parametros = np.loadtxt('./DataBases/ParametrosASimular_hexagonal.par')
+# parametros = pd.DataFrame(parametros)
+# parametros = parametros.sort_values(by=[1, 2, 0, 3, 4], ascending=True)
+# parametros = np.array(parametros)
+
+df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
+min_vs = df.groupby(['radio','densidad_nominal'])['voxelSize'].idxmin()
+df = df.loc[min_vs.values]
+
+
 
 # hago una corrida con parametros elegidos:
 # parametros = np.array([np.array([0.2500, 512, 50.0000, 2.0000, 5.5000, 0.4976])])

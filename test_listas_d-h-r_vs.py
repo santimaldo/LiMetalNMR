@@ -23,20 +23,20 @@ skdp = 14 # um
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-VSs = [0.125, 0.25, 0.5, 1] # um
+VSs = [0.125, 0.25, 0.5, 1, 1.25] # um
 
 # # todo en micrometros
-# radios = [0.05,1,2,5,10,20,50]
-# rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
-# alturas = [10, 50]
+radios = [1,2,5,10,20,50]
+rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
+alturas = [10, 50]
 
 
 # para cilindros aleatorios:
 # todo en micrometros 
-VSs = [0.25] # um
-radios = [2]
-rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
-alturas = [10]
+# VSs = [0.25] # um
+# radios = [2]
+# rho_target = np.linspace(0.1,0.9,9) # densidades buscadas
+# alturas = [10]
 
 
 Nx = 1024
@@ -171,13 +171,16 @@ for i in mylist:
 parametros = newlist
 #------------------------------------------------------------------------------
 
-filename = "./DataBases/ParametrosASimular_aleatorios.dat"
+filename = "./DataBases/ParametrosASimular_hexagonal.par"
 with open(filename, 'w') as f:
-    header = f"# voxelSize\t Nz\t altura(um)\t radio(um)\t distancia (um)\t densidad\n"
+    # header = f"# voxelSize\t Nz\t altura(um)\t radio(um)\t distancia (um)\t densidad\n"
+    header = f"voxelSize,Nz,altura,radio,distancia,densidad_nominal,densidad\n"
     f.write(header)
     for par in parametros:        
         vs, Nz, altura, radio, distancia, densidad = par
-        line = f"{vs:.4f}\t{Nz}\t{altura:.4f}\t{radio:.4f}\t{distancia:.4f}\t{densidad:.4f}\n"
+        densidad_nominal = round(densidad, 1)
+        # line = f"{vs:.4f}\t{Nz}\t{altura:.4f}\t{radio:.4f}\t{distancia:.4f}\t{densidad:.4f}\n"
+        line = f"{vs:.4f},{Nz},{altura:.4f},{radio:.4f},{distancia:.4f},{densidad_nominal:.1f},{densidad:.4f}\n"
         f.write(line)
         
         
