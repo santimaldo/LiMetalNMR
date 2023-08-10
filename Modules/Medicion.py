@@ -179,7 +179,7 @@ class Medicion(object):
             # elif 'bulk' in volumen_medido.lower():
             #   z0 = self.superposicion.z0
             #   condicion[z0:,:,:]=False
-        # -------------------------------------------------
+
 
         # -----------------------------------------------------------REGION
         if 'microestructuras' in volumen_medido.lower():  # la comparacion es case insenstive
@@ -217,6 +217,8 @@ class Medicion(object):
             condicion[:, :, 0:bordex] = False
             condicion[:, :, -bordex:] = False
 
+
+            
         self.volumen_medido = condicion
         return condicion
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -158,7 +158,7 @@ for par in parametros:
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    medicion = Medicion(superposicion)
+    medicion = Medicion(superposicion, volumen_medido='centro')
     # guardado
     regiones = ['', '-microestructuras', '-bulk']
     # %% -------- centro--------------------------------------------------------------
@@ -167,26 +167,30 @@ for par in parametros:
         # secuencia: ..... SP ......
         # - - - - SP
         ppmAxis, spec = medicion.CrearEspectro(
-            secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region),
+            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region),
             figure=1)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
-        # pulso de pi/12
-        # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, volumen_medido='completo{}'.format(region))
-        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        # file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(int(altura), radio, distancia, vs, region)
-        # np.savetxt(savepath+file, datos)
+        
+        #pulso de pi/12
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, 
+                                               volumen_medido='centro{}'.format(region))
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(int(altura), radio, distancia, vs, region)
+        np.savetxt(savepath+file, datos)
 
         # - - - - SMC16
-        # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1, Norm=False, volumen_medido='completo{}'.format(region))
-        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        # file = 'SMC16-k1/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SMC64k1{}.dat'.format(int(altura), radio, distancia, vs, region)
-        # np.savetxt(savepath+file, datos)
-        # ppmAxis, spec = medicion.CrearEspectro(
-        #     secuencia='smc', k=1, volumen_medido='completo{}'.format(region),
-        #     figure=2)
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1, 
+                                               Norm=False, 
+                                               volumen_medido='centro{}'.format(region))
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T        
+        file = 'SMC16/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+            int(altura), radio, densidad_nominal, vs, region)
+        np.savetxt(savepath+file, datos)
+
+
 
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0
@@ -195,7 +199,7 @@ for par in parametros:
         f.write(
             f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')
 
-     # del muestra, delta, superposicion, medicion, volumen
+    # del muestra, delta, superposicion, medicion, volumen
     # del ppmAxis, spec, datos
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
