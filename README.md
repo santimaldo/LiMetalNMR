@@ -27,5 +27,6 @@ https://doi.org/10.1038/s41598-017-05429-3
 - Numpy
 - Numpy-stl
 - Scipy
+- Scikit-image
 - Matplotlib
-- Oct2py
+
