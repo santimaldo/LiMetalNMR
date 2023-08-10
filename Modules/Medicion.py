@@ -271,7 +271,7 @@ class Medicion(object):
             # voy llenando las capas con los valores de B1. la variable de profundidad
             # es (n+1)*vs/2, ya que en la primer tajada n=0 y la profundidad es de la
             # mitad del voxelsize (si tomo el centro del voxel)
-            beta = beta + tajada*np.exp(-(n+1/2)*vs/skdp)
+            beta = beta + tajada*np.exp(-(n+1/2)/skdp) # RECORDAR QUE skdp ESTA EN UNIDADES DE VOXEL!!!
             # ahora el nuevo objeto a erosionar es el de la erosion anterior
             mask = (erode == 1)
 
