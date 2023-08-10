@@ -89,11 +89,12 @@ class Medicion(object):
         self.skdp = int(skindepth/self.superposicion.muestra.voxelSize[0])
         self.borde_a_quitar = borde_a_quitar
 
+        
         self.volumen_medido = self.crear_volumen_medido(volumen_medido)
-
-        # creo las matrices de utilidad:
+        ### creo las matrices de utilidad:        
         self.eta = self.Crear_eta()
         self.beta = self.Crear_beta()
+        
 
         # creacion de histograma 2D
         self.histograma = None
@@ -186,7 +187,7 @@ class Medicion(object):
             condicion[0:z0, :, :] = False
         elif 'bulk' in volumen_medido.lower():
             z0 = self.superposicion.z0
-            condicion[z0:, :, :] = False
+            condicion[z0:, :, :] = False            
         # -----------------------------------------------------------------
 
         # -----------------------------------------------------------REGION

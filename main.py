@@ -26,7 +26,7 @@ t0 = time.time()
 # Parametros fisicos
 Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
 B0 = 7 # T
-skindepth = 0.012 # profundida de penetracion, mm
+skindepth = 0.014    # profundida de penetracion, mm
 
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
@@ -34,7 +34,7 @@ skindepth = 0.012 # profundida de penetracion, mm
 voxel_microm = 0.25 # tamano de voxel en micros
 voxelSize = [voxel_microm*1e-3]*3# mm
 
-N = [128,128,128] 
+N = [512,256,256] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -47,24 +47,30 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #microestructuras
-medidas = [10e-3, 32e-3,32e-3]
+medidas = [50e-3, 32e-3, 32e-3]
 # muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=16e-3, distancia=20e-3)
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=0.1,radio=1e-3) # para 'porcentaje_palos' 
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=10e-3, ubicacion='superior') # para 'porcentaje_palos' 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
-delta = Delta(muestra, skip=True)
+delta = Delta(muestra)#, skip=True)
 
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-superposicion = Superposicion(muestra, delta)
+superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
 medicion = Medicion(superposicion, volumen_medido='centro')
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
 
 #%%
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=1111)
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False, volumen_medido='centro-bulk')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, Norm=False, volumen_medido='centro-microestructuras')
+#%%
+FigSMC = 157; k=1.5; N=16
+ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido='centro')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido='centro-bulk')
+ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido='centro-microestructuras')
 #datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
 #np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
