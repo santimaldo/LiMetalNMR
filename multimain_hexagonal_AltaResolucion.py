@@ -52,8 +52,11 @@ Nxy = 1204
 # parametros = np.array(parametros)
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
+df = df[df['Nz']<1024]
 min_vs = df.groupby(['radio','densidad_nominal'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
+parametros = np.array(df)
+
 
 
 
