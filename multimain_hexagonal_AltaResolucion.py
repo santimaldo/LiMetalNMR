@@ -38,12 +38,13 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
+
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
-Nxy = 1204
+Nxy = 1024
 
 # radio, distancia y vs estan en el archivo:
 # parametros = np.loadtxt('./DataBases/ParametrosASimular_hexagonal.par')
@@ -52,12 +53,12 @@ Nxy = 1204
 # parametros = np.array(parametros)
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
-df = df[df['Nz']<1024]
-min_vs = df.groupby(['radio','densidad_nominal'])['voxelSize'].idxmin()
+df = df[df['Nz'] < 1024]
+df = df[df['radio'] != 1.25]
+min_vs = df.groupby(['radio', 'densidad_nominal'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
+df = df.sort_values(['radio', 'densidad_nominal'], ascending=[False, True])
 parametros = np.array(df)
-
-
 
 
 # hago una corrida con parametros elegidos:
@@ -65,7 +66,7 @@ parametros = np.array(df)
 
 
 # %%
-savepath = './Outputs/2023-08-07_Cilindros_45grados_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# radio (um)\tdistancia (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -79,9 +80,9 @@ nnn = -1
 ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:
-    nnn += 1    
+    nnn += 1
     # todos los datos estan en um
-    vs, Nz, altura, radio, distancia, densidad = par
+    vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
     h = int(altura/vs)
     r = int(radio/vs)
@@ -99,10 +100,10 @@ for par in parametros:
     print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     msj = f"altura= {h:d}x{vs}um = {altura} um,\nradio= {r:d}x{vs}um = {radio} um,\ndistancia = {d:d}x{vs}um = {distancia} um,\ndensidad = {densidad:.2f}"
     print(msj)
-    print(' ')    
+    print(' ')
     msj = f"      hora: {datetime.now().strftime('%H:%M:%S')}"
     print(msj)
-    print(' ')                                                              
+    print(' ')
     msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100:.2f} %"
     print(msj)
     elapsed = (time.time() - t0)
@@ -137,18 +138,19 @@ for par in parametros:
                       geometria='cilindros_45grados_hexagonal',
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
-                      exceptions=False)    
+                      exceptions=False)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     densidad_volumetrica = muestra.densidad_volumetrica
-    print(f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
+    print(
+        f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
     with open(savepath+'/Densidades.dat', 'a') as f:
-        f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
-                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')      
+        f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
+                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
-    delta = Delta(muestra)#, skip=True)
+    delta = Delta(muestra)  # , skip=True)
     # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
     superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
                                   radio=0)
@@ -159,7 +161,7 @@ for par in parametros:
     medicion = Medicion(superposicion)
     # guardado
     regiones = ['', '-microestructuras', '-bulk']
-    #%% -------- centro--------------------------------------------------------------
+    # %% -------- centro--------------------------------------------------------------
     for region in regiones:
         print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
         # secuencia: ..... SP ......
@@ -168,8 +170,8 @@ for par in parametros:
             secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region),
             figure=1)
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SP/h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
-            int(altura), radio, distancia, vs, region)
+        file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+            int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
         # pulso de pi/12
         # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, volumen_medido='completo{}'.format(region))
@@ -185,14 +187,14 @@ for par in parametros:
         # ppmAxis, spec = medicion.CrearEspectro(
         #     secuencia='smc', k=1, volumen_medido='completo{}'.format(region),
         #     figure=2)
-        
+
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0
     print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
     with open(savepath+'tiempos.dat', 'a') as f:
         f.write(
-            f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')    
-    
+            f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')
+
      # del muestra, delta, superposicion, medicion, volumen
     # del ppmAxis, spec, datos
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
