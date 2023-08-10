@@ -1,8 +1,9 @@
 # ignore all .pyc files
 *.pyc
 *pycache*
-# ignore all .dat files
+# ignore all data files
 *.dat
+*.csv
 # ignore all .stl files
 *.stl
 # ignore all figures
