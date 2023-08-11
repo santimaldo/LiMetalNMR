@@ -111,17 +111,19 @@ for ax in axs.flatten():
 
 fix, axs = plt.subplots(1, 2, figsize=(10, 5), num=2)
 
+colores = ['k', 'r', 'b']
 for nn in range(len(radios)):    
     ax = axs[nn]
     # where is the bulk:
     ppmAxis, spec = specsSP[nn][2]
-    maxx = spec.max()      
-    
-    # for mm in range(len(regiones)):    
-    ppmAxis, spec = specsSP[nn][0]
-    ax.plot(ppmAxis, spec/spec.max())
-    ppmAxis, spec = specsSMC[nn][0]
-    ax.plot(ppmAxis, spec/spec.max())
+    maxSP = spec.max()
+    ppmAxis, spec = specsSMC[nn][2]
+    maxSMC = spec.max()          
+    for mm in range(len(regiones)):    
+        ppmAxis, spec = specsSP[nn][mm]
+        ax.plot(ppmAxis, spec/maxSP, color=colores[mm])
+        ppmAxis, spec = specsSMC[nn][mm]
+        ax.plot(ppmAxis, spec/maxSMC, '--', color=colores[mm])
     
 
 for ax in axs.flatten():

@@ -24,9 +24,9 @@ import matplotlib.patches as mpatches
 data_dir = "2023-08-10_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
-savefig = True
+savefig = False
 filename = "Cylinders"
-plot_Deltadelta = True
+plot_Deltadelta = False
 
 
 
@@ -131,8 +131,7 @@ for h in alturas:
 
 # agrego ejes y leyendas:------------------------------------------------------
 for hh in range(axs.shape[1]):
-  for rr in range(axs.shape[0]):
-    print(f'axs[{rr}, {hh}]')
+  for rr in range(axs.shape[0]):    
     ax = axs[rr, hh]    
     ax.set_xlabel('Density')
     if plot_Deltadelta:

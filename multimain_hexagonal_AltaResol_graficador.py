@@ -36,7 +36,7 @@ nn = 0
 path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
 print(path0)
 parametros10 = np.loadtxt(path0+'Densidades10um.dat')
-parametros50 = np.loadtxt(path0+'Densidades.dat')
+parametros50 = np.loadtxt(path0+'Densidades50um.dat')
 parametros = np.concatenate((parametros10, parametros50))
 distancias, radios, alturas, vss, densidades_nominales, densidades = parametros.T
 for ii in range(radios.size):
