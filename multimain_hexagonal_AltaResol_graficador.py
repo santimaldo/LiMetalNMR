@@ -26,88 +26,89 @@ densidades_t = []
 vss_t = []
 
 nn = 0
-# folders = ['','2022-03-11_','2022-03-13_']
-# folders = ['2023-07-20']
-folders = ['2023-08-10']
 
-for folder in folders:
-    path0 = f"./Outputs/{folder}_Cilindros_hexagonal_AltaResolucion/"
-    print(path0)
-    distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
-        path0+'Densidades.dat').T
-    for ii in range(radios.size):
-        # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
-        h = alturas[ii]
-        d = distancias[ii]
-        r = radios[ii]
-        p = densidades[ii]
-        densidad_nominal = densidades_nominales[ii]
-        vs = vss[ii]
 
-        regiones = ['-microestructuras', '-bulk']
-        col = ['k', 'r', 'b']
+path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
+print(path0)
+distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
+    path0+'Densidades.dat').T
+for ii in range(radios.size):
+    # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
+    h = alturas[ii]
+    d = distancias[ii]
+    r = radios[ii]
+    p = densidades[ii]
+    densidad_nominal = densidades_nominales[ii]
+    vs = vss[ii]
 
-        n_r = -1
-        for region in regiones:
-            n_r += 1
-            path = path0 + 'SP/'
-            # archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
-            #     int(h), r, d, vs, region)
-            archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
-                int(h), r, densidad_nominal, vs, region)
+    regiones = ['-microestructuras', '-bulk']
+    col = ['k', 'r', 'b']
 
-            # extraigo
+    n_r = -1
+    for region in regiones:
+        n_r += 1
+        path = path0 + 'SMC16/'
+        # archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
+        #     int(h), r, d, vs, region)
+        # archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+        #     int(h), r, densidad_nominal, vs, region)
+        archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+             int(h), r, densidad_nominal, vs, region)
 
-            try:
-                datos = np.loadtxt(path+archivo)
-                if n_r == 0:
-                    alturas_t.append(h)
-                    distancias_t.append(d)
-                    radios_t.append(r)
-                    densidades_t.append(p)
-                    vss_t.append(vs)
-                    nn += 1
-            except:
-                print(f"error al intentar leer: {archivo}")
-                continue
-            ppmAxis0 = datos[:, 0]
-            spec = datos[:, 1]
-            #spec_imag = datos[:,2]
+        # extraigo
 
-            # retoco:
-            ppmAxis = ppmAxis0
-            spec = spec - spec[0]
-            # reduzco los datos a una VENTANA alrededor de un CENTRO
-            ventana = 200
-            center = 0
-            ppmAxis = ppmAxis0[np.abs(center-ppmAxis0) < ventana]
-            spec = spec[np.abs(center-ppmAxis0) < ventana]
+        try:
+            datos = np.loadtxt(path+archivo)
+            if n_r == 0:
+                alturas_t.append(h)
+                distancias_t.append(d)
+                radios_t.append(r)
+                densidades_t.append(p)
+                vss_t.append(vs)
+                nn += 1
+        except:
+            print(f"error al intentar leer: {archivo}")
+            continue
+        ppmAxis0 = datos[:, 0]
+        spec = datos[:, 1]
+        spec_imag = datos[:,2]
+        
+        spec = np.abs(spec+1j*spec_imag)
 
-            plt.figure(1231)
-            plt.subplot(1, 3, n_r+1)
-            plt.plot(ppmAxis, spec, col[n_r], linewidth=2)
-            #plt.xlim([ppmAxis[-1], ppmAxis[0]])
-            plt.xlim(150, -150)
-            plt.vlines(0, 0, np.max(spec))
-            plt.yticks([])
+        # retoco:
+        ppmAxis = ppmAxis0
+        spec = spec - spec[0]
+        # reduzco los datos a una VENTANA alrededor de un CENTRO
+        ventana = 200
+        center = 0
+        ppmAxis = ppmAxis0[np.abs(center-ppmAxis0) < ventana]
+        spec = spec[np.abs(center-ppmAxis0) < ventana]
 
-            if region == '-microestructuras':
-                delta_mic.append(ppmAxis[spec == np.max(spec)][0])
-                i_mic = np.trapz(spec, x=ppmAxis)
-                amp_mic.append(i_mic)
+        plt.figure(1231)
+        plt.subplot(1, 3, n_r+1)
+        plt.plot(ppmAxis, spec, col[n_r], linewidth=2)
+        #plt.xlim([ppmAxis[-1], ppmAxis[0]])
+        plt.xlim(150, -150)
+        plt.vlines(0, 0, np.max(spec))
+        plt.yticks([])
 
-                # if vs == r:
-                #     plt.figure(11111)
-                # else:
-                #     plt.figure(22222)
-                #     plt.annotate(f"r{r} vs{vs}",
-                #                  (p, ppmAxis[spec == np.max(spec)][0]))
-                # plt.scatter(p, ppmAxis[spec == np.max(spec)][0])
+        if region == '-microestructuras':
+            delta_mic.append(ppmAxis[spec == np.max(spec)][0])
+            i_mic = np.trapz(spec, x=ppmAxis)
+            amp_mic.append(i_mic)
 
-            elif region == '-bulk':
-                delta_bulk.append(ppmAxis[spec == np.max(spec)][0])
-                i_bulk = np.trapz(spec, x=ppmAxis)
-                amp_bulk.append(i_bulk)
+            # if vs == r:
+            #     plt.figure(11111)
+            # else:
+            #     plt.figure(22222)
+            #     plt.annotate(f"r{r} vs{vs}",
+            #                  (p, ppmAxis[spec == np.max(spec)][0]))
+            # plt.scatter(p, ppmAxis[spec == np.max(spec)][0])
+
+        elif region == '-bulk':
+            delta_bulk.append(ppmAxis[spec == np.max(spec)][0])
+            i_bulk = np.trapz(spec, x=ppmAxis)
+            amp_bulk.append(i_bulk)
 
 
 #---------------- guardado
@@ -151,23 +152,25 @@ alturas = df['altura'].unique()
 radios = df['radio'].unique()
 vss = df['vs'].sort_values().unique()
 
+# df = df.sort_values(by='radio', ascending=True)
+
 # quito un puntos que esta feos.
-try:
-    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
-    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
-    # condicion2 = False
-    index = df.index[condicion1 | condicion2]
-    df.drop(index, inplace=True)
-except:
-    pass
+# try:
+#     condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
+#     condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
+#     # condicion2 = False
+#     index = df.index[condicion1 | condicion2]
+#     df.drop(index, inplace=True)
+# except:
+#     pass
 
 marks = ['^','o', 's', 'v', '*', 'p']
 
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = False
+plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = True
+sin_repetir_data = False
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
@@ -213,7 +216,7 @@ for h in alturas:
         if plot_Deltadelta:
             ax.set_ylim([0, 25])
         else:
-            ax.set_ylim([-5, 25])
+            ax.set_ylim([-10, 25])
             ax.axhline(y=0, color='gray', ls='--', lw=1)
         # ----------- amp
         eje_y = data['amp_mic'] / data['amp_bulk']
@@ -309,10 +312,10 @@ for ax in [axs, axs1]:
     ax[0].text(pos_x, pos_y, rf'a)    Height = ${alturas[0]:.0f}\,\mu$m',
                 fontsize=fontsize,
                 horizontalalignment='left', verticalalignment='center')
-    ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
-                fontsize=fontsize,
-                horizontalalignment='left', verticalalignment='center')
-    ax[1].label_outer()
+    # ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
+    #             fontsize=fontsize,
+    #             horizontalalignment='left', verticalalignment='center')
+    # ax[1].label_outer()
 
 
 if filename:
@@ -326,7 +329,7 @@ if filename:
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
-interpolar2D = True
+interpolar2D = False
 plot_3d = True
 
 
