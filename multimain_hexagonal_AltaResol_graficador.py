@@ -27,12 +27,13 @@ vss_t = []
 
 nn = 0
 # folders = ['','2022-03-11_','2022-03-13_']
-folders = ['2023-07-20']
+# folders = ['2023-07-20']
+folders = ['2023-08-10']
 
 for folder in folders:
     path0 = f"./Outputs/{folder}_Cilindros_hexagonal_AltaResolucion/"
     print(path0)
-    distancias, radios, alturas, vss, densidades = np.loadtxt(
+    distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
         path0+'Densidades.dat').T
     for ii in range(radios.size):
         # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
@@ -40,6 +41,7 @@ for folder in folders:
         d = distancias[ii]
         r = radios[ii]
         p = densidades[ii]
+        densidad_nominal = densidades_nominales[ii]
         vs = vss[ii]
 
         regiones = ['-microestructuras', '-bulk']
@@ -49,8 +51,10 @@ for folder in folders:
         for region in regiones:
             n_r += 1
             path = path0 + 'SP/'
-            archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
-                int(h), r, d, vs, region)
+            # archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
+            #     int(h), r, d, vs, region)
+            archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+                int(h), r, densidad_nominal, vs, region)
 
             # extraigo
 
@@ -121,7 +125,7 @@ densidades_t = np.array(densidades_t)
 vss_t = np.array(vss_t)
 
 
-df = pd.DataFrame(list(zip(alturas_t, radios_t, 
+df = pd.DataFrame(list(zip(alturas_t, radios_t,
                            densidades_t, distancias_t, vss_t,
                            delta_mic, delta_bulk, amp_mic, amp_bulk,
                            np.around(densidades_t, decimals=1))),
@@ -149,8 +153,8 @@ vss = df['vs'].sort_values().unique()
 
 # quito un puntos que esta feos.
 try:
-    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)    
-    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)    
+    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
+    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
     # condicion2 = False
     index = df.index[condicion1 | condicion2]
     df.drop(index, inplace=True)
@@ -161,30 +165,30 @@ marks = ['^','o', 's', 'v', '*', 'p']
 
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
+plot_Deltadelta = False
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = False
+sin_repetir_data = True
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df[(df['altura']== h) & (df['radio']== 50)]
+    data_h = df[(df['altura']== h)]
     nn = 0
-    for vs in vss:                    
+    for vs in vss:
         if sin_repetir_data:
             min_vs = data_h.groupby(['radio','densidad_nominal'])['vs'].idxmin()
             data = data_h.loc[min_vs.values]
         else:
-            data = data_h[data_h['vs']==vs]       
-        
-        # eje_x = data['distancia'] - 2*data['radio']        
-        eje_x = data['densidad']         
-    
-        colorscale = [np.where(radios==r)[0][0] for r in data['radio']]            
+            data = data_h[data_h['vs']==vs]
+
+        # eje_x = data['distancia'] - 2*data['radio']
+        eje_x = data['densidad']
+
+        colorscale = [np.where(radios==r)[0][0] for r in data['radio']]
         cmap = 'inferno'
         vmin = 0; vmax = 5.5
-       
+
         ax = axs[hh]
-        
+
         if plot_Deltadelta:
             eje_y = data['delta_mic']-data['delta_bulk']
         else:
@@ -195,24 +199,24 @@ for h in alturas:
         else:
             marker = marks[nn]
             label=rf"{vs:.3f}$\mu$m"
-            
+
         ax.scatter(eje_x, eje_y, marker=marker,
                          c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                          edgecolor='k',
-                         s=100, label=label)       
-        if not plot_Deltadelta:        
-            ax.scatter(eje_x, data['delta_bulk'] , marker='^',                                   
+                         s=100, label=label)
+        if not plot_Deltadelta:
+            ax.scatter(eje_x, data['delta_bulk'] , marker='^',
                         c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                         edgecolor='k',
-                        s=100, label=r"$\delta_{bulk}$")        
+                        s=100, label=r"$\delta_{bulk}$")
         ax.set_xlim([-0.08, 1.08])
         if plot_Deltadelta:
-            ax.set_ylim([0, 25])            
+            ax.set_ylim([0, 25])
         else:
-            ax.set_ylim([-5, 25])            
+            ax.set_ylim([-5, 25])
             ax.axhline(y=0, color='gray', ls='--', lw=1)
         # ----------- amp
-        eje_y = data['amp_mic'] / data['amp_bulk']        
+        eje_y = data['amp_mic'] / data['amp_bulk']
         ax = axs1[hh]
         ax.scatter(eje_x, eje_y , marker = 'o',
                          c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
@@ -222,26 +226,26 @@ for h in alturas:
         ax.axhline(y=1, ls='--', color='k')
         ax.set_xlim([-0.08, 1.08])
         ax.set_ylim([0.1, 30])
-        
+
         if sin_repetir_data:
             break
-        nn += 1    
-        
+        nn += 1
+
     hh+=1
-    
+
 # agrego ejes y leyendas:------------------------------------------------------
 for ax in axs:
     ax.set_xlabel('Density')
     if plot_Deltadelta:
     # ax.set_ylabel(r'$\delta_{mic}-\delta_{bulk}$ [ppm]')
-        ax.set_ylabel(r'$\Delta\delta$ [ppm]')        
+        ax.set_ylabel(r'$\Delta\delta$ [ppm]')
     else:
         ax.set_ylabel(r'$\delta$ [ppm]')
 for ax in axs1:
     ax.set_xlabel('Density')
     ax.set_ylabel(r'$A_{mic}/A_{bulk}$')
-    
-    
+
+
 
 #### colorbar manual ----------------------------------------------------------
 cMap = matplotlib.colormaps[cmap]
@@ -249,7 +253,7 @@ yi = 9
 yi1 = 1.5
 yf1 = 8
 altos1 = np.logspace(np.log10(yi1), np.log10(yf1), radios.size+1)
-for rr in range(radios.size+1):    
+for rr in range(radios.size+1):
     if rr<radios.size:
         radio = radios[rr]
         color = cMap(int(rr/vmax*256))
@@ -259,21 +263,21 @@ for rr in range(radios.size+1):
         xi = 0.82
         axs[0].text(xi+1.25*ancho, yi, f'{radio:.0f}', fontsize=14,
                 horizontalalignment='left',
-                verticalalignment='center')    
+                verticalalignment='center')
         axs[0].add_patch(
-            matplotlib.patches.Rectangle(xy=(xi, yi-alto/2.1), 
-                                         width=ancho, height=alto, 
+            matplotlib.patches.Rectangle(xy=(xi, yi-alto/2.1),
+                                         width=ancho, height=alto,
                                          facecolor=color))#, edgecolor='k'))
-        
+
         # figura de amplitudes:
         alto1 = np.diff(altos1)[rr]
         xi1 = 0.06
         axs1[0].text(xi1+1.25*ancho, altos1[rr]+alto1/2.5, f'{radio:.0f}', fontsize=14,
                 horizontalalignment='left',
-                verticalalignment='center')    
+                verticalalignment='center')
         axs1[0].add_patch(
-            matplotlib.patches.Rectangle(xy=(xi1,  altos1[rr]), 
-                                          width=ancho, height=alto1, 
+            matplotlib.patches.Rectangle(xy=(xi1,  altos1[rr]),
+                                          width=ancho, height=alto1,
                                           facecolor=color))#, edgecolor='k'))
     else:
         axs[0].text(xi+0.5*ancho, yi*1.02, r'Radius ($\mu$m)', fontsize=15,
@@ -294,19 +298,19 @@ handles, labels = ax.get_legend_handles_labels()
 # handles is a list, so append manual patch
 # plot the legend
 ax.legend(handles=handles, frameon=False, fontsize=14,
-          loc="upper right")#, bbox_to_anchor=(0.8,1),          
+          loc="upper right")#, bbox_to_anchor=(0.8,1),
           #title=r"Voxel width ($\mu$m)", title_fontsize=15)
 
 ########## Leyenda altura:
 pos_x = -0.05
 pos_y = 23.5
-fontsize = 15 
+fontsize = 15
 for ax in [axs, axs1]:
-    ax[0].text(pos_x, pos_y, rf'a)    Height = ${alturas[0]:.0f}\,\mu$m', 
-                fontsize=fontsize, 
+    ax[0].text(pos_x, pos_y, rf'a)    Height = ${alturas[0]:.0f}\,\mu$m',
+                fontsize=fontsize,
                 horizontalalignment='left', verticalalignment='center')
     ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
-                fontsize=fontsize, 
+                fontsize=fontsize,
                 horizontalalignment='left', verticalalignment='center')
     ax[1].label_outer()
 
@@ -314,7 +318,7 @@ for ax in [axs, axs1]:
 if filename:
     fig.savefig(f"{path0}/{filename}.png", format='png', bbox_inches='tight')
     fig.savefig(f"{path0}/{filename}.eps", format='eps',bbox_inches='tight')
-    
+
     fig1.savefig(f"{path0}/Amplitud_vs_density.png", format='png', bbox_inches='tight')
     fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')
 
@@ -328,23 +332,23 @@ plot_3d = True
 
 if interpolar2D:
     from scipy.interpolate import griddata
-    
+
     x = df['densidad']
     y = df['radio']/df['altura']
     z = df['delta_mic']-df['delta_bulk']
-    
+
     points = np.array([x,y]).T
     values = df['delta_mic']-df['delta_bulk']
-    
+
     grid_y, grid_x = np.meshgrid(np.linspace(min(y), max(y), 100),
                                  np.linspace(min(x), max(x), 100), indexing='ij')
-    
+
     grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
     grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
     grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
-    
-    
-    
+
+
+
     fig, axs = plt.subplots(1,2, num=78621)
     plt.subplot(121)
     vmin = min(z)
@@ -363,19 +367,19 @@ if interpolar2D:
     ax.set_title('interpolacion 2D: Linear')
     ax.set_ylabel("r/h")
     ax.set_xlabel(r"$\rho$")
-    
+
     if plot_3d:
         from mpl_toolkits import mplot3d
-         
+
         # Creating dataset
         x = grid_x
         y = grid_y
         z = grid_z1
-         
+
         # Creating figure
         fig = plt.figure(num=4566876, figsize =(14, 9))
         ax = plt.axes(projection ='3d')
-         
+
         # Creating plot
         ax.plot_surface(x, y, z, cmap = 'viridis')
         ax.set_ylabel("r/h")

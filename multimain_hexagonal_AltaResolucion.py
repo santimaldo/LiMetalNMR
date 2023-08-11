@@ -173,24 +173,23 @@ for par in parametros:
         file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
-        
-        #pulso de pi/12
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, 
+
+        # pulso de pi/12
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
                                                volumen_medido='centro{}'.format(region))
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(int(altura), radio, distancia, vs, region)
+        file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(
+            int(altura), radio, distancia, vs, region)
         np.savetxt(savepath+file, datos)
 
         # - - - - SMC16
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1, 
-                                               Norm=False, 
+        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
+                                               Norm=False,
                                                volumen_medido='centro{}'.format(region))
-        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T        
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SMC16/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
-
-
 
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0
