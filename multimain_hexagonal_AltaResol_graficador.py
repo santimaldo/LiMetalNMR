@@ -28,10 +28,17 @@ vss_t = []
 nn = 0
 
 
+# path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
+# print(path0)
+# distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
+#     path0+'Densidades.dat').T
+
 path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
 print(path0)
-distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
-    path0+'Densidades.dat').T
+parametros10 = np.loadtxt(path0+'Densidades10um.dat')
+parametros50 = np.loadtxt(path0+'Densidades.dat')
+parametros = np.concatenate((parametros10, parametros50))
+distancias, radios, alturas, vss, densidades_nominales, densidades = parametros.T
 for ii in range(radios.size):
     # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
     h = alturas[ii]
@@ -47,13 +54,13 @@ for ii in range(radios.size):
     n_r = -1
     for region in regiones:
         n_r += 1
-        path = path0 + 'SMC16/'
+        path = path0 + 'SP/'
         # archivo = 'h{:d}_r{:.2f}_d{:.2f}_vs{:.3f}um_SP{}.dat'.format(
         #     int(h), r, d, vs, region)
-        # archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
-        #     int(h), r, densidad_nominal, vs, region)
-        archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
-             int(h), r, densidad_nominal, vs, region)
+        archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+            int(h), r, densidad_nominal, vs, region)
+        # archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+        #      int(h), r, densidad_nominal, vs, region)
 
         # extraigo
 
@@ -133,7 +140,7 @@ df = pd.DataFrame(list(zip(alturas_t, radios_t,
                   columns =['altura', 'radio', 'densidad', 'distancia', 'vs',
                             'delta_mic', 'delta_bulk', 'amp_mic', 'amp_bulk',
                             'densidad_nominal'])
-
+df = df.sort_values(by='radio', ascending=True)
 
 
 amp_rel = amp_mic/amp_bulk
@@ -148,11 +155,12 @@ fig1 = plt.figure(num=2, figsize=(10,5))
 gs1 = fig1.add_gridspec(1,2,wspace=0.05)
 axs1 = gs1.subplots()
 
+
+
+
 alturas = df['altura'].unique()
 radios = df['radio'].unique()
 vss = df['vs'].sort_values().unique()
-
-# df = df.sort_values(by='radio', ascending=True)
 
 # quito un puntos que esta feos.
 # try:
@@ -166,11 +174,12 @@ vss = df['vs'].sort_values().unique()
 
 marks = ['^','o', 's', 'v', '*', 'p']
 
+savedata = True # para guardar los dataframes
 filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = False
+sin_repetir_data = True
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
@@ -315,7 +324,7 @@ for ax in [axs, axs1]:
     # ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
     #             fontsize=fontsize,
     #             horizontalalignment='left', verticalalignment='center')
-    # ax[1].label_outer()
+    ax[1].label_outer()
 
 
 if filename:
@@ -326,11 +335,13 @@ if filename:
     fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')
 
 
+if savedata:
+  df.to_csv(f'{path0}/datos.csv', index=False)    
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
 interpolar2D = False
-plot_3d = True
+plot_3d = False
 
 
 if interpolar2D:
@@ -339,21 +350,19 @@ if interpolar2D:
     x = df['densidad']
     y = df['radio']/df['altura']
     z = df['delta_mic']-df['delta_bulk']
+    zmic = df['delta_mic']
+    zbulk = df['delta_bulk']
 
-    points = np.array([x,y]).T
-    values = df['delta_mic']-df['delta_bulk']
+    points = np.array([x,y]).T    
 
     grid_y, grid_x = np.meshgrid(np.linspace(min(y), max(y), 100),
                                  np.linspace(min(x), max(x), 100), indexing='ij')
 
-    grid_z0 = griddata(points, values, (grid_x, grid_y), method='nearest')
-    grid_z1 = griddata(points, values, (grid_x, grid_y), method='linear')
-    grid_z2 = griddata(points, values, (grid_x, grid_y), method='cubic')
+    grid_z0 = griddata(points, z, (grid_x, grid_y), method='nearest')
+    grid_z1 = griddata(points, z, (grid_x, grid_y), method='linear')
+    grid_z2 = griddata(points, z, (grid_x, grid_y), method='cubic')
 
-
-
-    fig, axs = plt.subplots(1,2, num=78621)
-    plt.subplot(121)
+    fig, axs = plt.subplots(1,2, num=78621)    
     vmin = min(z)
     vmax = max(z)
     ax = axs[0]
@@ -368,6 +377,42 @@ if interpolar2D:
     ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
                 vmin=vmin, vmax=vmax)   # data
     ax.set_title('interpolacion 2D: Linear')
+    ax.set_ylabel("r/h")
+    ax.set_xlabel(r"$\rho$")
+    
+      
+    metodo = 'nearest' # 'linear0, 'cubic'
+    fig, axs = plt.subplots(1,3, num=78622)    
+    ax = axs[0]    
+    grid_z2 = griddata(points, z, (grid_x, grid_y), method=metodo)
+    vmin = min(z)
+    vmax = max(z)    
+    ax.pcolormesh(grid_x, grid_y, grid_z2, vmin=vmin, vmax=vmax)
+    ax.scatter(points[:, 0], points[:, 1], c=z, s=200, edgecolor='k',
+                vmin=vmin, vmax=vmax)   # data    
+    ax.set_title(r'interpolacion 2D: $\Delta\delta$')
+    ax.set_ylabel("r/h")
+    ax.set_xlabel(r"$\rho$")
+    #--------------
+    ax = axs[1]
+    vmin = min(zmic)
+    vmax = max(zmic)
+    grid_z2_mic = griddata(points, zmic, (grid_x, grid_y), method=metodo)
+    ax.pcolormesh(grid_x, grid_y, grid_z2_mic, vmin=vmin, vmax=vmax)
+    ax.scatter(points[:, 0], points[:, 1], c=zmic, s=200, edgecolor='k',
+                vmin=vmin, vmax=vmax)   # data
+    ax.set_title(r'interpolacion 2D: $\delta_{mic}$')
+    ax.set_ylabel("r/h")
+    ax.set_xlabel(r"$\rho$")
+    #--------------
+    ax = axs[2]
+    vmin = min(zbulk)
+    vmax = max(zbulk)
+    grid_z2_bulk = griddata(points, zbulk, (grid_x, grid_y), method=metodo)
+    ax.pcolormesh(grid_x, grid_y, grid_z2_bulk, vmin=vmin, vmax=vmax)
+    ax.scatter(points[:, 0], points[:, 1], c=zbulk, s=200, edgecolor='k',
+                vmin=vmin, vmax=vmax)   # data
+    ax.set_title(r'interpolacion 2D: $\delta_{bulk}$')
     ax.set_ylabel("r/h")
     ax.set_xlabel(r"$\rho$")
 
