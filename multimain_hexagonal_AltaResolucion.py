@@ -167,8 +167,7 @@ for par in parametros:
         # secuencia: ..... SP ......
         # - - - - SP
         ppmAxis, spec = medicion.CrearEspectro(
-            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region),
-            figure=1)
+            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region))            
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
