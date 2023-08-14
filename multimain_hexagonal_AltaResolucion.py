@@ -67,7 +67,7 @@ parametros = np.array(df)
 
 
 # %%
-savepath = './Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# radio (um)\tdistancia (um)\taltura (um)\tvs (um)\tdensidad\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -177,10 +177,10 @@ for par in parametros:
 
         # pulso de pi/12
         ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
-                                               volumen_medido='centro{}'.format(region))
+                                               volumen_medido='centro{}'.format(region))        
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(
-            int(altura), radio, distancia, vs, region)
+        file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+            int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
 
         # - - - - SMC16
@@ -188,7 +188,7 @@ for par in parametros:
                                                Norm=False,
                                                volumen_medido='centro{}'.format(region))
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SMC16/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+        file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
 
