@@ -57,9 +57,8 @@ df = df[df['Nz'] < 1024]
 df = df[df['radio'] != 1.25]
 min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
-df = df.sort_values(['radio', 'densidad_nominal'], ascending=[False, True])
+df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, True])
 # agrego esto porque me fallto simular la altura 50 um:
-df = df[df['altura']==50]
 parametros = np.array(df)
 
 
