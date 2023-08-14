@@ -68,10 +68,10 @@ parametros = np.array(df)
 # %%
 savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
-    f.write('# radio (um)\tdistancia (um)\taltura (um)\tvs (um)\tdensidad\n')
+    f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
     f.write('# N_iter\tt_total (min)\tt_iteracion(min)\tradio (um)\tdistancia (um)\taltura (um)\tvs (um)\n')
-
+    
 
 # inicializo una lista de cuales tienen error.
 # inicio el reloj
@@ -81,7 +81,6 @@ ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:    
     nnn += 1
-    if nnn<19: continue # esto porque se me corto el calculo
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
@@ -149,6 +148,12 @@ for par in parametros:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
                 f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    
+    
+    if nnn<2: continue
+    
+    
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
     delta = Delta(muestra)  # , skip=True)
@@ -168,7 +173,8 @@ for par in parametros:
         # secuencia: ..... SP ......
         # - - - - SP
         ppmAxis, spec = medicion.CrearEspectro(
-            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region))            
+            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region),
+            Norm=False)            
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
             int(altura), radio, densidad_nominal, vs, region)
@@ -176,6 +182,7 @@ for par in parametros:
 
         # pulso de pi/12
         ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+                                               Norm=False,
                                                volumen_medido='centro{}'.format(region))        
         datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
         file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
