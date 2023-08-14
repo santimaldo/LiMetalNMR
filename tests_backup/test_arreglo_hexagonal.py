@@ -11,7 +11,7 @@ Created on Thu Jun 10 20:48:44 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-3save = True
+save = True
 
 N = 100
 d = 10

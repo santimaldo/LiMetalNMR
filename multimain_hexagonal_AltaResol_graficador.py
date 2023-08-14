@@ -78,8 +78,7 @@ for ii in range(radios.size):
             continue
         ppmAxis0 = datos[:, 0]
         spec = datos[:, 1]
-        spec_imag = datos[:,2]
-        
+        spec_imag = datos[:,2]        
         spec = np.abs(spec+1j*spec_imag)
 
         # retoco:
@@ -177,7 +176,7 @@ marks = ['^','o', 's', 'v', '*', 'p']
 savedata = True # para guardar los dataframes
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
+plot_Deltadelta = False
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 sin_repetir_data = True
 letra = ['a', 'b']

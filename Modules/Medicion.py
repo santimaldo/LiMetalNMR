@@ -226,7 +226,7 @@ class Medicion(object):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     @timer
-    def Crear_beta(self):
+    def Crear_beta(self, graficos=False):
         """
         Mediante erosiones de 1 voxel vamos creando una matriz de beta.
         beta es el factor exponencial con el que decae B1 en el interior.
@@ -264,11 +264,15 @@ class Medicion(object):
             # hasta z0-n-2
             # solo añado el bulk si se hizo una superposicion con bulk.
             if self.superposicion.checkpoint:
-                erode[0:z0-n-1, :, :] = 1
+                if z0-n-1<0:
+                  # con esta condicion, corto si erosione hasta el fondo
+                  break
+                else:
+                  erode[0:z0-n-1, :, :] = 1
             # obtengo la tajada
             tajada = mask ^ erode
             if np.sum(tajada) == 0:
-                # si ya erosione todo, la tajada es nula, por lo tanto salgo del loop
+                # si ya erosione todo, la tajada es nula, por lo tanto salgo del loop                
                 break
             # voy llenando las capas con los valores de B1. la variable de profundidad
             # es (n+1)*vs/2, ya que en la primer tajada n=0 y la profundidad es de la
@@ -277,18 +281,22 @@ class Medicion(object):
             # ahora el nuevo objeto a erosionar es el de la erosion anterior
             mask = (erode == 1)
 
-            # # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
-            # slz = int(obj.shape[0]-10)
-            # sly = int(obj.shape[1]/2)
-            # if n < 9:
-            #     matriz = tajada
-            #     matriz = beta*self.volumen_medido
-            #     plt.figure(666)
-            #     plt.subplot(3, 3, n+1)
-            #     plt.pcolormesh(matriz[slz, :, :])
-            #     plt.figure(667)
-            #     plt.subplot(3, 3, n+1)
-            #     plt.pcolormesh(matriz[:, sly, :])
+            # GRAFICO PARA CHEQUEAR QUE ESTE TODO BIEN # comentar para no ver
+            if graficos:                
+                slz = int(obj.shape[0]-10)
+                sly = int(obj.shape[1]/2)
+                
+                ncols = 6
+                nrows = 6
+                if n < ncols*nrows:
+                    matriz = tajada
+                    matriz = beta*self.volumen_medido
+                    plt.figure(666)
+                    plt.subplot(nrows, ncols, n+1)
+                    plt.pcolormesh(matriz[slz, :, :])
+                    plt.figure(667)
+                    plt.subplot(nrows, ncols, n+1)
+                    plt.pcolormesh(matriz[:, sly, :])
 
         beta = beta*self.volumen_medido  # solo selecciono la parte del volumen medido
         return beta
@@ -318,7 +326,7 @@ class Medicion(object):
         """
         # inicializo parametros utiles
         vs = self.superposicion.muestra.voxelSize[0]
-        skdp = self.skindepth
+        skdp = self.skdp
         # obtengo las matrices de eta y beta
         # eta = self.Crear_eta()
         # beta = self.Crear_beta()
@@ -342,11 +350,11 @@ class Medicion(object):
         # --------beta----------
         # vamos a elegir los bins en beta de acuerdo al tamaño de voxel, para
         # asegurarnos de contar bien. para ello, definimos una variable n
-        n = np.arange(int(5*skdp/vs)+1)  # numero de voxel hacia el interior
-        beta_bin_edges = np.exp(-n*vs/skdp)
+        n = np.arange(int(5*skdp)+1)  # numero de voxel hacia el interior
+        beta_bin_edges = np.exp(-n/skdp)
         # distancia a la superficie, representada por el centro del voxel
         r = (n[:-1]+0.5)*vs
-        beta_bin_centers = np.exp(-r/skdp)
+        beta_bin_centers = np.exp(-r/(skdp*vs))
         # los doy vuelta para meter en el histograma (np.histogram exige que esten ordenados)
         beta_bin_edges = np.flip(beta_bin_edges)
         beta_bin_centers = np.flip(beta_bin_centers)

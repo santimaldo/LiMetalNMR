@@ -34,7 +34,7 @@ skindepth = 0.014    # profundida de penetracion, mm
 voxel_microm = 0.25 # tamano de voxel en micros
 voxelSize = [voxel_microm*1e-3]*3# mm
 
-N = [512,256,256] 
+N = [256,256,256] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -47,9 +47,27 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  el volumen
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #microestructuras
-medidas = [10e-3, 32e-3, 32e-3]
-# muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=16e-3, distancia=20e-3)
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=20e-3, ubicacion='superior') # para 'porcentaje_palos' 
+# medidas = [10e-3, 32e-3, 32e-3]
+h = 50/0.25
+d = (12/0.25)
+Nz, Ny, Nx = N
+vsz, vsy, vsx = voxelSize 
+# parametros de la muestra
+a = get_param_a(d)
+N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+N_celdas_y = (Ny/2)//(2*a)
+medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
+distancia_mm = d*vsx
+parametro_a = a*vsy
+radio_mm = r*vsx
+### Creacion de la muestra
+muestra = Muestra(volumen, medidas=medidas,
+                  # geometria='cilindros_hexagonal',
+                  geometria='cilindros_hexagonal',
+                  radio=2e-3, distancia=distancia_mm,
+                  parametro_a=parametro_a, ubicacion='superior',
+                  exceptions=False)
+# muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=20e-3, ubicacion='superior') # para 'porcentaje_palos' 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
 delta = Delta(muestra)#, skip=True)
@@ -59,33 +77,30 @@ delta = Delta(muestra)#, skip=True)
 superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 # superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
 #%%
-volumen_medido = 'completo'
+volumen_medido = 'centro'
 
-medicion = Medicion(superposicion, volumen_medido=f'{volumen_medido}', stl_file='test')
+medicion = Medicion(superposicion, volumen_medido=f'{volumen_medido}')
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
-
+#%%
 FigSP = 153
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}')
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
 
-FigSMC = 155; k=1; N=16
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
+# FigSMC = 155; k=1; N=16
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}')
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
 
-FigSMC = 156; k=1.5; N=16
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
-#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
+# FigSMC = 156; k=1.5; N=16
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}')
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
 
 #%%
-# ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=64, k=1  , figure=153, Norm=False)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.1, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.2, figure=153)
-#ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', k=1.3, figure=153)
+
+#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+#np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
 
 #%%
 elapsed = (time.time() - t0)/60
