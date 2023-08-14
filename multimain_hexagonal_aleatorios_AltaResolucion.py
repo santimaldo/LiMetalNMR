@@ -39,7 +39,7 @@ def get_param_a(d):
 # ------------------------------------------------------------------------------
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 20   
+Niteraciones = 10   
 Nxy = 1024
 
 # Parametros fisicos
@@ -52,13 +52,13 @@ skindepth = 14e-13  # profundida de penetracion, mm
 parametros = [0.25, 512, 10, 2]
 
 # densidades nominales: (terminan siendo equivalentes a arange(0.1, 0.9, 0.1)
-densidades = [0.1, 0.2, 0.35, 0.5, 0.67, 0.85, 1.2, 1.5]
+densidades = [0.1, 0.2, 0.35, 0.5, 0.67, 0.85, 1.2]#, 1.5]
 densidades_target = np.arange(0.1,0.9,0.1)
 
 
 # %%
 # savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
-savepath = './Outputs/2023-08-07_Cilindros_aleatorios_AltaResolucion/'
+savepath = './Outputs/2023-08-12_Cilindros_aleatorios_AltaResolucion/'
 
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# N_iter\tradio (um)\taltura (um)\tvs (um)\tdensidad\n')
@@ -74,6 +74,7 @@ ntotal = Niteraciones * len(densidades)
 for n_iter in range(Niteraciones):
     for ii in range(len(densidades)):        
         nnn += 1
+        if nnn<2: continue
         densidad_nominal = densidades[ii]
         densidad_target = densidades_target[ii]
     
@@ -149,7 +150,7 @@ for n_iter in range(Niteraciones):
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        medicion = Medicion(superposicion)
+        medicion = Medicion(superposicion, volumen_medido='centro')
         # guardado
         regiones = ['', '-microestructuras', '-bulk']
         #%% -------- centro--------------------------------------------------------------
@@ -158,23 +159,29 @@ for n_iter in range(Niteraciones):
             # secuencia: ..... SP ......
             # - - - - SP
             ppmAxis, spec = medicion.CrearEspectro(
-                secuencia='sp', k=0.5, volumen_medido='completo{}'.format(region))
+                secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region))
             datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
             file = 'SP/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
                 int(altura), radio, densidad_target, vs, n_iter, region)
             np.savetxt(savepath+file, datos)
+
             # pulso de pi/12
-            # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.08, volumen_medido='completo{}'.format(region))
-            # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            # file = 'SP_0.08/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SP{}.dat'.format(int(altura), radio, distancia, vs, region)
-            # np.savetxt(savepath+file, datos)
+            ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+                                                   volumen_medido='centro{}'.format(region))
+            datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+            file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+                int(altura), radio, densidad_nominal, vs, region)
+            np.savetxt(savepath+file, datos)
     
             # - - - - SMC16
-            # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1, Norm=False, volumen_medido='completo{}'.format(region))
-            # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            # file = 'SMC16-k1/h{:d}_r{:.2f}_d{:.2f}_vs{:.2f}um_SMC64k1{}.dat'.format(int(altura), radio, distancia, vs, region)
-            # np.savetxt(savepath+file, datos)
-    
+            ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
+                                                   Norm=False,
+                                                   volumen_medido='centro{}'.format(region))
+            datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+            file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+                int(altura), radio, densidad_nominal, vs, region)
+            np.savetxt(savepath+file, datos)
+        
         elapsed_parcial = (time.time() - t0parcial)/60.0
         elapsed = (time.time() - t0)/60.0
         

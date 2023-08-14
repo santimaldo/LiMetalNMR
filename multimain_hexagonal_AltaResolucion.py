@@ -81,8 +81,9 @@ t0 = time.time()
 nnn = -1
 ntotal = parametros.shape[0]
 # ntotal = 1
-for par in parametros:
+for par in parametros:    
     nnn += 1
+    if nnn<19: continue # esto porque se me corto el calculo
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
@@ -134,7 +135,7 @@ for par in parametros:
     parametro_a = a*vsy
     radio_mm = r*vsx
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Creacion de la muestra
+    ### Creacion de la muestra
     muestra = Muestra(volumen, medidas=medidas,
                       # geometria='cilindros_hexagonal',
                       geometria='cilindros_45grados_hexagonal',
@@ -143,12 +144,12 @@ for par in parametros:
                       exceptions=False)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    densidad_volumetrica = muestra.densidad_volumetrica
+    densidad_volumetrica = muestra.densidad_volumetrica    
     print(
         f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
-                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')
+                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
@@ -192,6 +193,7 @@ for par in parametros:
             int(altura), radio, densidad_nominal, vs, region)
         np.savetxt(savepath+file, datos)
 
+    del muestra, delta, superposicion, medicion
     elapsed_parcial = (time.time() - t0parcial)/60.0
     elapsed = (time.time() - t0)/60.0
     print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
