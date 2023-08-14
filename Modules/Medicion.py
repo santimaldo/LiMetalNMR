@@ -254,7 +254,7 @@ class Medicion(object):
         struct = ndimage.generate_binary_structure(3, 1)
         # hago suficientes slices como para llegar a una profundidad de 5xSkinDepth
         # es decir, 98um
-        n_slices = int(5*skdp)
+        n_slices = int(4*skdp)
         # print(n_slices)
         for n in range(n_slices):
             # erosiono:
