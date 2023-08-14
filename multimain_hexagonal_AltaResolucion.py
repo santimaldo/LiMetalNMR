@@ -58,7 +58,6 @@ df = df[df['radio'] != 1.25]
 min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, True])
-# agrego esto porque me fallto simular la altura 50 um:
 parametros = np.array(df)
 
 
@@ -136,8 +135,8 @@ for par in parametros:
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
     muestra = Muestra(volumen, medidas=medidas,
-                      # geometria='cilindros_hexagonal',
-                      geometria='cilindros_45grados_hexagonal',
+                       geometria='cilindros_hexagonal',
+                      # geometria='cilindros_45grados_hexagonal',
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
                       exceptions=False)

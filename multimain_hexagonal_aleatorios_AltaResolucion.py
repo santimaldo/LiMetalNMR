@@ -74,7 +74,8 @@ ntotal = Niteraciones * len(densidades)
 for n_iter in range(Niteraciones):
     for ii in range(len(densidades)):        
         nnn += 1
-        if nnn<2: continue
+        if nnn<2
+        : continue
         densidad_nominal = densidades[ii]
         densidad_target = densidades_target[ii]
     
