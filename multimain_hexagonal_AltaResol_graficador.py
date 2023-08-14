@@ -33,11 +33,12 @@ nn = 0
 # distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
 #     path0+'Densidades.dat').T
 
-path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
+path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
 print(path0)
-parametros10 = np.loadtxt(path0+'Densidades10um.dat')
-parametros50 = np.loadtxt(path0+'Densidades50um.dat')
-parametros = np.concatenate((parametros10, parametros50))
+# parametros10 = np.loadtxt(path0+'Densidades10um.dat')
+# parametros50 = np.loadtxt(path0+'Densidades50um.dat')
+# parametros = np.concatenate((parametros10, parametros50))
+parametros = np.loadtxt(path0+'Densidades.dat')
 distancias, radios, alturas, vss, densidades_nominales, densidades = parametros.T
 for ii in range(radios.size):
     # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
@@ -63,7 +64,6 @@ for ii in range(radios.size):
         #      int(h), r, densidad_nominal, vs, region)
 
         # extraigo
-
         try:
             datos = np.loadtxt(path+archivo)
             if n_r == 0:
@@ -74,7 +74,7 @@ for ii in range(radios.size):
                 vss_t.append(vs)
                 nn += 1
         except:
-            print(f"error al intentar leer: {archivo}")
+            print(f"error al intentar leer: {path+archivo}")
             continue
         ppmAxis0 = datos[:, 0]
         spec = datos[:, 1]
