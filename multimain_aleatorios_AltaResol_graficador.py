@@ -27,13 +27,13 @@ densidades_vol_t = []
 vss_t = []
 Niter_t = []
 
-Niteraciones=20
+Niteraciones=10
 
 nn = 0
 # data_dir0 = "2023-07-20_Cilindros_hexagonal_AltaResolucion"
 
 # leo los cilindros aleatorios
-data_dir = "2023-08-07_Cilindros_aleatorios_AltaResolucion"
+data_dir = "2023-08-16_Cilindros_aleatorios_AltaResolucion"
 
 # path0 = f"./Outputs/{data_dir0}/"
 path = f"./Outputs/{data_dir}/"
