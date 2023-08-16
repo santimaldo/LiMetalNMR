@@ -26,7 +26,7 @@ df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
 savefig = False
 filename = "Cylinders"
-plot_Deltadelta = False
+plot_Deltadelta = True
 
 
 
@@ -59,8 +59,6 @@ axs1 = gs1.subplots()
 #     pass
 
 marks = ['^','o', 's', 'v', '*', 'p']
-
-plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 letra = ['a', 'b']
 hh = 0
@@ -87,7 +85,7 @@ for h in alturas:
         eje_y = data['delta_mic']
 
     label= rf"radius: {r} $\mu m$"
-    ax.text(0.99, 17, label, fontsize=12,
+    ax.text(0.99, 22, label, fontsize=12,
             horizontalalignment='right',
             verticalalignment='center',
             bbox=dict(facecolor='white', edgecolor='none', pad=0.5)
@@ -99,8 +97,7 @@ for h in alturas:
     ax.scatter(eje_x, eje_y, marker=marker,
                      c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                      edgecolor='k',
-                     s=100)
-    ax.set_yticks([5,10,15,20])
+                     s=100)    
     ax.set_xticks([0, 0.2,0.4,0.6,0.8, 1])
     if not plot_Deltadelta:
         ax.scatter(eje_x, data['delta_bulk'] , marker='^',
@@ -109,9 +106,11 @@ for h in alturas:
                     s=100, label=r"$\delta_{bulk}$")    
     ax.set_xlim([-0.05, 1.05])
     if plot_Deltadelta:
-        ax.set_ylim([0.1, 20])
+        ax.set_ylim([0.1, 25])
+        ax.set_yticks([5,10,15,20,25])
     else:
-        ax.set_ylim([-10, 25])
+        ax.set_ylim([-5, 25])
+        ax.set_yticks([-5, 0, 5,10,15,20])
         ax.axhline(y=0, color='gray', ls='--', lw=1)
     # ----------- amp
     eje_y = data['amp_mic'] / data['amp_bulk']

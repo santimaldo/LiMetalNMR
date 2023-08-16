@@ -61,7 +61,7 @@ for ii in range(radios.size):
         archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
             int(h), r, densidad_nominal, vs, region)
         # archivo = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
-        #      int(h), r, densidad_nominal, vs, region)
+        #       int(h), r, densidad_nominal, vs, region)
 
         # extraigo
         try:
@@ -142,8 +142,8 @@ df = pd.DataFrame(list(zip(alturas_t, radios_t,
 df = df.sort_values(by='radio', ascending=True)
 
 
-amp_rel = amp_mic/amp_bulk
-corrimientos = delta_mic-delta_bulk
+# amp_rel = amp_mic/amp_bulk
+# corrimientos = delta_mic-delta_bulk
 
 # %%
 plt.rcParams.update({'font.size': 16})
@@ -178,7 +178,7 @@ filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = False
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = True
+sin_repetir_data = True                   
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
