@@ -24,7 +24,7 @@ import matplotlib.patches as mpatches
 data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
-savefig = False
+savefig = True
 filename = "Cylinders"
 plot_Deltadelta = True
 

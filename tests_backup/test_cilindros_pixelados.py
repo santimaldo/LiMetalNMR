@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-radio = 5
+radio = 4
 N = 2*radio+2
 o = np.zeros([N,N])
 c = np.zeros([N,N])
@@ -38,6 +38,12 @@ axes.pcolormesh(obj, facecolor='None', edgecolors='k')
 axes.add_artist( Drawing_uncolored_circle)
 plt.show()      
 
+area_continua = np.pi*radio**2
+area_real = np.sum(obj)
+
+print(f"Area continua: {area_continua:.4f}")
+print(f"Area real: {area_real:.4f}")
+print(f"real/continua: {area_real/area_continua:.4f}")
 
 
 

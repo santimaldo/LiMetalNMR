@@ -176,7 +176,7 @@ marks = ['^','o', 's', 'v', '*', 'p']
 savedata = True # para guardar los dataframes
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = False
+plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 sin_repetir_data = True                   
 letra = ['a', 'b']
