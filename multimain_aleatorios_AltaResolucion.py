@@ -49,10 +49,10 @@ skindepth = 14e-13  # profundida de penetracion, mm
 
 
 # parametros : vs, Nz, altura, radio 
-parametros = [0.25, 512, 10, 1]
+parametros = [0.25, 512, 10, 2]
 
 # densidades nominales: (terminan siendo equivalentes a arange(0.1, 0.9, 0.1)
-densidades = [0.1, 0.2, 0.35, 0.5, 0.67, 0.85, 1.2, 1.5]
+densidades = [0.1, 0.2, 0.35, 0.5, 0.67, 0.85, 1.2]#, 1.5]
 densidades_target = np.arange(0.1,0.9,0.1)
 
 
