@@ -41,4 +41,5 @@ def exportar_3D(matriz, archivo):
   export_mesh_to_stl(verts, faces, filename)
   
   print("       Listo!") 
+  print(f"guardado en:    '{filename}'")
   print(" -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  ")
