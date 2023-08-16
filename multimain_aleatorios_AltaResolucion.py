@@ -145,13 +145,16 @@ for n_iter in range(Niteraciones):
         delta = Delta(muestra)#, skip=True)
         # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
         superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
-                                      radio=0)
-        stop
+                                      radio=0)        
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        
+        if n_iter == 0 :
+            stl_file = f"{savefolder}/stls/" \
+                       f"h{int(altura)}_r{int(radio)}_dens{round(densidad, 1)}" 
+            medicion = Medicion(superposicion, volumen_medido='centro',
+                                stl_file=stl_file)
         medicion = Medicion(superposicion, volumen_medido='centro')
         # guardado
         regiones = ['', '-microestructuras', '-bulk']
