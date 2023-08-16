@@ -152,10 +152,12 @@ for n_iter in range(Niteraciones):
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if n_iter == 0 :
             stl_file = f"{savefolder}/stls/" \
-                       f"h{int(altura)}_r{int(radio)}_dens{round(densidad, 1)}" 
+                       f"h{int(altura)}_r{int(radio)}_"\
+                       f"dens{round(densidad_volumetrica, 1)}" 
             medicion = Medicion(superposicion, volumen_medido='centro',
                                 stl_file=stl_file)
-        medicion = Medicion(superposicion, volumen_medido='centro')
+        else:
+            medicion = Medicion(superposicion, volumen_medido='centro')
         # guardado
         regiones = ['', '-microestructuras', '-bulk']
         #%% -------- centro--------------------------------------------------------------
@@ -163,8 +165,9 @@ for n_iter in range(Niteraciones):
             print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
             # secuencia: ..... SP ......
             # - - - - SP
-            ppmAxis, spec = medicion.CrearEspectro(
-                secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region))
+            ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.5, 
+                                                   Norm=False,
+                                                   volumen_medido='centro{}'.format(region))
             datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
             file = 'SP/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
                 int(altura), radio, densidad_target, vs, n_iter, region)
@@ -172,10 +175,11 @@ for n_iter in range(Niteraciones):
 
             # pulso de pi/12
             ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+                                                   Norm=False,
                                                    volumen_medido='centro{}'.format(region))
             datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
-                int(altura), radio, densidad_nominal, vs, region)
+            file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
+                int(altura), radio, densidad_target, vs, n_iter, region)
             np.savetxt(savepath+file, datos)
     
             # - - - - SMC16
@@ -183,8 +187,8 @@ for n_iter in range(Niteraciones):
                                                    Norm=False,
                                                    volumen_medido='centro{}'.format(region))
             datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
-                int(altura), radio, densidad_nominal, vs, region)
+            file = 'SMC/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SMC{}.dat'.format(
+                int(altura), radio, densidad_target, vs, n_iter, region)
             np.savetxt(savepath+file, datos)
         
         elapsed_parcial = (time.time() - t0parcial)/60.0
