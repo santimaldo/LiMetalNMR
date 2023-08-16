@@ -17,6 +17,19 @@ from Modules.Graficador import *
 from Modules.Medicion import *
 import time
 
+def get_param_a(d):
+    if d > 512:
+        msg = ("d debe ser mas chico")
+        raise Exception(msg)
+    if d % 2 == 0:
+        # distancias, parametros_a, errores relativos
+        Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
+        a = As[Ds == d][0]
+        return a
+    else:
+        msg = ("la distancia debe ser tal que distancia/vs sea PAR")
+        raise Exception(msg)
+
 #inicio el reloj
 t0 = time.time()
 #%%----------------------------------------------------------------------------
@@ -31,10 +44,10 @@ skindepth = 0.014    # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxel_microm = 0.25 # tamano de voxel en micros
+voxel_microm = 1.25 # tamano de voxel en micros
 voxelSize = [voxel_microm*1e-3]*3# mm
 
-N = [256,256,256] 
+N = [128,256,256] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -48,14 +61,17 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #  la geometria: el nombre del constructor que va a usar para crear el phantom
 #microestructuras
 # medidas = [10e-3, 32e-3, 32e-3]
-h = 50/0.25
-d = (12/0.25)
+h = (1.25/voxel_microm)
+d = (100.8/voxel_microm)
+r = (50/voxel_microm)
 Nz, Ny, Nx = N
 vsz, vsy, vsx = voxelSize 
 # parametros de la muestra
 a = get_param_a(d)
-N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-N_celdas_y = (Ny/2)//(2*a)
+# N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+# N_celdas_y = (Ny/2)//(2*a)
+N_celdas_x = (Nx)//d   # // es division entera en python3  (floor)
+N_celdas_y = (Ny)//(2*a)
 medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
 distancia_mm = d*vsx
 parametro_a = a*vsy
@@ -64,13 +80,13 @@ radio_mm = r*vsx
 muestra = Muestra(volumen, medidas=medidas,
                   # geometria='cilindros_hexagonal',
                   geometria='cilindros_hexagonal',
-                  radio=2e-3, distancia=distancia_mm,
+                  radio=radio_mm, distancia=distancia_mm,
                   parametro_a=parametro_a, ubicacion='superior',
                   exceptions=False)
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=20e-3, ubicacion='superior') # para 'porcentaje_palos' 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
-delta = Delta(muestra)#, skip=True)
+delta = Delta(muestra, skip=True)
 
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK

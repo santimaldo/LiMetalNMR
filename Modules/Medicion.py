@@ -536,13 +536,13 @@ def find_nearest(array, value):
     return idx
 
 
-def autophase(ppmAxis, spec):
+def autophase(ppmAxis, spec, precision = 1):
     """
     Corrijo automaticamente la fase, utilizando el método de minimizar el area
     de la parte imaginaria:   case{'MinIntImagSpec'}
-    """
-    precision = 1
+    """    
     angle = np.arange(-180, 180, precision)
+    spec.astype('complex')
 
     SPECS = []
     IntImagSpec = []

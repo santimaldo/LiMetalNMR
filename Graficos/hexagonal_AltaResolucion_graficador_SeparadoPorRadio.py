@@ -122,7 +122,7 @@ for h in alturas:
     ax.set_yscale('log')
     ax.axhline(y=1, ls='--', color='k')
     ax.set_xlim([-0.08, 1.08])
-    ax.set_ylim([0.1, 30])
+    ax.set_ylim([0.1, 100])
     
     rr += 1      
   hh+=1
@@ -139,6 +139,13 @@ for hh in range(axs.shape[1]):
     else:
         ax.set_ylabel(r'$\delta$ [ppm]')
     ax.label_outer()
+    
+axs[0][0].text(0.5, 30, '(a)', fontsize=20,
+               horizontalalignment='center',
+               verticalalignment='center')
+axs[0][1].text(0.5, 30, '(b)', fontsize=20,
+               horizontalalignment='center',
+               verticalalignment='center')    
 # for ax in axs1:
 #     ax.set_xlabel('Density')
 #     ax.set_ylabel(r'$A_{mic}/A_{bulk}$')

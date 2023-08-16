@@ -30,6 +30,7 @@ def funciones(geometria):
   funciones['clusters_hexagonal_SinCeldaUnidad'] = clusters_hexagonal_SinCeldaUnidad
   funciones['cilindros_aleatorios_hexagonal'] = cilindros_aleatorios_hexagonal
   funciones['cilindros_45grados_hexagonal'] = cilindros_45grados_hexagonal
+  funciones['cilindros_con-angulo_hexagonal'] = cilindros_con_angulo_hexagonal
   funciones['cilindros_aleatorios'] = cilindros_aleatorios  
   if geometria in funciones:
     return funciones[geometria]
@@ -1233,6 +1234,104 @@ def cilindros_45grados_hexagonal(N, voxelSize, **geokwargs):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+def cilindros_con_angulo_hexagonal(N, voxelSize, **geokwargs):
+  """ 2023-08-07
+  Creo cilindritos a distancia constante entre sí. Es decir, en un arreglo
+  hexagonal. La distancia se define centro a centro.
+  Además, los cilindros toman direcciones aleatorias:
+  A los cilindritos inclinados con cierto angulo en la direccion x.
+  El  angulo esta dado por:
+    
+      angulo = atan(voxels_z/voxels_x)
+      
+  Donde voxels_z y voxels_x es cuanto se corre la capa subsiguiente.  
+  El arreglo es hexagonal como en otros casos.
+  
+  
+  Input:
+  -----
+  + angulo_target : float   - angulo que se busca hacer. ATENCION: no es el
+                              angulo definitivo!!!! ya que solo se utilizan
+                              aquellos cuya tangente es n o 1/n.
+                              Angulos resultantes posibles (en grados):
+                              11.3, 14.0, 18.4, 26.6, 45.0, 
+                              63.4, 71.6, 76.0, 78.7.
+  """  
+  
+  radio = geokwargs['radio']
+  distancia = geokwargs['distancia']
+  parametro_a = geokwargs['parametro_a']
+  angulo_target = geokwargs['angulo_target']
+ 
+  Nmz,Nmy,Nmx = N  
+  vsz, vsy, vsx = voxelSize
+   
+  # cuantos voxels debo usar por cilindro aproximadamente
+  R = int(radio/vsx)
+  d = int(distancia/vsx)
+  a = int(parametro_a/vsx)
+
+                  
+  # CREO LOS CENTROS DEL ARREGLO HEXAGONAL.  - - - - - - - - - - - - - - - - - 
+  Ncentros_x = int(Nmx/d + 1)
+  Ncentros_y = int(Nmy/a + 1)
+  centros = []
+  for iy in range(Ncentros_y):
+    if iy%2==0:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix))
+    else:
+      for ix in range(Ncentros_x):
+        centros.append((a*iy, d*ix+d/2))
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  # direccion de desviacion (j,i)  
+  tan = np.tan(angulo_target*np.pi/180)
+  if angulo_target<45:
+    n = round(1/tan)
+    dir1 = (1, n)
+    angulo_real = np.arctan(1/n) * 180/np.pi
+  elif angulo_target>89:
+    dir1 = (0,0)
+    angulo_real = 90
+  else:
+    n = round(tan)
+    dir1 = (n, 1)
+    angulo_real = np.arctan(n) * 180/np.pi
+  print(f"\nCilindros hexagonales con angulo de {angulo_real:.2f} grados.\n")
+  
+
+  indices = [] 
+  R2 = R**2
+  for centro in centros:
+    ind_yc, ind_xc = centro
+    xc = ind_xc - 0.5
+    yc = ind_yc - 0.5
+    ind_xc = int(xc)
+    ind_yc = int(yc)        
+    for ind_y in range(ind_yc-R,ind_yc+R+1):
+      for ind_x in range(ind_xc-R,ind_xc+R+1):      
+        if (ind_x-xc)**2 + (ind_y-yc)**2 < R2:          
+          ix = ind_x; iy = ind_y                             
+          for ind_z in range(Nmz):
+            iy += dir1[0]                          
+            ix += dir1[1]              
+            indices.append((ind_z,int(iy%Nmy), int(ix%Nmx))) # guardo modulo Nm para imponer condiciones periodicas          
+                
+  return indices  
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -1463,7 +1562,7 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
 #%%
 if __name__=='__main__':
     import matplotlib.pyplot as plt
-    from oct2py import Oct2Py
+    # from oct2py import Oct2Py
     
     """
     script para testear las geometrias
@@ -1481,7 +1580,8 @@ if __name__=='__main__':
     # geometria = 'clusters_hexagonal_SinCeldaUnidad'
     # geometria = 'cilindros_aleatorios_hexagonal'
     # geometria = 'cilindros_45grados_hexagonal'
-    geometria = 'cilindros_aleatorios'
+    geometria = 'cilindros_con-angulo_hexagonal'
+    # geometria = 'cilindros_aleatorios'
     constructor = funciones(geometria)
     # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
     # en los cuales hay litio.
@@ -1491,8 +1591,8 @@ if __name__=='__main__':
     # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
     # tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
     # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'  
-    tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=1.5) # para 'cilindros_aleatorios'
-    
+    # tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=1.5) # para 'cilindros_aleatorios'
+    tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019, angulo_target=78)
     # convierto a indices planos
     indices = np.array(tuplas).T  
     indices = np.ravel_multi_index(indices, N)

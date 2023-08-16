@@ -49,7 +49,7 @@ for par in parametros:
     Niter = int(Niter)    
     dens_target = round(densidad, 1)
     
-    regiones = ['-microestructuras', '-bulk']
+    regiones = ['-microestructuras', '-bulk', '']
     col = ['k', 'r', 'b']
 
 

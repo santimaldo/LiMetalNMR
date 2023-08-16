@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 20})
 import matplotlib
 import matplotlib.patches as mpatches
-
+from Modules.Medicion import autophase
 
 p_cubierto = []
 delta_mic = []
@@ -40,16 +40,20 @@ print(path0)
 # parametros = np.concatenate((parametros10, parametros50))
 parametros = np.loadtxt(path0+'Densidades.dat')
 distancias, radios, alturas, vss, densidades_nominales, densidades = parametros.T
-for ii in range(radios.size):
+for ii in range(radios.size):  
     # path=path0+'SMC64-k1/iteracion{:d}/'.format(jj)
-    h = alturas[ii]
+    h = alturas[ii]    
     d = distancias[ii]
     r = radios[ii]
     p = densidades[ii]
     densidad_nominal = densidades_nominales[ii]
     vs = vss[ii]
+    
+    # if h==50: continue
+    # if r!=50: continue
+    # if p<0.85: continue
 
-    regiones = ['-microestructuras', '-bulk']
+    regiones = ['-microestructuras', '-bulk', '']
     col = ['k', 'r', 'b']
 
     n_r = -1
@@ -78,14 +82,19 @@ for ii in range(radios.size):
             continue
         ppmAxis0 = datos[:, 0]
         spec = datos[:, 1]
-        spec_imag = datos[:,2]        
-        spec = np.abs(spec+1j*spec_imag)
+        spec_imag = datos[:,2]
+        # spec.astype('complex')
+        # spec, _ = autophase(ppmAxis0, spec+1j*spec_imag, precision=0.5)             
+        
+        spec = spec.real
+        # spec = np.abs(spec+1j*spec_imag)
+        
 
         # retoco:
         ppmAxis = ppmAxis0
-        spec = spec - spec[0]
+        spec = spec - np.mean(spec[0:50])
         # reduzco los datos a una VENTANA alrededor de un CENTRO
-        ventana = 200
+        ventana = 50
         center = 0
         ppmAxis = ppmAxis0[np.abs(center-ppmAxis0) < ventana]
         spec = spec[np.abs(center-ppmAxis0) < ventana]
