@@ -44,7 +44,7 @@ Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
-Nxy = 1024
+Nxy = 512
 
 # radio, distancia y vs estan en el archivo:
 # parametros = np.loadtxt('./DataBases/ParametrosASimular_hexagonal.par')
@@ -53,10 +53,12 @@ Nxy = 1024
 # parametros = np.array(parametros)
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
-df = df[df['Nz'] < 1024]
-df = df[df['radio'] != 1.25]
-min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
-df = df.loc[min_vs.values]
+# df = df[df['Nz'] < 1024]
+df = df[df['altura'] == 10]
+df = df[df['radio'] == 2]
+df = df[df['voxelSize'] == 0.25]
+# min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
+# df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, True])
 parametros = np.array(df)
 
@@ -66,7 +68,8 @@ parametros = np.array(df)
 
 
 # %%
-savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
+# savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-08-17_Cilindros_78grados_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -134,8 +137,9 @@ for par in parametros:
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
     muestra = Muestra(volumen, medidas=medidas,
-                       geometria='cilindros_hexagonal',
+                       # geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
+                      geometria='cilindros_con-angulo_hexagonal', angulo_target=78,
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
                       exceptions=False)
@@ -147,12 +151,7 @@ for par in parametros:
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
                 f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    
-    
-    
-    if nnn<2: continue
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
     
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
