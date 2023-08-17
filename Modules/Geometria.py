@@ -1427,12 +1427,12 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                         for nnz in range(nvz1):
                             if ind_z == zmax:
                                 break
-                            iy += nvxy1*dir1[0]
-                            ix += nvxy1*dir1[1]
                             # guardo modulo-Nm para imponer condiciones periodicas:
                             indices.append(
                                 (ind_z, int(iy % Nmy), int(ix % Nmx)))
                             ind_z += 1
+                        iy += nvxy1*dir1[0]
+                        ix += nvxy1*dir1[1]
                     # ------------------------------------------segundo tramo
                     zmin = Nz_rand1
                     zmax = Nz_rand2
@@ -1441,12 +1441,12 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                         for nnz in range(nvz2):
                             if ind_z == zmax:
                                 break
-                            iy += nvxy2*dir2[0]
-                            ix += nvxy2*dir2[1]
                             # guardo modulo-Nm para imponer condiciones periodicas:
                             indices.append(
                                 (ind_z, int(iy % Nmy), int(ix % Nmx)))
                             ind_z += 1
+                        iy += nvxy2*dir2[0]
+                        ix += nvxy2*dir2[1]
                     # ------------------------------------------tercer tramo
                     nvxy, nvz = parametros_angulo()  # sorteo
                     zmin = Nz_rand2
@@ -1456,12 +1456,12 @@ def cilindros_aleatorios(N, voxelSize, **geokwargs):
                         for nny in range(nvz3):
                             if ind_z == zmax:
                                 break
-                            iy += nvxy3*dir3[0]
-                            ix += nvxy3*dir3[1]
                             # guardo modulo-Nm para imponer condiciones periodicas:
                             indices.append(
                                 (ind_z, int(iy % Nmy), int(ix % Nmx)))
                             ind_z += 1
+                        iy += nvxy3*dir3[0]
+                        ix += nvxy3*dir3[1]
     return indices
 
 # ------------------------------------------------------------------------------
@@ -1620,8 +1620,8 @@ if __name__ == '__main__':
     # geometria = 'clusters_hexagonal_SinCeldaUnidad'
     # geometria = 'cilindros_aleatorios_hexagonal'
     # geometria = 'cilindros_45grados_hexagonal'
-    geometria = 'cilindros_con-angulo_hexagonal'
-    # geometria = 'cilindros_aleatorios'
+    # geometria = 'cilindros_con-angulo_hexagonal'
+    geometria = 'cilindros_aleatorios'
     constructor = funciones(geometria)
     # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
     # en los cuales hay litio.
@@ -1631,9 +1631,10 @@ if __name__ == '__main__':
     # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
     # tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
     # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'
-    # tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=1.5) # para 'cilindros_aleatorios'
-    tuplas = constructor(N, voxelSize, radio=2e-3,
-                         distancia=7e-3, parametro_a=6e-3, angulo_target=78)
+    # para 'cilindros_aleatorios'
+    tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=0.3)
+    # tuplas = constructor(N, voxelSize, radio=2e-3,
+    #                      distancia=7e-3, parametro_a=6e-3, angulo_target=78)
     # convierto a indices planos
     indices = np.array(tuplas).T
     indices = np.ravel_multi_index(indices, N)
@@ -1643,6 +1644,8 @@ if __name__ == '__main__':
     #  put(array       , indices, valor)
     np.put(muestra, indices, 1)
 
+    print(f"Densidad (area) : {np.sum(muestra[0,:,:])/Nx/Ny:.4f}")
+    print(f"Densidad (vol)  : {np.sum(muestra)/Nx/Ny/Nz:.4f}")
     # %%
 
     x0 = int(Nx/2)
@@ -1666,8 +1669,6 @@ if __name__ == '__main__':
     plt.imshow(muestra[:, :, x1])
     plt.show()
 
-    print(f"Densidad (area) : {np.sum(muestra[0,:,:])/Nx/Ny:.4f}")
-    print(f"Densidad (vol)  : {np.sum(muestra)/Nx/Ny/Nz:.4f}")
 
 # %%
     # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -1693,4 +1694,8 @@ if __name__ == '__main__':
     # print("       Listo!")
     # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-# %%
+# %% ploteo 3d con matplotlib
+  # print("grafico 3D con matplotlib... esto tarda muuuucho")
+  # voxels = np.moveaxis(muestra, 0, 2)
+  # ax = plt.figure().add_subplot(projection='3d')
+  # ax.voxels(voxels)
