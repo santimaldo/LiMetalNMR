@@ -4,6 +4,8 @@
 # ignore all data files
 *.dat
 *.csv
+# ignore all .html files
+*.html
 # ignore all .stl files
 *.stl
 # ignore all figures
