@@ -1609,7 +1609,8 @@ if __name__ == '__main__':
     """
     # este N es el N de la muestra ejemplo
     # N = np.array([16,228,242])
-    N = np.array([40, 96, 112])
+    # N = np.array([40, 96, 112])
+    N = np.array([40, 256, 256])
     Nz, Ny, Nx = N
     voxelSize = np.array([1e-3, 1e-3, 1e-3])*0.25
 

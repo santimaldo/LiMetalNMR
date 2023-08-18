@@ -143,11 +143,10 @@ for n_iter in range(Niteraciones):
             f.write(f'{n_iter}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
                     f'{densidad_area:.4f}\t{densidad_volumetrica:.4f}\n')
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        
-        
-        if nnn<1: continue # para continuar calculando                  
-        
-        
+
+        if nnn < 1:
+            continue  # para continuar calculando
+
         # CREACION DEL OBJETO DELTA-------------------------------------------------
         # delta es la perturbacion de campo magnetico
         delta = Delta(muestra)  # , skip=True)

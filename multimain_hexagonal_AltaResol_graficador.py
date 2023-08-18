@@ -34,7 +34,7 @@ nn = 0
 #     path0+'Densidades.dat').T
 
 # path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
-path0 = "./Outputs/2023-08-17_Cilindros_14grados_hexagonal_AltaResolucion/"
+path0 = "./Outputs/2023-08-18_Cilindros_45grados_hexagonal_AltaResolucion/"
 print(path0)
 # parametros10 = np.loadtxt(path0+'Densidades10um.dat')
 # parametros50 = np.loadtxt(path0+'Densidades50um.dat')
@@ -343,8 +343,6 @@ if filename:
                  format='png', bbox_inches='tight')
     fig1.savefig(f"{path0}/Amplitud_vs_density.eps",
                  format='eps', bbox_inches='tight')
-
-
 
 
 # %%%
