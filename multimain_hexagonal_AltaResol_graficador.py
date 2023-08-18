@@ -25,16 +25,16 @@ radios_t = []
 densidades_t = []
 vss_t = []
 
+savedata = True  # para guardar los dataframes
+
 nn = 0
-
-
 # path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
 # print(path0)
 # distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
 #     path0+'Densidades.dat').T
 
 # path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
-path0 = "./Outputs/2023-08-17_Cilindros_78grados_hexagonal_AltaResolucion/"
+path0 = "./Outputs/2023-08-17_Cilindros_14grados_hexagonal_AltaResolucion/"
 print(path0)
 # parametros10 = np.loadtxt(path0+'Densidades10um.dat')
 # parametros50 = np.loadtxt(path0+'Densidades50um.dat')
@@ -150,7 +150,8 @@ df = pd.DataFrame(list(zip(alturas_t, radios_t,
                            'densidad_nominal'])
 df = df.sort_values(by='radio', ascending=True)
 
-
+if savedata:
+    df.to_csv(f'{path0}/datos.csv', index=False)
 # amp_rel = amp_mic/amp_bulk
 # corrimientos = delta_mic-delta_bulk
 
@@ -180,7 +181,7 @@ vss = df['vs'].sort_values().unique()
 
 marks = ['^', 'o', 's', 'v', '*', 'p']
 
-savedata = True  # para guardar los dataframes
+
 filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = True
@@ -344,8 +345,7 @@ if filename:
                  format='eps', bbox_inches='tight')
 
 
-if savedata:
-    df.to_csv(f'{path0}/datos.csv', index=False)
+
 
 # %%%
 # A PARTIR DE ACA VA LA INTERPOLACION 2D
