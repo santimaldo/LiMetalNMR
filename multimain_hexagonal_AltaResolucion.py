@@ -56,7 +56,7 @@ df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
 # df = df[df['Nz'] < 1024]
 df = df[df['altura'] == 10]
 df = df[df['radio'] == 2]
-df = df[df['voxelSize'] == 0.25]
+df = df[df['voxelSize'] == 0.250]
 # min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 # df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, True])
@@ -69,7 +69,7 @@ parametros = np.array(df)
 
 # %%
 # savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2023-08-17_Cilindros_78grados_hexagonal_AltaResolucion/'
+savepath = './Outputs/2023-08-18_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -137,9 +137,9 @@ for par in parametros:
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
     muestra = Muestra(volumen, medidas=medidas,
-                       # geometria='cilindros_hexagonal',
+                      # geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
-                      geometria='cilindros_con-angulo_hexagonal', angulo_target=78,
+                      geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
                       exceptions=False)
