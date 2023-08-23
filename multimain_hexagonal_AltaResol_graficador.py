@@ -140,10 +140,11 @@ radios_t = np.array(radios_t)
 densidades_t = np.array(densidades_t)
 vss_t = np.array(vss_t)
 
-
+delta_pristine = 0.83723 # este es el centro del pico de una muestra sin mic.
 df = pd.DataFrame(list(zip(alturas_t, radios_t,
                            densidades_t, distancias_t, vss_t,
-                           delta_mic, delta_bulk, amp_mic, amp_bulk,
+                           delta_mic-delta_pristine, delta_bulk-delta_pristine,
+                           amp_mic, amp_bulk,
                            np.around(densidades_t, decimals=1))),
                   columns=['altura', 'radio', 'densidad', 'distancia', 'vs',
                            'delta_mic', 'delta_bulk', 'amp_mic', 'amp_bulk',
@@ -181,7 +182,6 @@ vss = df['vs'].sort_values().unique()
 
 marks = ['^', 'o', 's', 'v', '*', 'p']
 
-alturas = []
 
 
 filename = False
