@@ -44,10 +44,10 @@ skindepth = 0.014    # profundida de penetracion, mm
 # recordar que la convencion de python es {z,y,x}
 # elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
 # volumen simulado.
-voxel_microm = 1.25 # tamano de voxel en micros
+voxel_microm = 0.25 # tamano de voxel en micros
 voxelSize = [voxel_microm*1e-3]*3# mm
 
-N = [128,256,256] 
+N = [512,256,256] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -62,7 +62,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #microestructuras
 # medidas = [10e-3, 32e-3, 32e-3]
 h = (1.25/voxel_microm)
-d = (100.8/voxel_microm)
+d = (100/voxel_microm)
 r = (50/voxel_microm)
 Nz, Ny, Nx = N
 vsz, vsy, vsx = voxelSize 
@@ -76,13 +76,16 @@ medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
 distancia_mm = d*vsx
 parametro_a = a*vsy
 radio_mm = r*vsx
+
+medidas = [Nz/4*vsz, Ny*vsy, Nx*vsx] # para bulk
 ### Creacion de la muestra
 muestra = Muestra(volumen, medidas=medidas,
-                  geometria = 'bulk'
+                  geometria = 'bulk',
                   # geometria='cilindros_hexagonal',
                   # geometria='cilindros_hexagonal',
                   # radio=radio_mm, distancia=distancia_mm,
-                  # parametro_a=parametro_a, ubicacion='superior',
+                  # parametro_a=parametro_a, 
+                  ubicacion='superior',                  
                   exceptions=False)
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=20e-3, ubicacion='superior') # para 'porcentaje_palos' 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------
@@ -91,8 +94,8 @@ delta = Delta(muestra, skip=True)
 
 #%%
 # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK
-superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
-# superposicion = Superposicion(muestra, delta, radio='000', z0=84e-3) # si pongo 'radio', es porque lee de un perfil
+# superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
+superposicion = Superposicion(muestra, delta, radio=0) # si pongo 'radio', es porque lee de un perfil
 #%%
 volumen_medido = 'centro'
 

@@ -87,7 +87,7 @@ class Superposicion(object):
               f"\t bulk = {z0*self.muestra.voxelSize[0]*1000} um "\
               f"< 3 * skdp = {3*skdp*1000} um"
         # raise Exception(msg)
-        warnings.warn(mensaje, DeprecationWarning, stacklevel=2)
+        warnings.warn(msg, DeprecationWarning, stacklevel=2)
         
     self.z0 = z0 # z0 en unidades de voexel
     self.slice = None
