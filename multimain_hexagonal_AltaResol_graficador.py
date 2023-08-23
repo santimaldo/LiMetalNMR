@@ -25,7 +25,7 @@ radios_t = []
 densidades_t = []
 vss_t = []
 
-savedata = True  # para guardar los dataframes
+savedata = False  # para guardar los dataframes
 
 nn = 0
 # path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
@@ -33,8 +33,8 @@ nn = 0
 # distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
 #     path0+'Densidades.dat').T
 
-# path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
-path0 = "./Outputs/2023-08-18_Cilindros_45grados_hexagonal_AltaResolucion/"
+path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
+# path0 = "./Outputs/2023-08-18_Cilindros_hexagonal_AltaResolucion/"
 print(path0)
 # parametros10 = np.loadtxt(path0+'Densidades10um.dat')
 # parametros50 = np.loadtxt(path0+'Densidades50um.dat')
@@ -181,16 +181,18 @@ vss = df['vs'].sort_values().unique()
 
 marks = ['^', 'o', 's', 'v', '*', 'p']
 
+alturas = []
+
 
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
+plot_Deltadelta = False
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 sin_repetir_data = True
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df[(df['altura'] == h)]
+    data_h = df[(df['altura'] == h)]    
     nn = 0
     for vs in vss:
         if sin_repetir_data:
