@@ -105,7 +105,7 @@ medicion = Medicion(superposicion, volumen_medido=f'{volumen_medido}')
 FigSP = 153
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}')
 ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
-ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
+# ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
 
 # FigSMC = 155; k=1; N=16
 # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc' , N=N, k=k, figure=FigSMC, Norm=False, volumen_medido=f'{volumen_medido}')
@@ -119,8 +119,9 @@ ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Nor
 
 #%%
 
-#datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-#np.savetxt(path+'h{:d}_ancho{:d}_dens{:d}_SP_k{:.2f}'.format(int(h*1e3), int(ancho*1e3), int(porcentaje), k))
+datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+filename = "./Outputs/bulk.dat"
+np.savetxt(filename, datos)
 
 #%%
 elapsed = (time.time() - t0)/60
