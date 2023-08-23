@@ -78,10 +78,11 @@ parametro_a = a*vsy
 radio_mm = r*vsx
 ### Creacion de la muestra
 muestra = Muestra(volumen, medidas=medidas,
+                  geometria = 'bulk'
                   # geometria='cilindros_hexagonal',
-                  geometria='cilindros_hexagonal',
-                  radio=radio_mm, distancia=distancia_mm,
-                  parametro_a=parametro_a, ubicacion='superior',
+                  # geometria='cilindros_hexagonal',
+                  # radio=radio_mm, distancia=distancia_mm,
+                  # parametro_a=parametro_a, ubicacion='superior',
                   exceptions=False)
 # muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_aleatorios',densidad_nominal=1,radio=20e-3, ubicacion='superior') # para 'porcentaje_palos' 
 #%% CREACION DEL OBJETO DELTA--------------------------------------------------

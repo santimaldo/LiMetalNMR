@@ -54,12 +54,12 @@ Nxy = 512
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
 # df = df[df['Nz'] < 1024]
-df = df[df['altura'] == 10]
-df = df[df['radio'] == 2]
-df = df[df['voxelSize'] == 0.250]
-# min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
-# df = df.loc[min_vs.values]
-df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, True])
+df = df[df['altura'] == 50]
+df = df[df['radio'].isin([1,50])]
+df = df[df['voxelSize'] >= 0.250]
+min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
+df = df.loc[min_vs.values]
+df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, False])
 parametros = np.array(df)
 
 
@@ -87,6 +87,7 @@ for par in parametros:
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
+    Nz = 1024
     h = int(altura/vs)
     r = int(radio/vs)
     d = int(distancia/vs)
@@ -137,9 +138,9 @@ for par in parametros:
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
     muestra = Muestra(volumen, medidas=medidas,
-                      # geometria='cilindros_hexagonal',
+                       geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
-                      geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
+                      # geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
                       radio=radio_mm, distancia=distancia_mm,
                       parametro_a=parametro_a, ubicacion='superior',
                       exceptions=False)
@@ -151,7 +152,9 @@ for par in parametros:
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
                 f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    
+    if nnn<23: continue
     
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
