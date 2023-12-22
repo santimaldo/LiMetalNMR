@@ -213,6 +213,7 @@ axs[0][1].text(0.5, 30, '(b)', fontsize=20,
 if savefig:
     fig.savefig(f"../Outputs/{data_dir}/{filename}.png", format='png', bbox_inches='tight')
     fig.savefig(f"../Outputs/{data_dir}/{filename}.eps", format='eps', bbox_inches='tight')
+    fig.savefig(f"../Outputs/{data_dir}/{filename}.svg", format='svg', bbox_inches='tight')
 
     # fig1.savefig(f"{path0}/Amplitud_vs_density.png", format='png', bbox_inches='tight')
     # fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')

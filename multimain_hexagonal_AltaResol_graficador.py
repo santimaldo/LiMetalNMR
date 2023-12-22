@@ -186,7 +186,7 @@ marks = ['^', 'o', 's', 'v', '*', 'p']
 
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = False
+plot_Deltadelta = True
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
 sin_repetir_data = True
 letra = ['a', 'b']
@@ -234,7 +234,7 @@ for h in alturas:
                        s=100, label=r"$\delta_{bulk}$")
         ax.set_xlim([-0.08, 1.08])
         if plot_Deltadelta:
-            ax.set_ylim([0, 25])
+            ax.set_ylim([-1, 25])
         else:
             ax.set_ylim([-10, 25])
             ax.axhline(y=0, color='gray', ls='--', lw=1)
