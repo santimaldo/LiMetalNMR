@@ -24,7 +24,7 @@ import matplotlib.patches as mpatches
 data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
-savefig = True
+savefig = False
 filename = "Cylinders"
 plot_Deltadelta = True
 
@@ -49,14 +49,14 @@ axs1 = gs1.subplots()
 
 
 # quito un puntos que esta feos.
-# try:
-#     condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
-#     condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
-#     # condicion2 = False
-#     index = df.index[condicion1 | condicion2]
-#     df.drop(index, inplace=True)
-# except:
-#     pass
+try:
+    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
+    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
+    # condicion2 = False
+    index = df.index[condicion1 | condicion2]
+    df.drop(index, inplace=True)
+except:
+    pass
 
 marks = ['^','o', 's', 'v', '*', 'p']
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
