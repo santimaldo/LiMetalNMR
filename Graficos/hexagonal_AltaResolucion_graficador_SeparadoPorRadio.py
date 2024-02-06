@@ -21,7 +21,7 @@ import matplotlib.patches as mpatches
 
 
 
-data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
+data_dir = "2023-07-20_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
 savefig = False

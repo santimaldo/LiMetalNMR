@@ -21,7 +21,7 @@ import matplotlib.patches as mpatches
 
 
 
-data_dir = "2023-08-10_Cilindros_hexagonal_AltaResolucion"
+data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
 savefig = False
@@ -54,12 +54,12 @@ vss = df['vs'].sort_values().unique()
 
 marks = ['^','o', 's', 'v', '*', 'p']
 
-savedata = True # para guardar los dataframes
+savedata = False # para guardar los dataframes
 filename = False
 # filename = "Deltadelta_vs_density"
-plot_Deltadelta = True
+plot_Deltadelta = False
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
-sin_repetir_data = True
+sin_repetir_data = False
 letra = ['a', 'b']
 hh = 0
 for h in alturas:

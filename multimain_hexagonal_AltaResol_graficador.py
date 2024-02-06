@@ -25,7 +25,7 @@ radios_t = []
 densidades_t = []
 vss_t = []
 
-savedata = False  # para guardar los dataframes
+savedata = True  # para guardar los dataframes
 
 nn = 0
 # path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
@@ -33,7 +33,7 @@ nn = 0
 # distancias, radios, alturas, vss, densidades_nominales, densidades = np.loadtxt(
 #     path0+'Densidades.dat').T
 
-path0 = "./Outputs/2023-08-18_Cilindros_hexagonal_AltaResolucion/"
+path0 = "./Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/"
 # path0 = "./Outputs/2023-08-18_Cilindros_hexagonal_AltaResolucion/"
 print(path0)
 # parametros10 = np.loadtxt(path0+'Densidades10um.dat')
