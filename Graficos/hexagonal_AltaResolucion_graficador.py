@@ -83,7 +83,10 @@ for h in alturas:
         if plot_Deltadelta:
             eje_y = data['delta_mic']-data['delta_bulk']
         else:
-            eje_y = data['delta_mic']
+            offset = df[(df['altura']==10) & (df['radio']==1) & (df['densidad']<0.11)]['delta_bulk']
+            offset = float(offset)
+            eje_y = data['delta_mic'] - offset
+            delta_bulk = data['delta_bulk'] - offset        
         if sin_repetir_data:
             label= r"$\delta_{mic}$"
             marker = 'o'
@@ -96,7 +99,7 @@ for h in alturas:
                          edgecolor='k',
                          s=100, label=label)
         if not plot_Deltadelta:
-            ax.scatter(eje_x, data['delta_bulk'] , marker='^',
+            ax.scatter(eje_x, delta_bulk , marker='^',
                         c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                         edgecolor='k',
                         s=100, label=r"$\delta_{bulk}$")
@@ -104,7 +107,7 @@ for h in alturas:
         if plot_Deltadelta:
             ax.set_ylim([0, 25])
         else:
-            ax.set_ylim([-10, 25])
+            ax.set_ylim([-8, 25])
             ax.axhline(y=0, color='gray', ls='--', lw=1)
         # ----------- amp
         eje_y = data['amp_mic'] / data['amp_bulk']
@@ -116,7 +119,7 @@ for h in alturas:
         ax.set_yscale('log')
         ax.axhline(y=1, ls='--', color='k')
         ax.set_xlim([-0.08, 1.08])
-        ax.set_ylim([0.1, 30])
+        ax.set_ylim([0.1, 100])
 
         if sin_repetir_data:
             break
@@ -135,6 +138,7 @@ for ax in axs:
 for ax in axs1:
     ax.set_xlabel('Density')
     ax.set_ylabel(r'$A_{mic}/A_{bulk}$')
+   
 
 
 
@@ -182,28 +186,31 @@ for rr in range(radios.size+1):
     yi1 += alto1
 ##################### leyenda voxelsize:
 ax = axs[0]
-# access legend objects automatically created from data
-handles, labels = ax.get_legend_handles_labels()
-# where some data has already been plotted to ax
-handles, labels = ax.get_legend_handles_labels()
-# handles is a list, so append manual patch
-# plot the legend
-ax.legend(handles=handles, frameon=False, fontsize=14,
-          loc="upper right")#, bbox_to_anchor=(0.8,1),
-          #title=r"Voxel width ($\mu$m)", title_fontsize=15)
+# # access legend objects automatically created from data
+# handles, labels = ax.get_legend_handles_labels()
+# # where some data has already been plotted to ax
+# handles, labels = ax.get_legend_handles_labels()
+# # handles is a list, so append manual patch
+# # plot the legend
+# ax.legend(handles=handles, frameon=False, fontsize=14,
+#           loc="upper right")#, bbox_to_anchor=(0.8,1),
+#           #title=r"Voxel width ($\mu$m)", title_fontsize=15)
+
+
 
 ########## Leyenda altura:
 pos_x = -0.05
-pos_y = 23.5
+pos_y = 70
 fontsize = 15
 for ax in [axs, axs1]:
-    ax[0].text(pos_x, pos_y, rf'a)    Height = ${alturas[0]:.0f}\,\mu$m',
+    ax[0].text(pos_x, pos_y, rf'a)    height = ${alturas[0]:.0f}\,\mu$m',
                 fontsize=fontsize,
                 horizontalalignment='left', verticalalignment='center')
-    # ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
-    #             fontsize=fontsize,
-    #             horizontalalignment='left', verticalalignment='center')
+    ax[1].text(pos_x, pos_y, rf'b)    height = ${alturas[1]:.0f}\,\mu$m',
+                fontsize=fontsize,
+                horizontalalignment='left', verticalalignment='center')
     ax[1].label_outer()
+    
 
 
 if filename:

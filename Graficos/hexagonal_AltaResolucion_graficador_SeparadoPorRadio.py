@@ -21,10 +21,10 @@ import matplotlib.patches as mpatches
 
 
 
-data_dir = "2023-07-20_Cilindros_hexagonal_AltaResolucion"
+data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
-savefig = False
+savefig = True
 filename = "Cylinders"
 plot_Deltadelta = True
 
@@ -82,10 +82,14 @@ for h in alturas:
     if plot_Deltadelta:
         eje_y = data['delta_mic']-data['delta_bulk']
     else:
-        eje_y = data['delta_mic']
+        offset = df[(df['altura']==10) & (df['radio']==1) & (df['densidad']<0.11)]['delta_bulk']
+        offset = float(offset)
+        eje_y = data['delta_mic'] - offset
+        delta_bulk = data['delta_bulk'] - offset
+        
 
     label= rf"radius: {r} $\mu m$"
-    ax.text(0.99, 22, label, fontsize=12,
+    ax.text(0.99, 20, label, fontsize=12,
             horizontalalignment='right',
             verticalalignment='center',
             bbox=dict(facecolor='white', edgecolor='none', pad=0.5)
@@ -100,7 +104,7 @@ for h in alturas:
                      s=100)    
     ax.set_xticks([0, 0.2,0.4,0.6,0.8, 1])
     if not plot_Deltadelta:
-        ax.scatter(eje_x, data['delta_bulk'] , marker='^',
+        ax.scatter(eje_x, delta_bulk , marker='^',
                     c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                     edgecolor='k',
                     s=100, label=r"$\delta_{bulk}$")    
@@ -109,7 +113,7 @@ for h in alturas:
         ax.set_ylim([0.1, 25])
         ax.set_yticks([5,10,15,20,25])
     else:
-        ax.set_ylim([-5, 25])
+        ax.set_ylim([-8, 24])
         ax.set_yticks([-5, 0, 5,10,15,20])
         ax.axhline(y=0, color='gray', ls='--', lw=1)
     # ----------- amp
@@ -140,10 +144,10 @@ for hh in range(axs.shape[1]):
         ax.set_ylabel(r'$\delta$ [ppm]')
     ax.label_outer()
     
-axs[0][0].text(0.5, 30, '(a)', fontsize=20,
+axs[0][0].text(0.5, 30, r'(a)  $height: 10\,\mu m$', fontsize=16,
                horizontalalignment='center',
                verticalalignment='center')
-axs[0][1].text(0.5, 30, '(b)', fontsize=20,
+axs[0][1].text(0.5, 30, r'(b)  $height: 50\,\mu m$', fontsize=16,
                horizontalalignment='center',
                verticalalignment='center')    
 # for ax in axs1:

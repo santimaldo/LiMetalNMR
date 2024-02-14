@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # from VoigtFit import *
 plt.rcParams.update({'font.size': 20})
-# from Modules.Medicion import autophase
+from Modules.Funciones import autophase
 
 p_cubierto = []
 delta_mic = []
@@ -26,6 +26,7 @@ densidades_t = []
 vss_t = []
 
 savedata = True  # para guardar los dataframes
+usar_modulo_spec = False
 
 nn = 0
 # path0 = "./Outputs/2023-08-10_Cilindros_hexagonal_AltaResolucion/"
@@ -52,9 +53,12 @@ for ii in range(radios.size):
 
     # if h==50: continue
     # if r!=50: continue
-    # if p<0.85: continue
+    # # if p>0.75: continue
+    
+    # quito puntos en los que el espectro está feo
+    if h==10 and r==50 and p>0.75: continue
 
-    regiones = ['-microestructuras', '-bulk', '']
+    regiones = ['-microestructuras', '-bulk', '']    
     col = ['k', 'r', 'b']
 
     n_r = -1
@@ -82,19 +86,21 @@ for ii in range(radios.size):
             print(f"error al intentar leer: {path+archivo}")
             continue
         ppmAxis0 = datos[:, 0]
-        spec = datos[:, 1]
+        spec_real = datos[:, 1]        
         spec_imag = datos[:, 2]
-        # spec.astype('complex')
-        # spec, _ = autophase(ppmAxis0, spec+1j*spec_imag, precision=0.5)
-
-        spec = spec.real
-        # spec = np.abs(spec+1j*spec_imag)
+        spec = spec_real+1j*spec_imag        
+        spec, _ = autophase(ppmAxis0, spec, precision=0.5)
+        
+        if usar_modulo_spec:            
+            spec = np.abs(spec)
+        else:
+            spec = spec.real        
 
         # retoco:
         ppmAxis = ppmAxis0
         spec = spec - np.mean(spec[0:50])
         # reduzco los datos a una VENTANA alrededor de un CENTRO
-        ventana = 50
+        ventana = 200
         center = 0
         ppmAxis = ppmAxis0[np.abs(center-ppmAxis0) < ventana]
         spec = spec[np.abs(center-ppmAxis0) < ventana]
