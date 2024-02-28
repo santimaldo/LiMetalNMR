@@ -1610,7 +1610,7 @@ if __name__ == '__main__':
     # este N es el N de la muestra ejemplo
     # N = np.array([16,228,242])
     # N = np.array([40, 96, 112])
-    N = np.array([40, 256, 256])
+    N = np.array([80, 256, 256])
     Nz, Ny, Nx = N
     voxelSize = np.array([1e-3, 1e-3, 1e-3])*0.25
 
@@ -1633,7 +1633,7 @@ if __name__ == '__main__':
     # tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
     # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'
     # para 'cilindros_aleatorios'
-    tuplas = constructor(N, voxelSize, radio=2e-3, densidad_nominal=0.3)
+    tuplas = constructor(N, voxelSize, radio=4e-3, densidad_nominal=0.01)
     # tuplas = constructor(N, voxelSize, radio=2e-3,
     #                      distancia=7e-3, parametro_a=6e-3, angulo_target=78)
     # convierto a indices planos
@@ -1670,8 +1670,14 @@ if __name__ == '__main__':
     plt.imshow(muestra[:, :, x1])
     plt.show()
 
+    #%%
+    from Export3D import exportar_3D
 
-# %%
+    exportar_3D(muestra, "../Outputs/muestra.stl", give_full_name=True)
+
+
+
+    # %%
     # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     # print("Creando figura 3D. Esto puede demorar varios minutos...")
     # fig = plt.figure(43)
@@ -1681,7 +1687,7 @@ if __name__ == '__main__':
     # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 
-# %% 3D con OCT2PY
+    # %% 3D con OCT2PY
     # tmpvol =np.zeros((Nz+5,Ny,Nx))
     # tmpvol[1:-4,:,:] = muestra
     # tmpvol[0,:,:] = 1
@@ -1695,8 +1701,10 @@ if __name__ == '__main__':
     # print("       Listo!")
     # print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-# %% ploteo 3d con matplotlib
-  # print("grafico 3D con matplotlib... esto tarda muuuucho")
-  # voxels = np.moveaxis(muestra, 0, 2)
-  # ax = plt.figure().add_subplot(projection='3d')
-  # ax.voxels(voxels)
+    # %% ploteo 3d con matplotlib
+    # print("grafico 3D con matplotlib... esto tarda muuuucho")
+    # voxels = np.moveaxis(muestra, 0, 2)
+    # ax = plt.figure().add_subplot(projection='3d')
+    # ax.voxels(voxels)
+
+    
