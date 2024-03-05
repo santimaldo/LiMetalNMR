@@ -50,15 +50,15 @@ color_45 = cmap(0.65)
 mark0 = 'o'
 mark14 = '^'
 mark45 = 'o'
-mark78 = 'v'
+mark76 = 'v'
 
 # leyendas:
 label_rectos = r"Hex / $0^{\circ}$"
 label_14 = r"Hex / $14^{\circ}$"
 label_45 = r"Hex / $45^{\circ}$"
-label_78 = r"Hex / $78^{\circ}$"
+label_76 = r"Hex / $76^{\circ}$"
 # label_randhex = r"$\mathbf{C}$: Hexagonal / random ($0^{\circ}$ or $45^{\circ}$)"
-label_rand = r"Rand / ($14^{\circ}$ to $78^{\circ}$)"
+label_rand = r"Rand / ($14^{\circ}$ to $76^{\circ}$)"
 
 
 # cilindros A 14 GRADOS:-------------------------------------------------------
@@ -107,7 +107,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color=color_45,
 # end cilindros A 45 GRADOS:---------------------------------------------------
 
 
-# cilindros A 78 GRADOS:-------------------------------------------------------
+# cilindros A 76 GRADOS:-------------------------------------------------------
 data_dir = "2023-08-17_Cilindros_78grados_hexagonal_AltaResolucion"
 df45 = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 data = df45
@@ -120,14 +120,14 @@ else:
     eje_y = data['delta_mic']
 
 
-ax.plot(eje_x, eje_y, marker=mark78, linestyle='',
-        color=color_45, lw=2, ms=ms, label=label_78)
+ax.plot(eje_x, eje_y, marker=mark76, linestyle='',
+        color=color_45, lw=2, ms=ms, label=label_76)
 
 coef = np.polyfit(eje_x, eje_y, 1)
 linear_fit = np.poly1d(coef)
 ax.plot(eje_x, linear_fit(eje_x), '--', color=color_45,
         lw=1, alpha=0.8)  # marker=marker,
-# end cilindros A 78 GRADOS:---------------------------------------------------
+# end cilindros A 76 GRADOS:---------------------------------------------------
 
 
 # cilindros rectos ------------------------------------------------------------
@@ -225,7 +225,7 @@ else:
 
 if savefig:
     fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.png",
-                format='png', bbox_inches='tight')
+                format='png', bbox_inches='tight', dpi=600)
     fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.eps",
                 format='eps', bbox_inches='tight')
     fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.pdf",
