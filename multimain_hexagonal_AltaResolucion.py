@@ -44,7 +44,8 @@ Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
-Nxy = 512
+Nx = 512
+Ny = 512
 
 # radio, distancia y vs estan en el archivo:
 # parametros = np.loadtxt('./DataBases/ParametrosASimular_hexagonal.par')
@@ -53,13 +54,16 @@ Nxy = 512
 # parametros = np.array(parametros)
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
-# df = df[df['Nz'] < 1024]
-df = df[df['altura'] == 50]
-df = df[df['radio'].isin([1,50])]
+df = df[df['Nz'] < 1024]
+df = df[df['altura'] == 10]
+# df = df[df['radio'].isin([1,50])]
+df = df[df['radio']!=1.25]
 df = df[df['voxelSize'] >= 0.250]
 min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, False])
+# df = df[df['densidad_nominal'] <= 0.15]
+df = df[df['densidad_nominal'] == 0.2]
 parametros = np.array(df)
 
 
@@ -67,9 +71,9 @@ parametros = np.array(df)
 # parametros = np.array([np.array([0.2500, 512, 50.0000, 2.0000, 5.5000, 0.4976])])
 
 
-# %%
+#
 # savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2023-08-18_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2024-02-09_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -123,7 +127,6 @@ for par in parametros:
     # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
     voxelSize = [vs*1e-3]*3  # mm
     vsz, vsy, vsx = voxelSize
-    Nx = Ny = Nxy
     N = [Nz, Ny, Nx]
     volumen = SimulationVolume(voxelSize=voxelSize, N=N)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -152,13 +155,10 @@ for par in parametros:
     with open(savepath+'/Densidades.dat', 'a') as f:
         f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
                 f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    
-    if nnn<23: continue
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
     # CREACION DEL OBJETO DELTA-------------------------------------------------
     # delta es la perturbacion de campo magnetico
-    delta = Delta(muestra)  # , skip=True)
+    delta = Delta(muestra) #, skip=True)
     # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
     superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
                                   radio=0)
@@ -166,10 +166,12 @@ for par in parametros:
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    medicion = Medicion(superposicion, volumen_medido='centro')
-    # guardado
+    stl_file = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um'.format(
+            int(altura), radio, densidad_nominal, vs)
+    medicion = Medicion(superposicion, volumen_medido='centro', stl_file=stl_file)    
+    # guardado    
     regiones = ['', '-microestructuras', '-bulk']
-    # %% -------- centro--------------------------------------------------------------
+    #-------- centro--------------------------------------------------------------
     for region in regiones:
         print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
         # secuencia: ..... SP ......

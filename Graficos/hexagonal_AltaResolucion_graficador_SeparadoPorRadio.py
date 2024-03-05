@@ -46,14 +46,14 @@ axs1 = gs1.subplots()
 
 
 # quito un puntos que esta feos.
-# try:
-#     condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
-#     condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
-#     # condicion2 = False
-#     index = df.index[condicion1 | condicion2]
-#     df.drop(index, inplace=True)
-# except:
-#     pass
+try:
+    condicion1 = (df['radio']==20) & (df['densidad_nominal']==0.8) & (df['vs']==0.25) & (df['altura']==50)
+    condicion2 = (df['radio']==1) & (df['densidad_nominal']==0.6) & (df['vs']==0.125) & (df['altura']==50)
+    # condicion2 = False
+    index = df.index[condicion1 | condicion2]
+    df.drop(index, inplace=True)
+except:
+    pass
 
 marks = ['^', 'o', 's', 'v', '*', 'p']
 # con esto utilizo solo el menor voxelsize para cada par (radio, densidad)
@@ -125,6 +125,7 @@ for h in alturas:
     hh += 1
 
 
+
 # agrego ejes y leyendas:------------------------------------------------------
 for hh in range(axs.shape[1]):
     for rr in range(axs.shape[0]):
@@ -138,9 +139,10 @@ for hh in range(axs.shape[1]):
         ax.label_outer()
 
 axs[0][0].text(0.5, 30, '(a)', fontsize=20,
+
                horizontalalignment='center',
                verticalalignment='center')
-axs[0][1].text(0.5, 30, '(b)', fontsize=20,
+axs[0][1].text(0.5, 30, r'(b)  $height: 50\,\mu m$', fontsize=16,
                horizontalalignment='center',
                verticalalignment='center')
 # for ax in axs1:
@@ -211,6 +213,7 @@ if savefig:
                 format='png', bbox_inches='tight')
     fig.savefig(f"../Outputs/{data_dir}/{filename}.eps",
                 format='eps', bbox_inches='tight')
+
 
     # fig1.savefig(f"{path0}/Amplitud_vs_density.png", format='png', bbox_inches='tight')
     # fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')

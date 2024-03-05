@@ -23,7 +23,7 @@ def export_mesh_to_stl(verts, faces, filename):
   
 
 # funcion para crear la figura 3D
-def exportar_3D(matriz, archivo):
+def exportar_3D(matriz, archivo, give_full_name=False):
     
   print(" -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  ")
   print("Creando figura 3D. Esto puede demorar varios minutos...")
@@ -37,7 +37,10 @@ def exportar_3D(matriz, archivo):
   verts, faces, _, _ = measure.marching_cubes(voxel_data, level=0)
   
   # save 
-  filename = './Outputs/{}.stl'.format(archivo)
+  if give_full_name:
+    filename = archivo
+  else:
+    filename = './Outputs/{}.stl'.format(archivo)
   export_mesh_to_stl(verts, faces, filename)
   
   print("       Listo!") 

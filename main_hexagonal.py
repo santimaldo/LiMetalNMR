@@ -45,7 +45,7 @@ voxelSize = [0.25e-3]*3  # mm
 
 # N = [128, 1024, 1024]
 #N = [256,128,128]
-N = [256,512,512]
+N = [128,512,512]
 # N = [256,64,64]
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
@@ -65,7 +65,7 @@ path = "./Outputs/2023-07-19_CilindosRectos_HR"
 # altura (h), radio(r) y distancia (d) en micrometros
 h = 10
 r = 2
-d = 7
+d = 12
 
 
 # Debo "preparar" los parametros para que cumplan ciertos criterios:
@@ -94,7 +94,12 @@ distancia = d_vx*vsx
 parametro_a = a*vsy
 radio = r_vx*vsx
 muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
-muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_45grados_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a)
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_45grados_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, ubicacion='superior')
+# muestra = Muestra(volumen, medidas=medidas,
+#                     geometria='cilindros_aleatorios',
+#                     radio=radio,
+#                     densidad_nominal=0.1,
+#                     ubicacion='superior')
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal',radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
 # muestra = Muestra(volumen, medidas=medidas, geometria='clusters_hexagonal_SinCeldaUnidad',
                   # R_hueco_central=rh*1e-3, radio=radio, distancia=distancia, parametro_a=parametro_a, p_huecos=1-p_loc)
@@ -105,15 +110,15 @@ muestra = Muestra(volumen, medidas=medidas, geometria='cilindros_45grados_hexago
 # calculo densidad usando celda unidad
 
 # la muestra vale Chi en el objeto
-A_mic = np.sum(muestra.muestra[1, :int(2*a), :int(d_vx)]/Chi)
-A_tot = 2*a*distancia
+A_mic = np.sum(muestra.muestra[1, :int(2*a), :int(d_vx)]/Chi)*(vsx*vsy)
+A_tot = 2*(a*vsy)*distancia
 A_bulk = A_tot-A_mic
 
 densidad = A_mic/A_tot
 
 # %% CREACION DEL OBJETO DELTA--------------------------------------------------
 # delta es la perturbacion de campo magnetico
-delta = Delta(muestra)
+delta = Delta(muestra, skip=True)
 
 
 # %%
@@ -153,7 +158,7 @@ if save:
 #medicion = Medicion(superposicion, volumen_medido='completo', borde_a_quitar=[12,0,0])
 # medicion = Medicion(superposicion, volumen_medido='centro',stl_file='test')
 # medicion = Medicion(superposicion, volumen_medido='muestra')
-medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0])
+medicion = Medicion(superposicion, volumen_medido='centro', borde_a_quitar=[0, 0, 0], stl_file="20240209tmp")
 
 ####, stl_file=f"{filename}")
 # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')0

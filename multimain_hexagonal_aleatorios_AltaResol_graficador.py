@@ -337,8 +337,8 @@ if savedata:
 
 #%%%
 ####### A PARTIR DE ACA VA LA INTERPOLACION 2D
-interpolar2D = True
-plot_3d = True
+interpolar2D = False
+plot_3d = False
 
 
 if interpolar2D:
@@ -395,3 +395,5 @@ if interpolar2D:
         ax.plot_surface(x, y, z, cmap = 'viridis')
         ax.set_ylabel("r/h")
         ax.set_xlabel(r"$\rho$")
+
+# %%
