@@ -20,7 +20,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.patches as mpatches
-
+repo_path = "S:/pyprogs-github/calculateFieldShift/"
 
 fontsize = 16
 plt.rcParams.update({'font.size': fontsize})
@@ -29,7 +29,7 @@ gs = fig.add_gridspec(1, 1, wspace=0.05)
 axs = gs.subplots()
 
 
-savefig = True
+savefig = False
 filename = "RandomOrientations"
 plot_Deltadelta = True
 
@@ -63,7 +63,7 @@ label_rand = r"Rand / ($14^{\circ}$ to $78^{\circ}$)"
 
 # cilindros A 14 GRADOS:-------------------------------------------------------
 data_dir = "2023-08-17_Cilindros_14grados_hexagonal_AltaResolucion"
-df45 = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
+df45 = pd.read_csv(f"{repo_path}Outputs/{data_dir}/datos.csv")
 data = df45
 data = data.sort_values(by='densidad', ascending=True)
 eje_x = data['densidad']
@@ -86,7 +86,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color=color_45,
 
 # cilindros A 45 GRADOS:-------------------------------------------------------
 data_dir = "2023-08-18_Cilindros_45grados_hexagonal_AltaResolucion"
-df45 = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
+df45 = pd.read_csv(f"{repo_path}Outputs/{data_dir}/datos.csv")
 data = df45
 data = data.sort_values(by='densidad', ascending=True)
 eje_x = data['densidad']
@@ -109,7 +109,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color=color_45,
 
 # cilindros A 78 GRADOS:-------------------------------------------------------
 data_dir = "2023-08-17_Cilindros_78grados_hexagonal_AltaResolucion"
-df45 = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
+df45 = pd.read_csv(f"{repo_path}Outputs/{data_dir}/datos.csv")
 data = df45
 data = data.sort_values(by='densidad', ascending=True)
 eje_x = data['densidad']
@@ -132,7 +132,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color=color_45,
 
 # cilindros rectos ------------------------------------------------------------
 data_dir0 = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
-df0 = pd.read_csv(f"../Outputs/{data_dir0}/datos.csv")
+df0 = pd.read_csv(f"{repo_path}Outputs/{data_dir0}/datos.csv")
 
 data = df0
 data = data[(data['radio'] == 2) & (data['altura'] == 10)]
@@ -155,7 +155,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color='k', lw=1)  # marker=marker,
 
 # cilindros aleatorios hexagonal-----------------------------------------------
 # data_dir_randhex= "2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion"
-# df_randhex = pd.read_csv(f"../Outputs/{data_dir_randhex}/datos.csv")
+# df_randhex = pd.read_csv(f"{repo_path}Outputs/{data_dir_randhex}/datos.csv")
 
 # data = df_randhex
 # eje_x = data['densidad_volumetrica']
@@ -176,7 +176,7 @@ ax.plot(eje_x, linear_fit(eje_x), '--', color='k', lw=1)  # marker=marker,
 
 # cilindros aleatorios pos aleatoria-------------------------------------------
 data_dir_rand = "2023-08-17_Cilindros_aleatorios_AltaResolucion"
-df_rand = pd.read_csv(f"../Outputs/{data_dir_rand}/datos.csv")
+df_rand = pd.read_csv(f"{repo_path}Outputs/{data_dir_rand}/datos.csv")
 
 data = df_rand
 eje_x = data['densidad_volumetrica']
@@ -224,13 +224,13 @@ else:
 
 
 if savefig:
-    fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.png",
+    fig.savefig(f"{repo_path}Outputs/{data_dir_rand}/{filename}.png",
                 format='png', bbox_inches='tight')
-    fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.eps",
+    fig.savefig(f"{repo_path}Outputs/{data_dir_rand}/{filename}.eps",
                 format='eps', bbox_inches='tight')
-    fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.pdf",
+    fig.savefig(f"{repo_path}Outputs/{data_dir_rand}/{filename}.pdf",
                 format='pdf', bbox_inches='tight')
-    fig.savefig(f"../Outputs/{data_dir_rand}/{filename}.svg",
+    fig.savefig(f"{repo_path}Outputs/{data_dir_rand}/{filename}.svg",
                 format='svg', bbox_inches='tight')
 
 
