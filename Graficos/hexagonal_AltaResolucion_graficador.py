@@ -19,21 +19,20 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 
-
 data_dir = "2023-08-14_Cilindros_hexagonal_AltaResolucion"
 df = pd.read_csv(f"../Outputs/{data_dir}/datos.csv")
 
 savefig = False
 filename = "Cylinders"
-plot_Deltadelta = True
+plot_Deltadelta = False
 
 
 plt.rcParams.update({'font.size': 16})
-fig = plt.figure(num=1, figsize=(10,5))
-gs = fig.add_gridspec(1,2,wspace=0.05)
+fig = plt.figure(num=1, figsize=(10, 5))
+gs = fig.add_gridspec(1, 2, wspace=0.05)
 axs = gs.subplots()
-fig1 = plt.figure(num=2, figsize=(10,5))
-gs1 = fig1.add_gridspec(1,2,wspace=0.05)
+fig1 = plt.figure(num=2, figsize=(10, 5))
+gs1 = fig1.add_gridspec(1, 2, wspace=0.05)
 axs1 = gs1.subplots()
 
 
@@ -51,9 +50,9 @@ vss = df['vs'].sort_values().unique()
 # except:
 #     pass
 
-marks = ['^','o', 's', 'v', '*', 'p']
-
+marks = ['^', 'o', 's', 'v', '*', 'p']
 savedata = False # para guardar los dataframes
+
 filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = False
@@ -62,21 +61,23 @@ sin_repetir_data = False
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df[(df['altura']== h)]
+    data_h = df[(df['altura'] == h)]
     nn = 0
     for vs in vss:
         if sin_repetir_data:
-            min_vs = data_h.groupby(['radio','densidad_nominal'])['vs'].idxmin()
+            min_vs = data_h.groupby(['radio', 'densidad_nominal'])[
+                'vs'].idxmin()
             data = data_h.loc[min_vs.values]
         else:
-            data = data_h[data_h['vs']==vs]
+            data = data_h[data_h['vs'] == vs]
 
         # eje_x = data['distancia'] - 2*data['radio']
         eje_x = data['densidad']
 
-        colorscale = [np.where(radios==r)[0][0] for r in data['radio']]
+        colorscale = [np.where(radios == r)[0][0] for r in data['radio']]
         cmap = 'inferno'
-        vmin = 0; vmax = 5.5
+        vmin = 0
+        vmax = 5.5
 
         ax = axs[hh]
 
@@ -88,21 +89,21 @@ for h in alturas:
             eje_y = data['delta_mic'] - offset
             delta_bulk = data['delta_bulk'] - offset        
         if sin_repetir_data:
-            label= r"$\delta_{mic}$"
+            label = r"$\delta_{mic}$"
             marker = 'o'
         else:
             marker = marks[nn]
-            label=rf"{vs:.3f}$\mu$m"
+            label = rf"{vs:.3f}$\mu$m"
 
         ax.scatter(eje_x, eje_y, marker=marker,
-                         c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
-                         edgecolor='k',
-                         s=100, label=label)
+                   c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
+                   edgecolor='k',
+                   s=100, label=label)
         if not plot_Deltadelta:
-            ax.scatter(eje_x, delta_bulk , marker='^',
-                        c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
-                        edgecolor='k',
-                        s=100, label=r"$\delta_{bulk}$")
+            ax.scatter(eje_x, data['delta_bulk'], marker='^',
+                       c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
+                       edgecolor='k',
+                       s=100, label=r"$\delta_{bulk}$")
         ax.set_xlim([-0.08, 1.08])
         if plot_Deltadelta:
             ax.set_ylim([0, 25])
@@ -112,10 +113,10 @@ for h in alturas:
         # ----------- amp
         eje_y = data['amp_mic'] / data['amp_bulk']
         ax = axs1[hh]
-        ax.scatter(eje_x, eje_y , marker = 'o',
-                         c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
-                         edgecolor='k',
-                         s=100, label=f"vs = {vs} um")
+        ax.scatter(eje_x, eje_y, marker='o',
+                   c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
+                   edgecolor='k',
+                   s=100, label=f"vs = {vs} um")
         ax.set_yscale('log')
         ax.axhline(y=1, ls='--', color='k')
         ax.set_xlim([-0.08, 1.08])
@@ -125,13 +126,13 @@ for h in alturas:
             break
         nn += 1
 
-    hh+=1
+    hh += 1
 
 # agrego ejes y leyendas:------------------------------------------------------
 for ax in axs:
     ax.set_xlabel('Density')
     if plot_Deltadelta:
-    # ax.set_ylabel(r'$\delta_{mic}-\delta_{bulk}$ [ppm]')
+        # ax.set_ylabel(r'$\delta_{mic}-\delta_{bulk}$ [ppm]')
         ax.set_ylabel(r'$\Delta\delta$ [ppm]')
     else:
         ax.set_ylabel(r'$\delta$ [ppm]')
@@ -141,81 +142,83 @@ for ax in axs1:
    
 
 
-
-#### colorbar manual ----------------------------------------------------------
+# colorbar manual ----------------------------------------------------------
 cMap = matplotlib.colormaps[cmap]
 yi = 9
 yi1 = 1.5
 yf1 = 8
 altos1 = np.logspace(np.log10(yi1), np.log10(yf1), radios.size+1)
 for rr in range(radios.size+1):
-    if rr<radios.size:
+    if rr < radios.size:
         radio = radios[rr]
         color = cMap(int(rr/vmax*256))
         # figura de deltas:
-        ancho = 0.1 # unidades de densidad
+        ancho = 0.1  # unidades de densidad
         alto = 1.4
         xi = 0.82
         axs[0].text(xi+1.25*ancho, yi, f'{radio:.0f}', fontsize=14,
-                horizontalalignment='left',
-                verticalalignment='center')
+                    horizontalalignment='left',
+                    verticalalignment='center')
         axs[0].add_patch(
             matplotlib.patches.Rectangle(xy=(xi, yi-alto/2.1),
                                          width=ancho, height=alto,
-                                         facecolor=color))#, edgecolor='k'))
+                                         facecolor=color))  # , edgecolor='k'))
 
         # figura de amplitudes:
         alto1 = np.diff(altos1)[rr]
         xi1 = 0.06
         axs1[0].text(xi1+1.25*ancho, altos1[rr]+alto1/2.5, f'{radio:.0f}', fontsize=14,
-                horizontalalignment='left',
-                verticalalignment='center')
+                     horizontalalignment='left',
+                     verticalalignment='center')
         axs1[0].add_patch(
             matplotlib.patches.Rectangle(xy=(xi1,  altos1[rr]),
-                                          width=ancho, height=alto1,
-                                          facecolor=color))#, edgecolor='k'))
+                                         width=ancho, height=alto1,
+                                         facecolor=color))  # , edgecolor='k'))
     else:
         axs[0].text(xi+0.5*ancho, yi*1.02, r'Radius ($\mu$m)', fontsize=15,
-                horizontalalignment='center',
-                verticalalignment='center')
+                    horizontalalignment='center',
+                    verticalalignment='center')
         axs1[0].text(xi1+1*ancho, altos1[rr]*1.2, r'Radius ($\mu$m)', fontsize=15,
-                horizontalalignment='center',
-                verticalalignment='center')
+                     horizontalalignment='center',
+                     verticalalignment='center')
 
     yi += alto
     yi1 += alto1
-##################### leyenda voxelsize:
+# leyenda voxelsize:
 ax = axs[0]
-# # access legend objects automatically created from data
-# handles, labels = ax.get_legend_handles_labels()
-# # where some data has already been plotted to ax
-# handles, labels = ax.get_legend_handles_labels()
-# # handles is a list, so append manual patch
-# # plot the legend
-# ax.legend(handles=handles, frameon=False, fontsize=14,
-#           loc="upper right")#, bbox_to_anchor=(0.8,1),
-#           #title=r"Voxel width ($\mu$m)", title_fontsize=15)
+
+# access legend objects automatically created from data
+handles, labels = ax.get_legend_handles_labels()
+# where some data has already been plotted to ax
+handles, labels = ax.get_legend_handles_labels()
+# handles is a list, so append manual patch
+# plot the legend
+ax.legend(handles=handles, frameon=False, fontsize=14,
+          loc="upper right")  # , bbox_to_anchor=(0.8,1),
+# title=r"Voxel width ($\mu$m)", title_fontsize=15)
 
 
-
-########## Leyenda altura:
+# Leyenda altura:
 pos_x = -0.05
 pos_y = 70
 fontsize = 15
 for ax in [axs, axs1]:
-    ax[0].text(pos_x, pos_y, rf'a)    height = ${alturas[0]:.0f}\,\mu$m',
-                fontsize=fontsize,
-                horizontalalignment='left', verticalalignment='center')
-    ax[1].text(pos_x, pos_y, rf'b)    height = ${alturas[1]:.0f}\,\mu$m',
-                fontsize=fontsize,
-                horizontalalignment='left', verticalalignment='center')
+
+    ax[0].text(pos_x, pos_y, rf'a)    Height = ${alturas[0]:.0f}\,\mu$m',
+               fontsize=fontsize,
+               horizontalalignment='left', verticalalignment='center')
+    # ax[1].text(pos_x, pos_y, rf'b)    Height = ${alturas[1]:.0f}\,\mu$m',
+    #             fontsize=fontsize,
+    #             horizontalalignment='left', verticalalignment='center')
     ax[1].label_outer()
     
 
 
 if filename:
     fig.savefig(f"{path0}/{filename}.png", format='png', bbox_inches='tight')
-    fig.savefig(f"{path0}/{filename}.eps", format='eps',bbox_inches='tight')
+    fig.savefig(f"{path0}/{filename}.eps", format='eps', bbox_inches='tight')
 
-    fig1.savefig(f"{path0}/Amplitud_vs_density.png", format='png', bbox_inches='tight')
-    fig1.savefig(f"{path0}/Amplitud_vs_density.eps", format='eps',bbox_inches='tight')
+    fig1.savefig(f"{path0}/Amplitud_vs_density.png",
+                 format='png', bbox_inches='tight')
+    fig1.savefig(f"{path0}/Amplitud_vs_density.eps",
+                 format='eps', bbox_inches='tight')

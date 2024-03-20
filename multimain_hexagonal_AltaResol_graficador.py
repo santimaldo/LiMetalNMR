@@ -146,7 +146,7 @@ radios_t = np.array(radios_t)
 densidades_t = np.array(densidades_t)
 vss_t = np.array(vss_t)
 
-delta_pristine = 0.83723 # este es el centro del pico de una muestra sin mic.
+delta_pristine = 0.83723  # este es el centro del pico de una muestra sin mic.
 df = pd.DataFrame(list(zip(alturas_t, radios_t,
                            densidades_t, distancias_t, vss_t,
                            delta_mic-delta_pristine, delta_bulk-delta_pristine,
@@ -189,7 +189,6 @@ vss = df['vs'].sort_values().unique()
 marks = ['^', 'o', 's', 'v', '*', 'p']
 
 
-
 filename = False
 # filename = "Deltadelta_vs_density"
 plot_Deltadelta = True
@@ -198,7 +197,7 @@ sin_repetir_data = True
 letra = ['a', 'b']
 hh = 0
 for h in alturas:
-    data_h = df[(df['altura'] == h)]    
+    data_h = df[(df['altura'] == h)]
     nn = 0
     for vs in vss:
         if sin_repetir_data:
