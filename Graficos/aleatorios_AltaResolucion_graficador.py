@@ -5,7 +5,8 @@ Created on Wed Aug  9 13:11:37 2023
 @author: Santi
 
 
-Script para graficar los resultados de simular con radio 2 um y altura 10 um.
+Script para graficar superpuestos los resultados de simular 
+con radio 2 um y altura 10 um.
 
 Simulaciones:
   cilindros rectos, arreglo hexagonal
@@ -20,6 +21,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.patches as mpatches
+
 #repo_path = "S:/pyprogs-github/calculateFieldShift/" # Oficina
 repo_path = "T:/pyprogs/calculateFieldShift/" # ACer
 

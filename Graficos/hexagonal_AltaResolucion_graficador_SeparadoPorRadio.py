@@ -110,16 +110,17 @@ for h in alturas:
             ax.set_yticks([-5, 0, 5, 10, 15, 20])
             ax.axhline(y=0, color='gray', ls='--', lw=1)
         # ----------- amp
-        eje_y = data['amp_mic'] / data['amp_bulk']
+        # eje_y = data['amp_mic'] / data['amp_bulk']
+        eje_y = data['amp_mic'] 
         ax = axs1[hh]
         ax.scatter(eje_x, eje_y, marker='o',
                    c=colorscale, vmin=vmin, vmax=vmax, cmap=cmap,
                    edgecolor='k',
                    s=100)
-        ax.set_yscale('log')
+        # ax.set_yscale('log')
         ax.axhline(y=1, ls='--', color='k')
-        ax.set_xlim([-0.08, 1.08])
-        ax.set_ylim([0.1, 100])
+        # ax.set_xlim([-0.08, 1.08])
+        # ax.set_ylim([0.1, 100])
 
         rr += 1
     hh += 1
