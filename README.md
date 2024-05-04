@@ -1,7 +1,7 @@
-# calculateFieldShift
+# LiMetalNMR
 
 
-## Referencias
+## References
 [1] Salomir, R., de Senneville, B. D., & Moonen, C. T. (2003). A fast calculation method for magnetic field inhomogeneity due to an arbitrary distribution of bulk susceptibility. Concepts in Magnetic Resonance Part B: Magnetic Resonance Engineering: An Educational Journal, 19(1), 26-34.
 https://doi.org/10.1002/cmr.b.10083
 
@@ -22,7 +22,7 @@ https://doi.org/10.1002/pssb.2220530150
 [5] Ilott, A. J., & Jerschow, A. (2017). Super-resolution surface microscopy of conductors using magnetic resonance. Scientific Reports, 7(1), 1-7.
 https://doi.org/10.1038/s41598-017-05429-3
 
-# Requerimientos
+## Requirements
 
 - Numpy
 - Numpy-stl
@@ -30,3 +30,7 @@ https://doi.org/10.1038/s41598-017-05429-3
 - Scikit-image
 - Matplotlib
 
+## Install
+
+conda install conda-forge::numpy-stl
+conda install conda-forge::scikit-image
