@@ -20,7 +20,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.patches as mpatches
-repo_path = "S:/pyprogs-github/calculateFieldShift/"
+#repo_path = "S:/pyprogs-github/calculateFieldShift/" # Oficina
+repo_path = "T:/pyprogs/calculateFieldShift/" # ACer
+
 
 fontsize = 16
 plt.rcParams.update({'font.size': fontsize})
