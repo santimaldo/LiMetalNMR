@@ -186,8 +186,10 @@ class Muestra(object):
     ## the geometry occupies half of the x-y simulated volume
     N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
     N_celdas_y = (Ny/2)//(2*a)
-    # overwrite self.medidas
-    self.medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
+    # overwrite self.medidas    
+    self.medidas[1] = N_celdas_y*(2*a)*vsy
+    self.medidas[2] = N_celdas_x*d*vsx
+    print(f"size of sample overwriten: {self.medidas} (mm)")
 
   
   

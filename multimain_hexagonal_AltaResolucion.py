@@ -20,25 +20,9 @@ import time
 from datetime import datetime
 import pandas as pd
 
-
-def get_param_a(d):
-    if d > 512:
-        msg = ("d debe ser mas chico")
-        raise Exception(msg)
-    if d % 2 == 0:
-        # distancias, parametros_a, errores relativos
-        Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
-        a = As[Ds == d][0]
-        return a
-    else:
-        msg = ("la distancia debe ser tal que distancia/vs sea PAR")
-        raise Exception(msg)
-
 # %%----------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
-
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
@@ -73,7 +57,7 @@ parametros = np.array(df)
 
 #
 # savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2024-02-09_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2024-05-06_Cilindros_hexagonal_AltaResolucion/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -125,18 +109,20 @@ for par in parametros:
         print(' ')
 
     # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
-    voxelSize = [vs*1e-3]*3  # mm
+    voxelSize = [vs]*3  # mm
     vsz, vsy, vsx = voxelSize
     N = [Nz, Ny, Nx]
     volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-    
+
+    ### la geometria hexagonal sobreescribe medidas[1] y medidas[2]
+    medidas = [h*vsz,Ny/2*vsy,Nx/2*vsx]
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
-    muestra = Muestra(volumen,
-                       geometria='cilindros_hexagonal',
+    muestra = Muestra(volumen, medidas = medidas,
+                      geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
                       # geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
-                      radio=radio_mm, distancia=distancia_mm, ubicacion='superior',
+                      radio=radio, distancia=distancia, ubicacion='superior',
                       exceptions=False)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -176,22 +162,22 @@ for par in parametros:
         np.savetxt(savepath+file, datos)
 
         # pulso de pi/12
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
-                                               Norm=False,
-                                               volumen_medido='centro{}'.format(region))        
-        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
-            int(altura), radio, densidad_nominal, vs, region)
-        np.savetxt(savepath+file, datos)
+        # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+        #                                        Norm=False,
+        #                                        volumen_medido='centro{}'.format(region))        
+        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        # file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+        #     int(altura), radio, densidad_nominal, vs, region)
+        # np.savetxt(savepath+file, datos)
 
         # - - - - SMC16
-        ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
-                                               Norm=False,
-                                               volumen_medido='centro{}'.format(region))
-        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-        file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
-            int(altura), radio, densidad_nominal, vs, region)
-        np.savetxt(savepath+file, datos)
+        # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
+        #                                        Norm=False,
+        #                                        volumen_medido='centro{}'.format(region))
+        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        # file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+        #     int(altura), radio, densidad_nominal, vs, region)
+        # np.savetxt(savepath+file, datos)
 
     del muestra, delta, superposicion, medicion
     elapsed_parcial = (time.time() - t0parcial)/60.0
