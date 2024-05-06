@@ -176,7 +176,7 @@ class Superposicion(object):
     
     else:
       path = './DataBases/Bulk_perfiles/'
-      archivo = path + 'perfil_radio{:04d}.{}'
+      archivo = path + 'perfil_radio{}.{}'
       # leo el perfil:
       z_in, delta_in = np.loadtxt(archivo.format(radio,'in')).T
       z_out, delta_out = np.loadtxt(archivo.format(radio,'out')).T

@@ -1,3 +1,5 @@
+
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Jun 30 18:33:19 2023
@@ -61,30 +63,27 @@ medidas = [0.128,0.256,0.256]
 
 
 
-lista_radios = ['0000','1000','2000','3000','4000','5000','5960'] 
+lista_radios = ['0000','0320','0520','0800','1000','1320','1600','1800','2000','2320','2600','2960','3000','3440','3720','3920','4000','4400','4720','5000','5199','5480','5720','5960'] 
 
         
 espectros_R = []
 
-RADIO = '0000'
-for RADIO in lista_radios:
+RADIO = '000'
 
-    muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_dist_cte', ancho=16e-3, distancia= 20e-3)
-    delta = Delta(muestra)
+
+muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_dist_cte', ancho=16e-3, distancia= 20e-3)
+delta = Delta(muestra)
+for RADIO in lista_radios:
     superposicion = Superposicion(muestra, delta, radio = RADIO)
     medicion = Medicion(superposicion, volumen_medido='centro')
     ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=153, KS=258)
 
     espectros_R.append([ppmAxis,spec])
-    
-    
-
-
 #%%
 #Contruyo el promedio del espectro total
 
-A_mic = 1024*1024 #um
-L_mic = 1024     #um
+A_med = 256*256 #um
+L_med = 256     #um
 
 R_e = 6000 #um 
 
@@ -92,8 +91,8 @@ R_e = 6000 #um
 
 A_elec = np.pi*R_e*R_e #um*um
 print(A_elec)
-veces = A_elec/A_mic
-print(veces)
+veces = A_elec/A_med
+print('veces=',veces)
 
 
 w_it = 0
@@ -104,17 +103,18 @@ w_it_list = []
 
 for RADIO in lista_radios :
     if RADIO == '0000':
-        w_it = 1                            # Porque para R=0 tiene que aparecer una vez
+        w_it = 1                                  # Porque para R=0 tiene que aparecer una vez
         print('w_it',w_it)
         w_it_list.append([int(w_it)])
     else:
-        w_it =2*np.pi*float(RADIO)/L_mic -3.2     # El -3.2 es para fitear la cantidad de veces que entra el area de las mic en el area del electrodo
+        w_it =2*np.pi*float(RADIO)/L_med -1.2     # El -1.2 es para fitear la cantidad de veces que entra el area de las mic en el area del electrodo
         print('w_it',w_it)
         w_it_list.append([int(w_it)])
     
     w = w + int(w_it)
         
 print('w',w)
+
 
 lista_espectros_R = []
 
@@ -126,20 +126,40 @@ espectro_4 = espectros_R[3]
 espectro_5 = espectros_R[4]
 espectro_6 = espectros_R[5]
 espectro_7 = espectros_R[6]
-
+espectro_8 = espectros_R[7]
+espectro_9 = espectros_R[8]
+espectro_10 = espectros_R[9]
+espectro_11 = espectros_R[10]
+espectro_12 = espectros_R[11]
+espectro_13 = espectros_R[12] 
+espectro_14 = espectros_R[13] 
+espectro_15 = espectros_R[14]
+espectro_16 = espectros_R[15]
+espectro_17 = espectros_R[16]
+espectro_18 = espectros_R[17]
+espectro_19 = espectros_R[18]
+espectro_20 = espectros_R[19]
+espectro_21 = espectros_R[20]
+espectro_22 = espectros_R[21]
+espectro_23 = espectros_R[22]
+espectro_24 = espectros_R[23]
 
 
 
     
 
 Spec_prom = (w_it_list[0]*espectro_1[1] + w_it_list[1]*espectro_2[1]+ w_it_list[2]*espectro_3[1]+ w_it_list[3]*espectro_4[1]+
-             w_it_list[4]*espectro_5[1]+ w_it_list[5]*espectro_6[1]+ w_it_list[6]*espectro_7[1])/108
+             w_it_list[4]*espectro_5[1]+ w_it_list[5]*espectro_6[1]+ w_it_list[6]*espectro_7[1]+ w_it_list[7]*espectro_8[1]+ 
+             w_it_list[8]*espectro_9[1]+ w_it_list[9]*espectro_10[1]+ w_it_list[10]*espectro_11[1]+ w_it_list[11]*espectro_12[1]
+             + w_it_list[12]*espectro_13[1]+ w_it_list[13]*espectro_14[1]+ w_it_list[14]*espectro_15[1]+ w_it_list[15]*espectro_16[1]
+             + w_it_list[16]*espectro_17[1]+ w_it_list[17]*espectro_18[1]+ w_it_list[18]*espectro_19[1]+ w_it_list[9]*espectro_20[1]
+             + w_it_list[20]*espectro_21[1]+ w_it_list[21]*espectro_22[1]+ w_it_list[22]*espectro_23[1]+ w_it_list[23]*espectro_24[1])/1725
 
-#Divido por 108 porque es la cantidad de veces que entra el área de las mic en el electrodo
+#Divido por 1725 porque es la cantidad de veces que entra el área de las mic en el electrodo
 
 #Exporto la data de S_prom
-datos_espectro_prom= np.array([np.real(espectro_1[0]),np.real(Spec_prom)]).T
-np.savetxt('./datos_espectro_prom.dat', datos_espectro_prom)
+datos_espectro_prom23= np.array([np.real(espectro_1[0]),np.real(Spec_prom)]).T
+np.savetxt('./datos_espectro_prom23.dat', datos_espectro_prom23)
 
 
 #%%
@@ -182,7 +202,7 @@ ppmAxis_bulk, spec_bulk = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=
 plt.figure(52)
 ax = plt.subplot(111)
 plt.set_cmap('inferno')
-ax.plot(espectro_1[0],Spec_prom,linestyle='-', marker='.',linewidth=2, color='inferno()', label=' Spec_prom')
+ax.plot(espectro_1[0],Spec_prom,linestyle='-', marker='.',linewidth=2, label=' Spec_prom')
 ax.plot(ppmAxis_bulk,spec_bulk,'.',linewidth=2, label=' bulk')
 plt.xlim(left=350,right=150)
 plt.xlabel('$\delta$ (ppm)')
