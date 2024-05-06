@@ -8,6 +8,7 @@ Created on Tue May 12 14:00:22 2020
 import numpy as np
 from math import ceil
 import warnings
+from Modules.Funciones import get_hexagonal_dimensions_in_voxels
 
 
 def funciones(geometria):
@@ -833,11 +834,13 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
     valores de a optimos para cada d.
 
     d DEBE SER PAR
+
+    EDIT 2024-05-04:
+    Uno de los geokwargs debe ser el volumen de la simulacion (class volumen)
     """
 
     radio = geokwargs['radio']  # debe estar en unidad de milimetros
     distancia = geokwargs['distancia']
-    parametro_a = geokwargs['parametro_a']
 
     Nmz, Nmy, Nmx = N
     vsz, vsy, vsx = voxelSize
@@ -845,7 +848,7 @@ def cilindros_hexagonal(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     centros_CU = [(0, 0), (0, d), (a, d/2), (2*a, 0), (2*a, d)]
 
@@ -903,8 +906,7 @@ def clusters_hexagonal(N, voxelSize, **geokwargs):
     """
 
     radio = geokwargs['radio']
-    distancia = geokwargs['distancia']
-    parametro_a = geokwargs['parametro_a']
+    distancia = geokwargs['distancia']    
     try:
         p_huecos = geokwargs['p_huecos']
     except:
@@ -916,7 +918,7 @@ def clusters_hexagonal(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     centros_CU = [(0, 0), (0, d), (a, d/2), (2*a, 0), (2*a, d)]
 
@@ -987,7 +989,7 @@ def clusters_hexagonal_SinCeldaUnidad(N, voxelSize, R_hueco_central=0, **geokwar
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     # vectores base:
     v0 = np.array((0, d))  # horizontal
@@ -1079,7 +1081,7 @@ def cilindros_aleatorios_hexagonal(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     # Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar
     # la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
@@ -1188,7 +1190,7 @@ def cilindros_45grados_hexagonal(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     # CREO LOS CENTROS DEL ARREGLO HEXAGONAL.  - - - - - - - - - - - - - - - - -
     Ncentros_x = int(Nmx/d + 1)
@@ -1272,7 +1274,7 @@ def cilindros_aleatorios_hexagonal_SinCeldaUnidad(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     # Esta geometría tiene 3 bloques en z donde los cilindros pueden o no cambiar
     # la dirección de crecimiento. En el primer bloque los cilindros crecen derechos
@@ -1508,7 +1510,7 @@ def cilindros_con_angulo_hexagonal(N, voxelSize, **geokwargs):
     # cuantos voxels debo usar por cilindro aproximadamente
     R = int(radio/vsx)
     d = int(distancia/vsx)
-    a = int(parametro_a/vsx)
+    a = get_hexagonal_dimensions_in_voxels(d)
 
     # CREO LOS CENTROS DEL ARREGLO HEXAGONAL.  - - - - - - - - - - - - - - - - -
     Ncentros_x = int(Nmx/d + 1)
@@ -1622,18 +1624,18 @@ if __name__ == '__main__':
     # geometria = 'cilindros_aleatorios_hexagonal'
     # geometria = 'cilindros_45grados_hexagonal'
     # geometria = 'cilindros_con-angulo_hexagonal'
-    geometria = 'cilindros_aleatorios'
+    # geometria = 'cilindros_aleatorios'
+    geometria = 'cilindros_hexagonal'
     constructor = funciones(geometria)
     # la funcion 'constructor' me devuelve las tuplas (ind_z, ind_y, ind_x) de los indices
     # en los cuales hay litio.
     #tuplas = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3)
     # tuplas = constructor(N, voxelSize, ancho=4e-3, distancia=3e-3) # para 'distancia_constante'
     # tuplas, extra_info = constructor(N, voxelSize, ancho=16e-3, distancia=20e-3, extra_info=True) # para 'distancia_constante'
-    # tuplas = constructor(N, voxelSize, ancho=20e-3, porcentaje=80) # para 'porcentaje_palos'
-    # tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3, parametro_a=0.019)#, R_hueco_central=40e-3) # para 'cilindros_hexagonal'
+    tuplas = constructor(N, voxelSize, radio=2e-3, distancia=7e-3) # para 'cilindros_hexagonal'
     # tuplas = constructor(N, voxelSize, ancho=10e-3, distancia=4) # para 'porcentaje_palos'
     # para 'cilindros_aleatorios'
-    tuplas = constructor(N, voxelSize, radio=4e-3, densidad_nominal=0.01)
+    # tuplas = constructor(N, voxelSize, radio=4e-3, densidad_nominal=0.01)
     # tuplas = constructor(N, voxelSize, radio=2e-3,
     #                      distancia=7e-3, parametro_a=6e-3, angulo_target=78)
     # convierto a indices planos

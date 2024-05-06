@@ -80,8 +80,8 @@ radio_mm = r*vsx
 medidas = [Nz/4*vsz, Ny*vsy, Nx*vsx] # para bulk
 ### Creacion de la muestra
 muestra = Muestra(volumen, medidas=medidas,
-                  geometria = 'bulk',
-                  # geometria='cilindros_hexagonal',
+                  #geometria = 'bulk',
+                  geometria='cilindros_hexagonal',
                   # geometria='cilindros_hexagonal',
                   # radio=radio_mm, distancia=distancia_mm,
                   # parametro_a=parametro_a, 

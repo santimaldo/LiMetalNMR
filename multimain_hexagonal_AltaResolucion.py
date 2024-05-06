@@ -129,23 +129,14 @@ for par in parametros:
     vsz, vsy, vsx = voxelSize
     N = [Nz, Ny, Nx]
     volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # parametros de la muestra
-    a = get_param_a(d)
-    N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-    N_celdas_y = (Ny/2)//(2*a)
-    medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
-    distancia_mm = d*vsx
-    parametro_a = a*vsy
-    radio_mm = r*vsx
+    
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ### Creacion de la muestra
-    muestra = Muestra(volumen, medidas=medidas,
+    muestra = Muestra(volumen,
                        geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
                       # geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
-                      radio=radio_mm, distancia=distancia_mm,
-                      parametro_a=parametro_a, ubicacion='superior',
+                      radio=radio_mm, distancia=distancia_mm, ubicacion='superior',
                       exceptions=False)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

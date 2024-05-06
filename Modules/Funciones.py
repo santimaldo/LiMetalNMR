@@ -80,3 +80,30 @@ def autophase(ppmAxis, spec, precision = 1):
         spec = -spec
     angle = angle[idx]
     return spec, angle
+
+#########################################################
+def get_hexagonal_dimensions_in_voxels(d):
+    """
+    For a hexagonal arrangement with a distance of
+    d voxels between dendrites, this function returns
+    the best approximation of sqrt(3)/2*d, corresponding
+    to sin(60 degrees), which is the y-distance:
+            o
+      |    /
+    a |   /     a = sin(60)*d = sqrt(3)/2*d
+      |  /
+      | /  ) 60 degrees
+       o----o
+          d
+    """
+    if d > 512:
+        msg = ("d debe ser mas chico")
+        raise Exception(msg)
+    if d % 2 == 0:
+        # distancias, parametros_a, errores relativos
+        Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
+        a = As[Ds == d][0]
+        return int(a)
+    else:
+        msg = ("la distancia debe ser tal que distancia/vs sea PAR")
+        raise Exception(msg)

@@ -9,7 +9,7 @@ Created on Thu May  7 12:48:21 2020
 import numpy as np
 import warnings
 import Modules.Geometria as Geometria
-from Modules.Funciones import timerClass
+from Modules.Funciones import timerClass, get_hexagonal_dimensions_in_voxels
 
 
 @timerClass
@@ -69,7 +69,7 @@ class Muestra(object):
   chi_Li = 24.1*1e-6 #(ppm) Susceptibilidad volumetrica
   
   
-  def __init__(self, volumen, medidas, geometria='bulk', chi=chi_Li,
+  def __init__(self, volumen, medidas=None, geometria='bulk', chi=chi_Li,
                skdp=14e-3, exceptions=True, ubicacion='centro', 
                calcular_densidad = True, **geokwargs):
     # Dadas las variables de entrada, hago algunos pasos para crear la muestra
@@ -143,6 +143,11 @@ class Muestra(object):
 
 
     # 2.2)---------------------------------------------------------------------
+    # Si la geometria tiene arrego hexagonal, las dimensiones deben ser reescritas:    
+    if 'hexagonal' in self.geometria.lower():
+      self.overwrite_medidas_with_hexagonal_parameters(geokwargs)
+    elif self.medidas is None:
+      self.medidas = N
     # con este metodo seteo las dimensiones de la submatriz que contiene a la
     # muestra.
     self.set_medidas()
@@ -164,6 +169,28 @@ class Muestra(object):
   #============================================================================
   #===============================METHODS======================================
   #============================================================================
+  def overwrite_medidas_with_hexagonal_parameters(self, geokwargs):
+    try:
+      distancia = geokwargs['distancia']
+    except:
+      msg = "Hexagonal-like geometry must have a\
+            geokwarg called 'distancia'"
+      raise Exception(msg)
+    vsz, vsy, vsx = self.voxelSize
+    _, Ny, Nx = self.N
+    # Hexagonal arrangement unit cell is a Right Rectangle
+    # with hypotenuse d and a the opposite leg of the
+    # 60 deg angle.
+    d = int(distancia//vsx)    
+    a = get_hexagonal_dimensions_in_voxels(d)
+    ## the geometry occupies half of the x-y simulated volume
+    N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
+    N_celdas_y = (Ny/2)//(2*a)
+    # overwrite self.medidas
+    self.medidas = [h*vsz, N_celdas_y*(2*a)*vsy, N_celdas_x*d*vsx]
+
+  
+  
   def set_medidas(self):
     """
     seteo la cantidad de voxels que contienten a la muestra
