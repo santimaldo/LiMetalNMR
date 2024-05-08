@@ -21,27 +21,14 @@ from datetime import datetime
 import pandas as pd
 
 
-def get_param_a(d):
-    if d > 512:
-        msg = ("d debe ser mas chico")
-        raise Exception(msg)
-    if d % 2 == 0:
-        # distancias, parametros_a, errores relativos
-        Ds, As, Es = np.loadtxt('./DataBases/Hexagonal_parametro_a.dat').T
-        a = As[Ds == d][0]
-        return a
-    else:
-        msg = ("la distancia debe ser tal que distancia/vs sea PAR")
-        raise Exception(msg)
-
 # %%----------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
 
 # Niteraciones de cada conjunto de parametros:
-Niteraciones = 10
-Nxy = 512
+Niteraciones = 1
+Nxy = 1024
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
@@ -50,16 +37,17 @@ skindepth = 14e-13  # profundida de penetracion, mm
 
 
 # parametros : vs, Nz, altura, radio
-parametros = [0.25, 512, 10, 2]
+parametros = [0.25, 512, 10, 1]
 
 # densidades nominales: (terminan siendo equivalentes a arange(0.1, 0.9, 0.1)
-densidades = [0.1, 0.2, 0.3, 0.45, 0.65, 0.8, 1.2]  # , 1.5]
-densidades_target = np.arange(0.1, 0.9, 0.1)
+densidades = [0.2]  # , 1.5]
+densidades_target = [0.2]
+#densidades_target = np.arange(0.1, 0.9, 0.1)
 
 
 # %%
 # savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
-savefolder = '2023-08-17_Cilindros_aleatorios_AltaResolucion'
+savefolder = '2024-05-07_Cilindros_aleatorios_AltaResolucion'
 savepath = f'./Outputs/{savefolder}/'
 
 with open(savepath+'Densidades.dat', 'w') as f:
@@ -71,7 +59,7 @@ with open(savepath+'tiempos.dat', 'w') as f:
 # inicializo una lista de cuales tienen error.
 # inicio el reloj
 t0 = time.time()
-nnn = -1
+nnn =  0
 ntotal = Niteraciones * len(densidades)
 for n_iter in range(Niteraciones):
     for ii in range(len(densidades)):
@@ -84,6 +72,9 @@ for n_iter in range(Niteraciones):
 
         h = int(altura/vs)
         r = int(radio/vs)
+        
+        
+        
 
         radio = vs*r
         altura = vs*h
@@ -152,15 +143,16 @@ for n_iter in range(Niteraciones):
         delta = Delta(muestra)  # , skip=True)
         # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
         superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
-                                      radio=0)
+                                      radio='0000')
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         if n_iter == 0:
+            print('ENTRO en n_iter=0')
             stl_file = f"{savefolder}/stls/" \
                        f"h{int(altura)}_r{int(radio)}_"\
-                       f"dens{round(densidad_volumetrica, 1)}"
+                       f"dens{densidad_nominal}"
             medicion = Medicion(superposicion, volumen_medido='centro',
                                 stl_file=stl_file)
         else:
@@ -182,22 +174,22 @@ for n_iter in range(Niteraciones):
             np.savetxt(savepath+file, datos)
 
             # pulso de pi/12
-            ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
-                                                   Norm=False,
-                                                   volumen_medido='centro{}'.format(region))
-            datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
-                int(altura), radio, densidad_target, vs, n_iter, region)
-            np.savetxt(savepath+file, datos)
+            # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+            #                                        Norm=False,
+            #                                        volumen_medido='centro{}'.format(region))
+            # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+            # file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SP{}.dat'.format(
+            #     int(altura), radio, densidad_target, vs, n_iter, region)
+            # np.savetxt(savepath+file, datos)
 
             # - - - - SMC16
-            ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
-                                                   Norm=False,
-                                                   volumen_medido='centro{}'.format(region))
-            datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
-            file = 'SMC/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SMC{}.dat'.format(
-                int(altura), radio, densidad_target, vs, n_iter, region)
-            np.savetxt(savepath+file, datos)
+            # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
+            #                                        Norm=False,
+            #                                        volumen_medido='centro{}'.format(region))
+            # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+            # file = 'SMC/h{:d}_r{:.2f}_dens{:.2f}_vs{:.3f}um_niter{}_SMC{}.dat'.format(
+            #     int(altura), radio, densidad_target, vs, n_iter, region)
+            # np.savetxt(savepath+file, datos)
 
         elapsed_parcial = (time.time() - t0parcial)/60.0
         elapsed = (time.time() - t0)/60.0

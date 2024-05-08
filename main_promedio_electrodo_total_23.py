@@ -68,7 +68,7 @@ lista_radios = ['0000','0320','0520','0800','1000','1320','1600','1800','2000','
         
 espectros_R = []
 
-RADIO = '000'
+RADIO = '0000'
 
 
 muestra = Muestra(volumen, medidas=medidas, geometria='cilindritos_dist_cte', ancho=16e-3, distancia= 20e-3)

@@ -28,8 +28,8 @@ Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
 B0 = 7  # T
 skindepth = 14e-13  # profundida de penetracion, mm
 
-Nx = 512
-Ny = 512
+Nx = 1024
+Ny = 1024
 
 # radio, distancia y vs estan en el archivo:
 # parametros = np.loadtxt('./DataBases/ParametrosASimular_hexagonal.par')
@@ -39,15 +39,15 @@ Ny = 512
 
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
 df = df[df['Nz'] < 1024]
-df = df[df['altura'] == 10]
-# df = df[df['radio'].isin([1,50])]
-df = df[df['radio']!=1.25]
+df = df[df['altura'].isin([10,50])]
+df = df[df['radio'] == 50]
+### voxelSize en um:
 df = df[df['voxelSize'] >= 0.250]
 min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, False])
 # df = df[df['densidad_nominal'] <= 0.15]
-df = df[df['densidad_nominal'] == 0.2]
+df = df[df['densidad_nominal'].isin([0.2,0.6])]
 parametros = np.array(df)
 
 
@@ -57,7 +57,7 @@ parametros = np.array(df)
 
 #
 # savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2024-05-06_Cilindros_hexagonal_AltaResolucion/'
+savepath = './Outputs/2024-05-06_Cilindros_hexagonal_AltaResolución/'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -75,14 +75,14 @@ for par in parametros:
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
-    Nz = 1024
+   
     h = int(altura/vs)
     r = int(radio/vs)
     d = int(distancia/vs)
 
-    radio = vs*r
-    distancia = vs*d
-    altura = vs*h
+    radio_mm = vs*r*1e-3
+    distancia_mm = vs*d*1e-3
+    altura_mm = vs*h*1e-3
 
     # inicio el reloj parcial
     t0parcial = time.time()
@@ -109,7 +109,7 @@ for par in parametros:
         print(' ')
 
     # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
-    voxelSize = [vs]*3  # mm
+    voxelSize = [vs*1e-3]*3  # mm
     vsz, vsy, vsx = voxelSize
     N = [Nz, Ny, Nx]
     volumen = SimulationVolume(voxelSize=voxelSize, N=N)
@@ -122,7 +122,7 @@ for par in parametros:
                       geometria='cilindros_hexagonal',
                       # geometria='cilindros_45grados_hexagonal',
                       # geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
-                      radio=radio, distancia=distancia, ubicacion='superior',
+                      radio=radio_mm, distancia=distancia_mm, ubicacion='superior',
                       exceptions=False)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -138,14 +138,15 @@ for par in parametros:
     delta = Delta(muestra) #, skip=True)
     # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
     superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
-                                  radio=0)
+                                  radio=None)
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    stl_file = 'h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um'.format(
-            int(altura), radio, densidad_nominal, vs)
-    medicion = Medicion(superposicion, volumen_medido='centro', stl_file=stl_file)    
+    stl_file = '{}stls/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um'.format(
+            savepath, int(altura), radio, densidad_nominal, vs)
+    medicion = Medicion(superposicion, volumen_medido='centro', 
+                        stl_file=stl_file)    
     # guardado    
     regiones = ['', '-microestructuras', '-bulk']
     #-------- centro--------------------------------------------------------------
