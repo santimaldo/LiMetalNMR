@@ -91,7 +91,7 @@ class Medicion(object):
         self.borde_a_quitar = borde_a_quitar
 
         
-        self.volumen_medido = self.crear_volumen_medido(volumen_medido)
+        self.volumen_medido = self.crear_volumen_medido(volumen_medido)        
         ### creo las matrices de utilidad:        
         self.eta = self.Crear_eta()
         self.beta = self.Crear_beta()

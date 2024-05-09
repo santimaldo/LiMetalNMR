@@ -59,7 +59,7 @@ with open(savepath+'tiempos.dat', 'w') as f:
 # inicializo una lista de cuales tienen error.
 # inicio el reloj
 t0 = time.time()
-nnn =  0
+nnn =  1
 ntotal = Niteraciones * len(densidades)
 for n_iter in range(Niteraciones):
     for ii in range(len(densidades)):
