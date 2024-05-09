@@ -121,6 +121,7 @@ def func_exact(zz,yy,xx):
 Bmac_list = []
 Bexact_voxel_list = []
 Bexact_0_voxel_list = []
+Bexact_0x_voxel_list = []
 Bexact_list = []
 muestra_list = []
 eta_list = []
@@ -195,12 +196,14 @@ for vs_um in voxelSizes_um:
   #------------------------------------------------------------------------------
   # solucion exacta en el voxel 
   Bexact_voxel  = np.zeros_like(muestra)
-  Bexact_0_voxel  = np.zeros_like(muestra) # exacta que pasa por el centro y que tiene misma cantidad de elementos que la muestra
+  Bexact_0_voxel  = np.zeros_like(muestra) # exacta que pasa por el centro (eje z) y que tiene misma cantidad de elementos que la muestra
+  Bexact_0x_voxel  = np.zeros_like(muestra) # exacta que pasa por el centro (eje x) y que tiene misma cantidad de elementos que la muestra
   for i in range(x.size):
     for j in range(y.size):
       for k in range(z.size):
         Bexact_voxel[k,j,i] = func_exact(z[k],y[j],x[i])  
         Bexact_0_voxel[k,j,i] = func_exact(z[k],0,0)  
+        Bexact_0x_voxel[k,j,i] = func_exact(0,0,x[k])  
 
   nx = int(N/2)
   ny = int(N/2)  
@@ -218,19 +221,26 @@ for vs_um in voxelSizes_um:
        Bexact_j[i] = func_exact(zz[i],yy,xx)
      Bexact.append(Bexact_j)
 
-  # solucion exacta por el centro
+  # solucion exacta por el centro a lo largo del eje z
   zz = np.linspace(z[0],z[-1],4096*8)
   Bexact_0 = np.zeros_like(zz)
   yy = 0  
   xx = 0
   for i in range(np.size(zz)):
-     Bexact_0[i] = func_exact(zz[i],yy,xx)     
+     Bexact_0[i] = func_exact(zz[i],yy,xx)
+
+  # solucion exacta por el centro a lo largo del eje x
+  x_ex = np.linspace(x[0],x[-1],4096*8)
+  Bexact_0x = np.zeros_like(x_ex)  
+  for i in range(np.size(zz)):
+     Bexact_0x[i] = func_exact(0,0,x_ex[i])            
 
 
   # GUARDO VARIABLES:
   Bmac_list.append(Bmac)
   Bexact_voxel_list.append(Bexact_voxel)
   Bexact_0_voxel_list.append(Bexact_0_voxel)
+  Bexact_0x_voxel_list.append(Bexact_0_voxel)
   Bexact_list.append(Bexact)
   muestra_list.append(muestra)
   eta_list.append(eta)
@@ -257,7 +267,7 @@ axs_eta = gs.subplots(sharex=True, sharey=True)
 vmax_eta = max([np.max(np.abs(eta_list[nn][:,int(Ns[nn]/2),:])) for nn in range(len(Ns))])*1e6
 # fig_muestra.suptitle('Sharing both axes')  
 
-#### figura de B mac
+#### figura de B mac (eje z)
 size = 5
 fig_Bmac= plt.figure(3, figsize=(size*2, size*2), constrained_layout=False)
 gs = fig_Bmac.add_gridspec(2, 2, hspace=0, wspace=0)
@@ -266,7 +276,7 @@ axs_Bmac= gs.subplots(sharex=True, sharey=True)
 # vmax_eta = max([np.max(np.abs(eta_list[nn][:,int(Ns[nn]/2),:])) for nn in range(len(Ns))])*1e6
 # fig_muestra.suptitle('Sharing both axes')  
 
-#### figura de Errores
+#### figura de Errores (eje z)
 size = 5
 fig_Error= plt.figure(4, figsize=(size*2, size*2), constrained_layout=False)
 gs = fig_Error.add_gridspec(2, 2, hspace=0, wspace=0)
@@ -275,10 +285,28 @@ axs_Error= gs.subplots(sharex=True, sharey=True)
 # vmax_eta = max([np.max(np.abs(eta_list[nn][:,int(Ns[nn]/2),:])) for nn in range(len(Ns))])*1e6
 # fig_muestra.suptitle('Sharing both axes')  
 
+#### figura de B mac (eje x)
+size = 5
+fig_Bmac_x= plt.figure(5, figsize=(size*2, size*2), constrained_layout=False)
+gs = fig_Bmac_x.add_gridspec(2, 2, hspace=0, wspace=0)
+axs_Bmac_x= gs.subplots(sharex=True, sharey=True)
+# busco el maximo de todos los etas
+# vmax_eta = max([np.max(np.abs(eta_list[nn][:,int(Ns[nn]/2),:])) for nn in range(len(Ns))])*1e6
+# fig_muestra.suptitle('Sharing both axes')  
+
+#### figura de Errores (eje x)
+size = 5
+fig_Error_x= plt.figure(6, figsize=(size*2, size*2), constrained_layout=False)
+gs = fig_Error_x.add_gridspec(2, 2, hspace=0, wspace=0)
+axs_Error_x= gs.subplots(sharex=True, sharey=True)
+# busco el maximo de todos los etas
+# vmax_eta = max([np.max(np.abs(eta_list[nn][:,int(Ns[nn]/2),:])) for nn in range(len(Ns))])*1e6
+# fig_muestra.suptitle('Sharing both axes')  
+
 
 #### figura de histogramas
 size = 5
-fig_hist= plt.figure(5, figsize=(size*2, size*2), constrained_layout=False)
+fig_hist= plt.figure(8, figsize=(size*2, size*2), constrained_layout=False)
 gs = fig_hist.add_gridspec(2, 2, hspace=0, wspace=0)
 axs_hist= gs.subplots(sharex=True, sharey=True)
 # busco el maximo de todos los etas
@@ -296,6 +324,7 @@ for N in Ns:
   Bmac = Bmac_list[jj]
   Bexact_voxel = Bexact_voxel_list[jj]
   Bexact_0_voxel = Bexact_0_voxel_list[jj]
+  Bexact_0x_voxel = Bexact_0x_voxel_list[jj]
   Bexact = Bexact_list[jj]
   muestra = muestra_list[jj]
   eta = eta_list[jj]
@@ -317,6 +346,7 @@ for N in Ns:
   
   nx = int(N/2)
   ny = int(N/2)  
+  nz = int(N/2)
   x0 = x[nx]
   y0 = y[ny]  
   
@@ -331,9 +361,9 @@ for N in Ns:
   ax.set_xlim([x[0],x[-1]])    
   ax.set_ylim([z[0],z[-1]])    
   ax.label_outer()  
-  legend = f"voxel length: {voxelSize_um} $\mu$m"\
-            "\n"\
-           f"# voxels per diameter: {N_diam}"
+  legend = fr"voxel length: {voxelSize_um} $\mu$m"\
+             "\n"\
+            f"# voxels per diameter: {N_diam}"
   ax.text(-0.4*FOV_um,0.3*FOV_um,  legend, fontsize=16)
   # 1 voxel :
   XX = X[int(ny/2)-1:int(ny/2)+1:,ny,int(ny/2)-1:int(ny/2)+1]    
@@ -350,8 +380,8 @@ for N in Ns:
   deltaB_mac = (Bmac[:,ny,:]-B0)/B0*1e6
   vmax_eta = 17
   pcol = ax.pcolormesh(X[:,ny,:], Z[:,ny,:], deltaB_mac, cmap='seismic', vmax=vmax_eta, vmin=-vmax_eta, shading='nearest')  
-  ax.set_xlabel("x [$\mu$m]", fontsize=22)
-  ax.set_ylabel("z [$\mu$m]", fontsize=22)  
+  ax.set_xlabel(r"x [$\mu$m]", fontsize=22)
+  ax.set_ylabel(r"z [$\mu$m]", fontsize=22)  
   circle = plt.Circle((0, 0), radius*1e6, color='k', ls='--', lw=2, fill=False)
   ax.add_patch(circle)  
   if jj in [1,3]:
@@ -375,7 +405,7 @@ for N in Ns:
 
 
 
-  # grafico de Bmac
+  # grafico de Bmac (eje z)
   Bmac_z = Bmac[:,ny,nx]
   Bexact_voxel_z = Bexact_voxel[:,ny,nx]
   Bexact_0_voxel_z = Bexact_0_voxel[:,ny,nx]
@@ -408,16 +438,62 @@ for N in Ns:
   vmax = np.max(np.array([Bmac_z,Bexact_voxel_z]))
   ax=axs_Error[np.unravel_index(jj,(2,2))]      
   ax.axvspan(-1,1, facecolor='lightgray', alpha=0.5)  
-  ax.plot(z/(radius*1e6) , abs(Bmac[:,ny,nx]-Bexact_0_voxel[:,ny,nx])/B0*1e6,'bo--')  
+  ax.plot(z/(radius*1e6) , (Bmac[:,ny,nx]-Bexact_voxel[:,ny,nx])/B0*1e6,'bo--')  
   ax.axhline(0, color="k", ls='--')
   ax.set_xlabel(r"$z/r_{sphere}$", fontsize=22)
-  ax.set_ylabel(r"Absolute Error [ppm]", fontsize=22)  
+  ax.set_ylabel(r"$(B_{Numeric}-B_{Exact})/B_0$ [ppm]", fontsize=20)  
   ax.label_outer()
-  ax.set_ylim([-0.2,3.4])
+  ax.set_ylim([-0.6,3.4])
   ax.set_xticks(np.linspace(-7,7,8))  
   ax.text(-8,2.9,  legend, fontsize=14)
 
   # ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, fontsize=10)
+
+
+  # grafico de Bmac (eje x)
+  Bmac_x = Bmac[nz,ny,:]
+  Bexact_voxel_x = Bexact_voxel[nz,ny,:]
+  Bexact_0x_voxel_x = Bexact_0x_voxel[nz,ny,:]
+  vmin = np.min(np.array([Bmac_z,Bexact_voxel_x]))
+  vmax = np.max(np.array([Bmac_z,Bexact_voxel_x]))
+  
+  ax=axs_Bmac_x[np.unravel_index(jj,(2,2))]  
+  # ax.set_aspect('box')  
+  # ax.axvspan(-radius,radius, facecolor='lightgray', alpha=0.5)
+  ax.axvspan(-1,1, facecolor='lightgray', alpha=0.5)
+  ax.plot(x/(radius*1e6) , (Bmac_x-B0)/B0*1e6,'bo--', label=fr"Numeric")
+  ax.plot(x_ex/(radius) , (Bexact_0x-B0)/B0*1e6, 'k--', lw = 3, label=f"Exact" )  
+  ax.set_xlabel(r"$x/r_{sphere}$", fontsize=22)
+  ax.set_ylabel(r"$(B_{mac}-B_0)/B_0$ [ppm]", fontsize=22)
+  ax.set_ylim([-9,22])
+  ax.set_xticks(np.linspace(-7,7,8))
+  ax.text(-8,18,  legend, fontsize=16)
+  ax.label_outer()
+  # ax.text(-0.25*FOV_um,0.35*FOV_um, r"$N_{voxels} = $"+ fr" {N}$^3$", fontsize=22)
+  if jj==2:
+    # ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=3, fancybox=True, fontsize=10)
+    ax.legend(loc='center right', fancybox=True, fontsize=12)
+
+
+  # grafico de ERRORES (eje x)
+  Bmac_x = Bmac[nz,ny,:]
+  Bexact_voxel_x = Bexact_voxel[nz,ny,:]
+  Bexact_0x_voxel_x = Bexact_0x_voxel[nz,ny,:]
+  vmin = np.min(np.array([Bmac_z,Bexact_voxel_x]))
+  vmax = np.max(np.array([Bmac_z,Bexact_voxel_x]))
+  ax=axs_Error_x[np.unravel_index(jj,(2,2))]      
+  ax.axvspan(-1,1, facecolor='lightgray', alpha=0.5)  
+  #ax.plot(x/(radius*1e6) , abs(Bmac[nz,ny,:]-Bexact_voxel[nz,ny,:])/B0*1e6,'bo--')  
+  ax.plot(x/(radius*1e6) , (Bmac[nz,ny,:]-Bexact_voxel[nz,ny,:])/B0*1e6,'bo--')  
+  ax.axhline(0, color="k", ls='--')
+  ax.set_xlabel(r"$x/r_{sphere}$", fontsize=22)
+  ax.set_ylabel(r"$(B_{Numeric}-B_{Exact})/B_0$ [ppm]", fontsize=20)  
+  ax.label_outer()
+  ax.set_ylim([-2.4,1.6])
+  ax.set_xticks(np.linspace(-7,7,8))  
+  ax.text(-8,1,  legend, fontsize=14)
+
+
 
 
   # grafico de HISTOGRAMAS  
@@ -434,7 +510,7 @@ for N in Ns:
   if jj>2:
     # ax.set_xlabel(r"$\eta$ [ppm]",fontsize=22)
     # ax.set_xlabel(r"$|B_{mac,z}^{numerico}-B_{mac,z}^{exacto}|/B_0$ [ppm]", fontsize=18)  
-    ax.set_xlabel(r"Absolute Error [ppm]", fontsize=22)  
+    ax.set_xlabel(r"$(B_{Numeric}-B_{Exact})/B_0$ [ppm]", fontsize=20)  
   ax.set_ylabel("")
   ax.set_xticks(np.arange(-4,5))
   ax.yaxis.set_major_formatter(PercentFormatter(1))
