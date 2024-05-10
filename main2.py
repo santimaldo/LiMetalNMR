@@ -79,16 +79,17 @@ superposicion = Superposicion(muestra, delta)#, superposicion_lateral=True)
 
 Bnuc = superposicion.delta_sup - superposicion.delta_in
 Bnuc[superposicion.muestra_sup==0]=np.nan
-# vmin = 10
-# vmax = 11
+#%%
+vmin = 10
+vmax = 17
 fig, ax = plt.subplots()
-c = ax.pcolormesh(Bnuc[-10, :, :])#, vmin=vmin, vmax=vmax)
+c = ax.pcolormesh(Bnuc[-10, :, :], vmin=vmin, vmax=vmax)
 ax.axis('equal')
 cbar = fig.colorbar(c)
 cbar.ax.set_title(r"$\Delta\delta$ [ppm]")
 plt.figure(2)
 plt.plot(Bnuc[400,256,:])
-# plt.ylim([vmin, vmax])
+plt.ylim([vmin, vmax])
 #%%
 # volumen_medido = 'centro'
 
