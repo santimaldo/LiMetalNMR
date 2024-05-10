@@ -185,11 +185,17 @@ class Muestra(object):
     a = get_hexagonal_dimensions_in_voxels(d)
     ## the geometry occupies half of the x-y simulated volume
     N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
-    N_celdas_y = (Ny/2)//(2*a)
+    N_celdas_y = (Ny/2)//(2*a) # una celda unidad tiene area: d*(2*a)    
     # overwrite self.medidas    
     self.medidas[1] = N_celdas_y*(2*a)*vsy
     self.medidas[2] = N_celdas_x*d*vsx
     print(f"size of sample overwriten: {self.medidas} (mm)")
+    if N_celdas_y<=0:
+        msg = "La celda unidad es muy grande en la direccion y: DUPLICAR Ny"
+        raise Exception(msg)
+    elif N_celdas_x<=0:
+        msg = "La celda unidad es muy grande en la direccion x: DUPLICAR Nx"
+        raise Exception(msg)
 
   
   

@@ -40,14 +40,14 @@ Ny = 1024
 df = pd.read_csv('./DataBases/ParametrosASimular_hexagonal.par')
 df = df[df['Nz'] < 1024]
 df = df[df['altura'].isin([10])]
-df = df[df['radio'].isin([1,5,50])]
+df = df[df['radio'].isin([50])]
 ### voxelSize en um:
 df = df[df['voxelSize'] >= 0.250]
 min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
 df = df.loc[min_vs.values]
 df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, False])
 # df = df[df['densidad_nominal'] <= 0.15]
-# df = df[df['densidad_nominal'].isin([0.2,0.6])]
+df = df[df['densidad_nominal'].isin([0.2,0.6])]
 parametros = np.array(df)
 
 print(df)
@@ -57,7 +57,7 @@ print(df)
 
 #
 # savepath = './Outputs/2023-08-14_Cilindros_hexagonal_AltaResolucion/'
-savepath = './Outputs/2024-05-09_CilindrosHexagonal_cantidad-senal/'
+savepath = './Outputs//'
 with open(savepath+'Densidades.dat', 'w') as f:
     f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
 with open(savepath+'tiempos.dat', 'w') as f:
@@ -74,8 +74,7 @@ nnn = -1
 ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:    
-    nnn += 1
-    if nnn<6: continue 
+    nnn += 1    
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 
