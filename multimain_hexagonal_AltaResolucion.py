@@ -75,6 +75,7 @@ ntotal = parametros.shape[0]
 # ntotal = 1
 for par in parametros:    
     nnn += 1
+    if nnn<6: continue 
     # todos los datos estan en um
     vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
 

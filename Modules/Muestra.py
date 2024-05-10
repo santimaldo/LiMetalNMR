@@ -181,7 +181,7 @@ class Muestra(object):
     # Hexagonal arrangement unit cell is a Right Rectangle
     # with hypotenuse d and a the opposite leg of the
     # 60 deg angle.
-    d = int(distancia//vsx)    
+    d = int(distancia/vsx)    
     a = get_hexagonal_dimensions_in_voxels(d)
     ## the geometry occupies half of the x-y simulated volume
     N_celdas_x = (Nx/2)//d   # // es division entera en python3  (floor)
