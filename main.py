@@ -34,7 +34,7 @@ skindepth = 0.014    # profundida de penetracion, mm
 voxel_microm = 0.25 # tamano de voxel en micros
 voxelSize = [voxel_microm*1e-3]*3# mm
 
-N = [512,512,512] 
+N = [256,512,512] 
 
 # utilizo una funcion que dado dos argumentos define el restante. Ya sea N,
 # FOV (field of view) o  voxelSize
@@ -49,15 +49,15 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #microestructuras
 # medidas = [10e-3, 32e-3, 32e-3]
 h = (10/voxel_microm)
-d = (2.5/voxel_microm)
-r = (1/voxel_microm)
+d = (15/voxel_microm)
+r = (5/voxel_microm)
 Nz, Ny, Nx = N
 vsz, vsy, vsx = voxelSize 
 
 distancia_mm = d*vsx
 radio_mm = r*vsx
 
-medidas = [Nz/4*vsz, Ny*vsy, Nx*vsx]
+medidas = [h*vsz, Ny*vsy, Nx*vsx] # en mm
 ### Creacion de la muestra
 muestra = Muestra(volumen, medidas=medidas,
                   #geometria = 'bulk',
@@ -78,34 +78,35 @@ superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 Bnuc = superposicion.delta_sup - superposicion.delta_in
 Bnuc[superposicion.muestra_sup==0]=np.nan
 #%%
-vmin = 10
-vmax = 17
+vmin = 13
+vmax = 19
 
-x = np.linspace(-(FOV-voxelSize)/2.0, (FOV-voxelSize)/2.0,N)# FOV simetrico sin voxel en cero
-# x = np.linspace(-(FOV)/2.0, (FOV)/2.0-voxelSize,N)# FOV simetrico CON voxel en cero
-  y = x
-  z = x
+vs = voxelSize[2]*1e3
+FOVum = N[2]*vs
+x = np.linspace(-(FOVum-vs)/2.0, (FOVum-vs)/2.0,N[2])# FOV simetrico sin voxel en cero
+y = x  
   
-  Z,Y,X= np.meshgrid(z,y,x, indexing='ij')
-
+slice_z = -int(h/2)
 fig, ax = plt.subplots()
-c = ax.pcolormesh(Bnuc[-10, :, :], vmin=vmin, vmax=vmax)
+c = ax.pcolormesh(x,y,Bnuc[slice_z, :, :], vmin=vmin, vmax=vmax)
+ax.set_xlabel(r"x [$\mu$m]", fontsize=16)
+ax.set_ylabel(r"y [$\mu$m]", fontsize=16)
 ax.axis('equal')
 cbar = fig.colorbar(c)
-cbar.ax.set_title(r"$\Delta\delta$ [ppm]")
-plt.figure(2)
-plt.plot(Bnuc[400,256,:])
-plt.ylim([vmin, vmax])
+cbar.ax.set_ylabel(r"$\Delta\delta$ [ppm]", fontsize=16)
 
+plt.figure(2)
+plt.plot(Bnuc[slice_z,256,:])
+plt.ylim([vmin, vmax])
 # superposicion = Superposicion(muestra, delta, radio=0) # si pongo 'radio', es porque lee de un perfil
 #%%
 # volumen_medido = 'centro'
 
 # medicion = Medicion(superposicion, volumen_medido=f'{volumen_medido}')
-# # medicion = Medicion(superposicion, volumen_medido='completo',stl_file='test')
+medicion = Medicion(superposicion, volumen_medido='completo')
 # #%%
-# FigSP = 153
-# ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}')
+FigSP = 153
+ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}')
 # # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-bulk')
 # # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp' , k=0.5, figure=FigSP, Norm=False, volumen_medido=f'{volumen_medido}-microestructuras')
 
