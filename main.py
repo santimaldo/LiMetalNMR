@@ -49,7 +49,7 @@ volumen = SimulationVolume(voxelSize=voxelSize, N=N)
 #microestructuras
 # medidas = [10e-3, 32e-3, 32e-3]
 h = (10/voxel_microm)
-d = (2/voxel_microm)
+d = (2.5/voxel_microm)
 r = (1/voxel_microm)
 Nz, Ny, Nx = N
 vsz, vsy, vsx = voxelSize 
@@ -77,16 +77,25 @@ superposicion = Superposicion(muestra, delta, superposicion_lateral=True)
 
 Bnuc = superposicion.delta_sup - superposicion.delta_in
 Bnuc[superposicion.muestra_sup==0]=np.nan
-# vmin = 10
-# vmax = 11
+#%%
+vmin = 10
+vmax = 17
+
+x = np.linspace(-(FOV-voxelSize)/2.0, (FOV-voxelSize)/2.0,N)# FOV simetrico sin voxel en cero
+# x = np.linspace(-(FOV)/2.0, (FOV)/2.0-voxelSize,N)# FOV simetrico CON voxel en cero
+  y = x
+  z = x
+  
+  Z,Y,X= np.meshgrid(z,y,x, indexing='ij')
+
 fig, ax = plt.subplots()
-c = ax.pcolormesh(Bnuc[-10, :, :])#, vmin=vmin, vmax=vmax)
+c = ax.pcolormesh(Bnuc[-10, :, :], vmin=vmin, vmax=vmax)
 ax.axis('equal')
 cbar = fig.colorbar(c)
 cbar.ax.set_title(r"$\Delta\delta$ [ppm]")
 plt.figure(2)
 plt.plot(Bnuc[400,256,:])
-# plt.ylim([vmin, vmax])
+plt.ylim([vmin, vmax])
 
 # superposicion = Superposicion(muestra, delta, radio=0) # si pongo 'radio', es porque lee de un perfil
 #%%
