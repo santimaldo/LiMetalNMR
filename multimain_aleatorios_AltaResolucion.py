@@ -28,7 +28,7 @@ import pandas as pd
 
 # Niteraciones de cada conjunto de parametros:
 Niteraciones = 1
-Nxy = 1024
+Nxy = 256
 
 # Parametros fisicos
 Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
@@ -40,14 +40,14 @@ skindepth = 14e-13  # profundida de penetracion, mm
 parametros = [0.25, 512, 10, 1]
 
 # densidades nominales: (terminan siendo equivalentes a arange(0.1, 0.9, 0.1)
-densidades = [0.2]  # , 1.5]
-densidades_target = [0.2]
+densidades = [0.1]  # , 1.5]
+densidades_target = [0.1]
 #densidades_target = np.arange(0.1, 0.9, 0.1)
 
 
 # %%
 # savepath = './Outputs/2023-08-02_Cilindros_aleatorios_hexagonal_AltaResolucion/'
-savefolder = '2024-05-07_Cilindros_aleatorios_AltaResolucion'
+savefolder = '2024-05-10_Cilindros_aleatorios_AltaResolucion'
 savepath = f'./Outputs/{savefolder}/'
 
 with open(savepath+'Densidades.dat', 'w') as f:
