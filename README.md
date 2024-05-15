@@ -1,5 +1,7 @@
 # LiMetalNMR
 
+![Alt text](./DataBases/TOC_transparent.png "a title")
+
 
 ## References
 [1] Salomir, R., de Senneville, B. D., & Moonen, C. T. (2003). A fast calculation method for magnetic field inhomogeneity due to an arbitrary distribution of bulk susceptibility. Concepts in Magnetic Resonance Part B: Magnetic Resonance Engineering: An Educational Journal, 19(1), 26-34.

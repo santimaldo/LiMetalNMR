@@ -11,6 +11,7 @@
 # ignore all figures
 *.svg
 *.png
+!TOC_transparent.png
 *.jpg
 *.eps
 # ignore all .pdf files
