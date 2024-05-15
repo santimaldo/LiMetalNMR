@@ -10,9 +10,8 @@ plt.rcParams.update({'font.size': 20})
 # from VoigtFit import *
 
 file = 'rectos'
-path0 ='./Outputs/Resultados/rectos/'
+path0 ='./Outputs/2024-05-09_CilindrosHexagonal_cantidad-senal/'
 
-# path0 ='./Outputs/Resultados/rectos/'
 radios, distancias, alturas, densidades = np.loadtxt(path0+'Densidades.dat').T
 
 
