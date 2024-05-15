@@ -1,87 +1,213 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep  7 13:47:27 2020
+Created on 2021-06-12
 
 @author: santi
 """
-
-"""
-Es el main, pero que corre varias veces y no hace graficos. Además lo intercalo
-con el generador de espectros
-"""
+# stop
 
 import numpy as np
 import matplotlib.pyplot as plt
-from Muestra import *
-from Delta import *
-from Superposicion import *
-from Graficador import *
-from SimulationVolume import *
-from Espectro import espectro
+from Modules.SimulationVolume import *
+from Modules.Muestra import *
+from Modules.Delta import *
+from Modules.Superposicion import *
+from Modules.Graficador import *
+from Modules.Medicion import *
+import os
+import time
+from datetime import datetime
+import pandas as pd
 
-path = 'S:/temp/'
-
-#%%----------------------------------------------------------------------------  
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
+# %%----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Parametros fisicos
-Chi =  24.1*1e-6 #(ppm) Susceptibilidad volumetrica
-B0 = 7 # T
-skindepth = 0.012 # profundida de penetracion, mm
-# recordar que la convencion de python es {z,y,x}
-# elijo el tamaño de voxels de forma tal que la lamina quepa justo en el
-# volumen simulado.
-voxelSize = [0.001, 0.001, 0.001]# mm
-N = [256,256,256] 
-# con estos numeros, Nj*voxelSize_j queda
-#    z: 1.536 mm  ; y: 3.84 mm  ; x: 10.24 mm
-# utilizo una funcion que dado dos argumentos define el restante. Ya sea N, 
-# FOV (field of view) o  voxelSize
-volumen = SimulationVolume(voxelSize=voxelSize, N=N)
-#volumen = SimulationVolume(FOV=FOV, N=N)
-medidas = [0.028,0.088,0.088]
+Chi = 24.1*1e-6  # (ppm) Susceptibilidad volumetrica
+B0 = 7  # T
+skindepth = 14e-13  # profundida de penetracion, mm
 
-#%%
-# ACA VA EL LOOP
+# Number of voxels in each dimension
+Nz = 128
+Ny = 512
+Nx = 512
 
-distancias = [1, 3, 6, 9, 12, 15,18,21]
-lados = [1, 3, 6, 9, 12, 15]
+savepath = './Outputs/tmp/'
+
+## Read the list of parameters for hexagonal arrange of cylinders:
+df = pd.read_csv('./DataBases/HexagonalParameters.par')
+# Filter the list based on what I need:
+df = df[df['Nz'] < 1024]
+df = df[df['altura'].isin([10])]
+df = df[df['radio'].isin([50])]
+### voxelSize en micrometros:
+df = df[df['voxelSize'] >= 0.250]
+min_vs = df.groupby(['radio', 'densidad_nominal', 'altura'])['voxelSize'].idxmin()
+df = df.loc[min_vs.values]
+df = df.sort_values(['radio', 'densidad_nominal'], ascending=[True, False])
+# df = df[df['densidad_nominal'] <= 0.15]
+df = df[df['densidad_nominal'].isin([0.2,0.6])]
 
 
-for distancia in distancias:
-    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    print('++++++++++++++++++++++ distancia:  {} um+++++++++++++++++++++++++++++++'.format(distancia))
-    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-    for lado in lados:
-        print('---------------------d :{} um  -----------------------------------'.format(distancia))
-        print('-------------------- lado:  {}  um--------------------------------'.format(lado))
-        print('------------------------------------------------------------------')
-        # CREACION DE LA MUESTRA-----------------------------------------------------    
-        muestra = Muestra(volumen, medidas=medidas, geometria='distancia_constante', ancho=lado*1e-3, distancia=distancia*1e-3)    
-        # CREACION DEL OBJETO DELTA--------------------------------------------------
-#        delta = Delta(muestra)
-        # SUPERPOSICION --------------------------------------------------
-#        superposicion = Superposicion(muestra, delta)
-        # espectros:---------------------------------------------------------------
-        # -------------------------------------------------------------------------
-#        del delta, muestra
-#        matriz = superposicion.delta_sens # todo
-#        ppmAxis, spec = espectro(matriz)
-#        spec_data = np.array([ppmAxis, np.real(spec)]).T
-#        np.savetxt(path+'dist{}um_lado{}um_spec.dat'.format(distancia, lado), spec_data)
-#        #
-#        matriz = superposicion.delta_sens[superposicion.z0:,:,:] # dendritas
-#        ppmAxis, spec = espectro(matriz)
-#        spec_data = np.array([ppmAxis, np.real(spec)]).T
-#        np.savetxt(path+'dist{}um_lado{}um_spec_dend.dat'.format(distancia, lado), spec_data)
-#        #
-#        matriz = superposicion.delta_sens[:superposicion.z0,:,:] # bulk
-#        ppmAxis, spec = espectro(matriz)
-#        spec_data = np.array([ppmAxis, np.real(spec)]).T
-#        np.savetxt(path+'dist{}um_lado{}um_spec_bulk.dat'.format(distancia, lado), spec_data)
-#        del superposicion
-        
-        
+
+with open(savepath+'Densidades.dat', 'w') as f:
+    f.write('# distancia (um)\tradio (um)\taltura (um)\tvs (um)\tdensidad\t densidad volumetrica\n')
+with open(savepath+'tiempos.dat', 'w') as f:
+    f.write('# N_iter\tt_total (min)\tt_iteracion(min)\tradio (um)\tdistancia (um)\taltura (um)\tvs (um)\n')
+with open(savepath+'/MasaMedida.dat', 'w') as f:
+    f.write(f'# radio(um)\t altura(um)\t voxelSize(um)\t'\
+                f'densidad_nominal\t densidad_volumetrica\t'\
+                f'masa total(u.a)\t masa microestructuras(u.a)\t masa bulk(u.a)\n')
+
+
+if not os.path.exists(savepath):
+    os.makedirs(savepath)
+parametros = np.array(df)
+# inicio el reloj
+t0 = time.time()
+nnn = -1
+ntotal = parametros.shape[0]
+# ntotal = 1
+for par in parametros:    
+    nnn += 1    
+    # todos los datos estan en um
+    vs, Nz, altura, radio, distancia, densidad_nominal, densidad = par
+   
+    h = int(altura/vs)
+    r = int(radio/vs)
+    d = int(distancia/vs)
+
+    radio_mm = vs*r*1e-3
+    distancia_mm = vs*d*1e-3
+    altura_mm = vs*h*1e-3
+
+    # inicio el reloj parcial
+    t0parcial = time.time()
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    msj = f"altura= {h:d}x{vs}um = {altura} um,\nradio= {r:d}x{vs}um = {radio} um,\ndistancia = {d:d}x{vs}um = {distancia} um,\ndensidad = {densidad:.2f}"
+    print(msj)
+    print(' ')
+    msj = f"      hora: {datetime.now().strftime('%H:%M:%S')}"
+    print(msj)
+    print(' ')
+    msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100:.2f} %"
+    print(msj)
+    elapsed = (time.time() - t0)
+    print(
+        f'---  tiempo: {elapsed:.2f} s = {elapsed/60:.2f} min = {elapsed/60/60:.2f} h')
+    if nnn > 0:
+        t_est = elapsed*(ntotal/nnn-1)
+        msj = 'tiempo restante estimado: {:.2f} min  =  {:.2f} h'.format(
+            t_est/60, t_est/60/60)
+        print(msj)
+        print(' ')
+
+    # Crecion del volumen simulado - - - - - - - - - - - - - - - - - - - - -
+    voxelSize = [vs*1e-3]*3  # mm
+    vsz, vsy, vsx = voxelSize
+    N = [Nz, Ny, Nx]
+    volumen = SimulationVolume(voxelSize=voxelSize, N=N)
+
+    ### la geometria hexagonal sobreescribe medidas[1] y medidas[2]
+    medidas = [h*vsz,Ny/2*vsy,Nx/2*vsx]
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ### Creacion de la muestra
+    muestra = Muestra(volumen, medidas = medidas,
+                      geometria='cilindros_hexagonal',
+                      # geometria='cilindros_45grados_hexagonal',
+                      # geometria='cilindros_con-angulo_hexagonal', angulo_target=45,
+                      radio=radio_mm, distancia=distancia_mm, ubicacion='superior',
+                      exceptions=False)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    densidad_volumetrica = muestra.densidad_volumetrica    
+    print(
+        f" densidad: {densidad:.4f}, densidad_volumetrica: {densidad_volumetrica:.4f}")
+    with open(savepath+'/Densidades.dat', 'a') as f:
+        f.write(f'{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'
+                f'{densidad:.4f}\t{densidad_volumetrica:.4f}\n')    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
+    # CREACION DEL OBJETO DELTA-------------------------------------------------
+    # delta es la perturbacion de campo magnetico
+    delta = Delta(muestra) #, skip=True)
+    # SUPERPOSICION DE LAS MICROESTRUCTURAS CON EL BULK -----------------------
+    superposicion = Superposicion(muestra, delta, superposicion_lateral=True,
+                                  radio=None)
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    stl_file = '{}stls/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um'.format(
+            savepath, int(altura), radio, densidad_nominal, vs)
+    medicion = Medicion(superposicion, volumen_medido='centro', 
+                        stl_file=None)    
+    # guardado    
+    regiones = ['', '-microestructuras', '-bulk']  
+    #-------- centro--------------------------------------------------------------
+    masas = [] # lista para guardar las masas medidas en cada region
+    for region in regiones:
+        print("\n Trabajando en medicion y espectro de la muestra{}...".format(region))
+        # secuencia: ..... SP ......
+        # - - - - SP
+        ppmAxis, spec = medicion.CrearEspectro(
+            secuencia='sp', k=0.5, volumen_medido='centro{}'.format(region),
+            Norm=False)            
+        datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        if not os.path.exists(savepath+'SP'):
+            os.makedirs(savepath+'SP')
+        file = 'SP/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+            int(altura), radio, densidad_nominal, vs, region)
+        np.savetxt(savepath+file, datos)
+        masa_medida = np.sum(medicion.get_volumen_medido())
+        masas.append(masa_medida)
+                        
+        # pulso de pi/12
+        # ppmAxis, spec = medicion.CrearEspectro(secuencia='sp', k=0.08,
+        #                                        Norm=False,
+        #                                        volumen_medido='centro{}'.format(region))        
+        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        # if not os.path.exists(savepath+'SP_0.08'):
+        #     os.makedirs(savepath+'SP_0.08')
+        # file = 'SP_0.08/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SP{}.dat'.format(
+        #     int(altura), radio, densidad_nominal, vs, region)
+        # np.savetxt(savepath+file, datos)
+
+        # - - - - SMC64
+        # ppmAxis, spec = medicion.CrearEspectro(secuencia='smc', N=16, k=1,
+        #                                        Norm=False,
+        #                                        volumen_medido='centro{}'.format(region))
+        # datos = np.array([ppmAxis, np.real(spec), np.imag(spec)]).T
+        # if not os.path.exists(savepath+'SMC'):
+        #     os.makedirs(savepath+'SMC')
+        # file = 'SMC/h{:d}_r{:.2f}_dens{:.1f}_vs{:.3f}um_SMC{}.dat'.format(
+        #     int(altura), radio, densidad_nominal, vs, region)
+        # np.savetxt(savepath+file, datos)
     
+    with open(savepath+'/MasaMedida.dat', 'a') as f:
+        f.write(f'{radio:.2f}\t{altura:.2f}\t{vs:.3f}\t'\
+                f'{densidad_nominal:.2f}\t{densidad_volumetrica:.4f}\t'\
+                f'{masas[0]:.4f}\t{masas[1]:.4f}\t{masas[2]:.4f}\n'    )
+
     
+    del muestra, delta, superposicion, medicion
+    elapsed_parcial = (time.time() - t0parcial)/60.0
+    elapsed = (time.time() - t0)/60.0
+    print('---  tiempo parcial: {:.2f} min'.format(elapsed_parcial))
+    with open(savepath+'tiempos.dat', 'a') as f:
+        f.write(
+            f'{int(nnn):d}\t{elapsed:.2f}\t{elapsed_parcial:.2f}\t{distancia:.2f}\t{radio:.2f}\t{altura:.2f}\t{vs:.2f}\n')
+
+    # del muestra, delta, superposicion, medicion, volumen
+    # del ppmAxis, spec, datos
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+msj = f"progreso {nnn}/{ntotal} = {nnn/ntotal*100} %"
+print(msj)
+print(' ')
+elapsed = (time.time() - t0)
+print(
+    f'---  tiempo total: {elapsed:.2f} s = {elapsed/60:.2f} min = {elapsed/60/60:.2f} h')

@@ -2,12 +2,15 @@
 """
 This script runs the basic programs to enable the data bases needed for the calculations
 """
+import os
+pwd = os.getcwd()
+os.chdir("./DataBases/")
 
-import subprocess
- 
-# running other file using run()
+from single_pulse import *
+from smc import *
+from hexagonal_parameter import *
 
-path = "./DataBases/"
-subprocess.run([path+"single_pulse.py",
-                path+"smc.py",
-                path+"hexagonal_parameter.py"])
+os.chdir(pwd)
+
+
+print("="*40,"\n"," "*10,"Ready to use!\n","="*40)

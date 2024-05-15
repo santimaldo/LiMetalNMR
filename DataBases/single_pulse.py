@@ -103,7 +103,7 @@ My = np.zeros((r_list.size, k_list.size)).astype('complex')
 
 for kk in range(k_list.size):
     k = k_list[kk]
-    print('k = %s' % k)
+    print(f'k = {k:.2f}')
     for rr in range(r_list.size):
 
         r = r_list[rr]
