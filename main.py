@@ -5,8 +5,6 @@ Created on 2021-06-12
 
 @author: santi
 """
-# stop
-
 import numpy as np
 import matplotlib.pyplot as plt
 from Modules.SimulationVolume import *
