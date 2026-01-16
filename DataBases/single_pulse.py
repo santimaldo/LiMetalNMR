@@ -13,6 +13,7 @@ Nota: no se tiene en cuenta off-resonance
 """
 
 from scipy.linalg import expm
+from scipy.integrate import simpson
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 14})
@@ -65,25 +66,28 @@ Iz = 1/2*np.array([[3, 0, 0, 0], [0, 1, 0, 0], [0, 0, -1, 0], [0, 0, 0, -3]])
 
 kB = 1.3806488e-23
 T = 300
-w = 116e6 / 2*np.pi
+w = 116e6 / (2*np.pi)
 hbar = 1.054571818e-34
 Boltz = hbar*w / (kB*T)  # factor de boltzmann
-# rho0 = 1/2 + Boltz * Iz/2
-rho0 = Iz
-# rho0 =np.zeros((4,4))
-# rho0[0,0] = 1
+rho0_not_norm =  np.identity(4) + Boltz * Iz  # estado inicial (equilibrio)
+rho0 = rho0_not_norm / np.trace(rho0_not_norm)
+
 
 T2 = 600e-6
 T1 = 170e-3
 # w = 0
 N = 16
 b = 1/14  # 1/um
-r_list = np.linspace(0, int(8/b-1), 1024)
+r_max = int(8/b-1) # full range
+r_max = int(0.4/b) # full range
+# r_list = np.linspace(0, r_max, 1024)
+r_list = np.linspace(0, r_max, 256)
 # evanesencia: B1 = B10*beta = B10 * exp(-b*r)
 beta = np.exp(-b*r_list)
 
 
 k_list = np.arange(0, 2.1, 0.1)
+k_list = np.arange(0, 8, 0.1)
 k_list[0] = 0.08  # pulso de pi/12
 
 
@@ -185,7 +189,7 @@ if S.shape[1] > 1:  # grafico esto solo si corro para varios k
 
     S = -np.real(Sy) + 1j * np.real(Sx)
     # S = np.abs(My)
-    S = np.trapz(S, axis=0)
+    S = simpson(S, axis=0)
 
     plt.figure(1)
     plt.plot(k_list, np.imag(S)*0, 'k--')
